@@ -13,11 +13,11 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
       exit={{ opacity: 0, x: -20 }}
       className="form-step"
     >
-      <h2>Account Information</h2>
+      <h2>Hesap Bilgileri</h2>
       <div className="form-group">
         <label htmlFor="email">
           <FiMail className="input-icon" />
-          Email Address
+          E-posta Adresi
         </label>
         <input
           type="email"
@@ -25,7 +25,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
           name="email"
           value={formData.email}
           onChange={onInputChange}
-          placeholder="you@example.com"
+          placeholder="ornek@email.com"
           required
         />
         {errors.email && <span className="field-error">{errors.email}</span>}
@@ -34,7 +34,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
       <div className="form-group">
         <label htmlFor="username">
           <FiUser className="input-icon" />
-          Username
+          Kullanıcı Adı
         </label>
         <input
           type="text"
@@ -42,7 +42,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
           name="username"
           value={formData.username}
           onChange={onInputChange}
-          placeholder="Choose a username"
+          placeholder="Kullanıcı adınızı seçin"
           required
         />
         {errors.username && <span className="field-error">{errors.username}</span>}
@@ -51,7 +51,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
       <div className="form-group">
         <label htmlFor="password">
           <FiLock className="input-icon" />
-          Password
+          Şifre
         </label>
         <div className="password-input-wrapper">
           <input
@@ -66,7 +66,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
             onBlur={() => {
               onPasswordFocusChange?.(false)
             }}
-            placeholder="At least 8 characters"
+            placeholder="En az 8 karakter"
             required
           />
           <button
@@ -77,7 +77,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
               setShowPassword(newState)
               onShowPasswordChange?.(newState)
             }}
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
           >
             {showPassword ? (
               <svg className="eye-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -98,7 +98,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
       <div className="form-group">
         <label htmlFor="confirmPassword">
           <FiLock className="input-icon" />
-          Confirm Password
+          Şifreyi Onayla
         </label>
         <div className="password-input-wrapper">
           <input
@@ -107,14 +107,14 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={onInputChange}
-            placeholder="Re-enter your password"
+            placeholder="Şifrenizi tekrar girin"
             required
           />
           <button
             type="button"
             className="password-toggle"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            aria-label={showConfirmPassword ? "Şifreyi gizle" : "Şifreyi göster"}
           >
             {showConfirmPassword ? (
               <svg className="eye-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -133,7 +133,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
       </div>
 
       <AuthButton type="button" onClick={onNext}>
-        Continue
+        Devam Et
       </AuthButton>
     </motion.div>
   )
