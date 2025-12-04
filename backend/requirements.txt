@@ -5,7 +5,9 @@ python-multipart==0.0.6
 
 # Database
 sqlalchemy==2.0.23
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.9  # Optional: May fail on some systems (PostgreSQL only)
+                        # If installation fails, continue with: pip install -r requirements.txt --ignore-installed psycopg2-binary
+                        # Or skip it entirely - SQLite works without it
 alembic==1.13.1
 
 # Caching & Performance
