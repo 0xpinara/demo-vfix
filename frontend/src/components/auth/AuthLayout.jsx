@@ -3,11 +3,12 @@ import AuthBackground from './AuthBackground'
 import Logo from './Logo'
 import './AuthLayout.css'
 
-function AuthLayout({ children, title, subtitle, className = '' }) {
+function AuthLayout({ children, title, subtitle, className = '', backgroundType }) {
   const isRegisterPage = className.includes('register-card')
+  const bgType = backgroundType || (isRegisterPage ? 'register' : 'login')
   return (
     <div className={`auth-container ${isRegisterPage ? 'register-container' : ''}`}>
-      <AuthBackground />
+      <AuthBackground type={bgType} />
       <motion.div
         className={`auth-card ${className}`}
         initial={{ opacity: 0, y: 20 }}

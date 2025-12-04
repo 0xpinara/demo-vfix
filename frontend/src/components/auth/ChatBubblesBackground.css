@@ -1,0 +1,60 @@
+.chat-bubbles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.chat-bubble {
+  position: absolute;
+  background: rgba(99, 102, 241, 0.18);
+  border: 2px solid rgba(99, 102, 241, 0.35);
+  border-radius: 25px;
+  padding: 14px 20px;
+  font-size: 13px;
+  color: rgba(241, 245, 249, 0.9);
+  white-space: nowrap;
+  animation: float-bubble linear infinite;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+  will-change: transform, opacity;
+}
+
+.chat-bubble.small {
+  font-size: 11px;
+  padding: 10px 16px;
+}
+
+.chat-bubble.medium {
+  font-size: 13px;
+  padding: 14px 20px;
+}
+
+.chat-bubble.large {
+  font-size: 15px;
+  padding: 16px 24px;
+}
+
+@keyframes float-bubble {
+  from {
+    bottom: var(--initial-bottom, -100px);
+    opacity: 0;
+    transform: translateX(0) rotate(0deg);
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  to {
+    bottom: 110vh;
+    opacity: 0;
+    transform: translateX(var(--drift)) rotate(var(--rotate));
+  }
+}
+

@@ -9,6 +9,7 @@ import StepIndicator from '../../components/register/StepIndicator'
 import Step1AccountInfo from '../../components/register/Step1AccountInfo'
 import Step2PersonalInfo from '../../components/register/Step2PersonalInfo'
 import Step3AdditionalDetails from '../../components/register/Step3AdditionalDetails'
+import AirConditioner from '../../components/auth/AirConditioner'
 import './Register.css'
 
 function Register() {
@@ -31,6 +32,8 @@ function Register() {
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { register } = useAuth()
   const navigate = useNavigate()
 
@@ -151,8 +154,13 @@ function Register() {
   }
 
   return (
-    <AuthLayout title="Create Account" subtitle="Join V-Fix and get started" className="register-card">
+    <AuthLayout title="Hesap Oluştur" subtitle="V-Fix'e katılın ve başlayın" className="register-card" backgroundType="register">
       <div className="register-wrapper">
+        <AirConditioner 
+          isPasswordFocused={isPasswordFocused} 
+          passwordValue={formData.password} 
+          showPassword={showPassword} 
+        />
         <StepIndicator currentStep={step} totalSteps={3} />
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -164,6 +172,8 @@ function Register() {
                 errors={errors}
                 onInputChange={handleInputChange}
                 onNext={handleNext}
+                onPasswordFocusChange={setIsPasswordFocused}
+                onShowPasswordChange={setShowPassword}
               />
             )}
 
