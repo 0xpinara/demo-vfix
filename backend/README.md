@@ -29,8 +29,13 @@ uvicorn app.main:app --reload
 
 
 ## API Versioning
-All routes prefixed with `/api/v1/…`.
+All routes are currently under `/api/...` (chat feedback uses `/api/chat/feedback`).
 Future versions: `/api/v2/…`.
+
+## Chat Feedback Endpoints
+- `POST /api/chat/feedback` — create or update feedback for a chat session. Body: `session_id` (string), `rating` (1-5), optional `comment`, optional `session_title`.
+- `GET /api/chat/feedback/{session_id}` — fetch feedback for the current user and chat session.
+- `GET /api/chat/feedback` — list recent feedback for the authenticated user (limit 50 by default).
 
 ## Environment Variables (.env)
 ```ini
@@ -55,6 +60,7 @@ Run all tests:
 
 ```bash
 pytest -v
+pytest app/tests/test_chat_feedback.py
 ```
 
 ---

@@ -12,7 +12,6 @@ Production-ready FastAPI application with scalability features:
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import os
@@ -24,6 +23,8 @@ from app import models, schemas
 from app.core.security import verify_token, limiter, AUTH_RATE_LIMITS, get_rate_limit_handler, get_rate_limit_decorator
 from app.services import AuthService
 from app.core.logger import setup_logging
+from app.core.dependencies import get_current_user
+from app.api.v1.routes import chat
 
 load_dotenv()
 
@@ -57,57 +58,6 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["X-Request-ID"]
 )
-
-security = HTTPBearer()
-
-
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
-) -> models.User:
-    token = credentials.credentials
-    payload = verify_token(token)
-    if payload is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
-        )
-    user_id = payload.get("sub")
-    jti = payload.get("jti")
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
-        )
-    
-    # Validate session if jti is present
-    if jti:
-        from app.services.repositories import SessionRepository
-        from datetime import datetime
-        session_repo = SessionRepository(db)
-        session = session_repo.get_by_token_id(jti)
-        if not session or not session.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Session expired or revoked"
-            )
-        # Check if session is expired
-        if session.expires_at < datetime.utcnow():
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Session expired"
-            )
-        # Update last used timestamp
-        session_repo.update_last_used(session)
-    
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if user is None or not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated"
-        )
-    return user
-
 
 @app.get("/health")
 async def health_check(db: Session = Depends(get_db)):
@@ -510,9 +460,11 @@ async def get_login_history(
     }
 
 
-# TODO: Chat, Appointments, Technicians, Admin endpoints will be added by team
-# from app.api.v1.routes import chat, appointments, technicians, admin
-# app.include_router(chat.router, prefix="/api/v1/chat", tags=["Chat"])
+# Chat and feedback endpoints
+app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
+
+# TODO: Appointments, Technicians, Admin endpoints will be added by team
+# from app.api.v1.routes import appointments, technicians, admin
 # app.include_router(appointments.router, prefix="/api/v1/appointments", tags=["Appointments"])
 # app.include_router(technicians.router, prefix="/api/v1/technicians", tags=["Technicians"])
 # app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])

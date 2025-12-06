@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid"; // for unique session IDs
+import { getFeedback, saveFeedback } from "@/services/feedback";
 
 export function useChat() {
   const [sessions, setSessions] = useState([]);
@@ -10,6 +11,9 @@ export function useChat() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [feedbackBySession, setFeedbackBySession] = useState({});
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackError, setFeedbackError] = useState(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -236,7 +240,60 @@ Varsa fotoğraf da gönderebilirsiniz, daha iyi yardımcı olabilirim! 😊`;
     }, 800);
   };
 
-    return {
+  const fetchFeedbackForSession = async (sessionId) => {
+    if (!sessionId) return null;
+    if (feedbackBySession[sessionId]?.__loaded) {
+      return feedbackBySession[sessionId];
+    }
+
+    try {
+      setFeedbackLoading(true);
+      setFeedbackError(null);
+      const data = await getFeedback(sessionId);
+      setFeedbackBySession((prev) => ({
+        ...prev,
+        [sessionId]: { ...data, __loaded: true },
+      }));
+      return data;
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 404) {
+        setFeedbackBySession((prev) => ({
+          ...prev,
+          [sessionId]: { __loaded: true, notFound: true },
+        }));
+        return null;
+      }
+      setFeedbackError(
+        err?.response?.data?.detail || "Feedback could not be loaded."
+      );
+      throw err;
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  const submitFeedback = async (payload) => {
+    try {
+      setFeedbackLoading(true);
+      setFeedbackError(null);
+      const saved = await saveFeedback(payload);
+      setFeedbackBySession((prev) => ({
+        ...prev,
+        [payload.session_id]: { ...saved, __loaded: true },
+      }));
+      return saved;
+    } catch (err) {
+      setFeedbackError(
+        err?.response?.data?.detail || "Feedback could not be saved."
+      );
+      throw err;
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
+  return {
     sessions,
     currentSessionId,
     setCurrentSessionId,
@@ -253,5 +310,10 @@ Varsa fotoğraf da gönderebilirsiniz, daha iyi yardımcı olabilirim! 😊`;
     handleNewChat,
     downloadChat,
     messagesEndRef,
+    fetchFeedbackForSession,
+    submitFeedback,
+    feedbackBySession,
+    feedbackLoading,
+    feedbackError,
   };
 }
