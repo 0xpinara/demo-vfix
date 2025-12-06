@@ -196,12 +196,12 @@ async def login(request: Request, credentials: schemas.UserLogin, db: Session = 
     except ValueError as e:
         error_message = str(e)
         # Check for specific error types
-        if "inactive" in error_message.lower():
+        if "inactive" in error_message.lower() or "aktif değil" in error_message.lower():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Account is inactive"
+                detail="Hesap aktif değil"
             )
-        elif "locked" in error_message.lower():
+        elif "locked" in error_message.lower() or "kilitlendi" in error_message.lower():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=error_message  # Return the specific lockout message
@@ -209,7 +209,7 @@ async def login(request: Request, credentials: schemas.UserLogin, db: Session = 
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password"
+                detail="Geçersiz e-posta veya şifre"
             )
 
 
@@ -220,7 +220,7 @@ async def google_login(google_data: schemas.GoogleLogin, db: Session = Depends(g
     if not google_data.token or len(google_data.token) < 10:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Google token"
+            detail="Geçersiz Google token"
         )
     
     # TODO: Implement actual Google OAuth verification
@@ -229,7 +229,7 @@ async def google_login(google_data: schemas.GoogleLogin, db: Session = Depends(g
     
     raise HTTPException(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Google OAuth integration not yet implemented"
+        detail="Google OAuth entegrasyonu henüz uygulanmadı"
     )
 
 
@@ -255,7 +255,7 @@ async def guest_login(request: Request, guest_data: schemas.GuestLogin, db: Sess
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Product barcode not found or invalid."
+            detail="Ürün barkodu bulunamadı veya geçersiz."
         )
 
 
@@ -275,7 +275,7 @@ async def password_reset(request: Request, reset_request: schemas.PasswordResetR
     logger.info(f"Password reset requested for: {reset_request.email}")
     
     return {
-        "message": "If an account with this email exists, a password reset link has been sent."
+        "message": "Bu e-posta ile bir hesap varsa, şifre sıfırlama bağlantısı gönderildi."
     }
 
 
@@ -300,7 +300,7 @@ async def logout(
             session_repo.revoke_session(str(session.id), str(current_user.id))
     
     logger.info(f"User logged out: {current_user.email}")
-    return {"message": "Successfully logged out"}
+    return {"message": "Başarıyla çıkış yapıldı"}
 
 
 @app.get("/api/users/me", response_model=schemas.UserResponse)
@@ -375,11 +375,11 @@ async def revoke_session(
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found"
+            detail="Oturum bulunamadı"
         )
     
     logger.info(f"Session {session_id} revoked by user {current_user.email}")
-    return {"message": "Session revoked successfully"}
+    return {"message": "Oturum başarıyla iptal edildi"}
 
 
 @app.post("/api/auth/sessions/revoke-all")
@@ -406,7 +406,7 @@ async def revoke_all_sessions(
     
     logger.info(f"User {current_user.email} revoked {count} sessions")
     return {
-        "message": f"Revoked {count} session(s)",
+        "message": f"{count} oturum iptal edildi",
         "revoked_count": count
     }
 
