@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import Landing from './pages/landing/Landing'
 import Login from './pages/login/Login'
 import Register from './pages/register/Register'
 import Dashboard from './pages/Dashboard'
@@ -13,6 +14,7 @@ function ProtectedRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route
@@ -31,7 +33,6 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }
