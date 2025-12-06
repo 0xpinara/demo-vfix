@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { FiMail, FiUser, FiLock } from 'react-icons/fi'
 import AuthButton from '../auth/AuthButton'
+import PasswordStrengthIndicator from './PasswordStrengthIndicator'
 
 function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordFocusChange, onShowPasswordChange }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -92,6 +93,7 @@ function Step1AccountInfo({ formData, errors, onInputChange, onNext, onPasswordF
             )}
           </button>
         </div>
+        <PasswordStrengthIndicator password={formData.password} />
         {errors.password && <span className="field-error">{errors.password}</span>}
       </div>
 
