@@ -1,6 +1,6 @@
 // ChatSidebar.jsx
 import React from "react";
-import { Plus, Download, Wrench } from "lucide-react";
+import { Plus, Download, Wrench, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ChatSidebar = ({
@@ -10,6 +10,8 @@ const ChatSidebar = ({
   sessions = [],
   currentSessionId,
   setCurrentSessionId,
+  onOpenFeedback,
+  feedbackBySession = {},
 }) => {
   const currentMessages =
     sessions.find((s) => s.id === currentSessionId)?.messages || [];
@@ -55,6 +57,26 @@ const ChatSidebar = ({
                   {session.messages[session.messages.length - 1]?.content
                     .substring(0, 40) || ""}
                   ...
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenFeedback?.(session.id);
+                    }}
+                    className="border-slate-700 text-slate-200 hover:bg-slate-700/70"
+                  >
+                    <Star className="h-4 w-4 mr-2" />
+                    Değerlendir
+                  </Button>
+                  {feedbackBySession[session.id]?.rating ? (
+                    <span className="text-xs text-amber-300">
+                      {feedbackBySession[session.id].rating}/5
+                    </span>
+                  ) : null}
                 </div>
               </div>
             ))

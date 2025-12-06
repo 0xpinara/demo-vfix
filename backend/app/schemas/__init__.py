@@ -14,6 +14,11 @@ from app.schemas.auth_schema import (
     LoginHistoryListResponse,
     OwnedProduct
 )
+from app.schemas.chat_schema import (
+    ChatFeedbackCreate,
+    ChatFeedbackResponse,
+    ChatFeedbackListResponse,
+)
 
 __all__ = [
     "UserRegister",
@@ -29,5 +34,8 @@ __all__ = [
     "SessionsListResponse",
     "LoginHistoryResponse",
     "LoginHistoryListResponse",
-    "OwnedProduct"
+    "OwnedProduct",
+    "ChatFeedbackCreate",
+    "ChatFeedbackResponse",
+    "ChatFeedbackListResponse",
 ]

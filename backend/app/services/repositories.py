@@ -6,7 +6,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from app import models
-from app.models import User, Product, PasswordResetToken, UserSession, LoginHistory
+from app.models import User, Product, PasswordResetToken, UserSession, LoginHistory, ChatFeedback
 import logging
 
 logger = logging.getLogger(__name__)
@@ -310,4 +310,57 @@ class LoginHistoryRepository:
         ).order_by(
             models.LoginHistory.created_at.desc()
         ).all()
+
+
+class ChatFeedbackRepository:
+    """Repository for chat feedback persistence"""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_by_user_and_session(self, user_id: str, session_id: str) -> Optional[ChatFeedback]:
+        return (
+            self.db.query(ChatFeedback)
+            .filter(ChatFeedback.user_id == user_id, ChatFeedback.session_id == session_id)
+            .first()
+        )
+
+    def list_for_user(self, user_id: str, limit: int = 50) -> List[ChatFeedback]:
+        return (
+            self.db.query(ChatFeedback)
+            .filter(ChatFeedback.user_id == user_id)
+            .order_by(ChatFeedback.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+
+    def upsert(
+        self,
+        *,
+        user_id: str,
+        session_id: str,
+        rating: int,
+        comment: Optional[str] = None,
+        session_title: Optional[str] = None,
+    ) -> ChatFeedback:
+        existing = self.get_by_user_and_session(user_id, session_id)
+        if existing:
+            existing.rating = rating
+            existing.comment = comment
+            existing.session_title = session_title or existing.session_title
+            self.db.commit()
+            self.db.refresh(existing)
+            return existing
+
+        feedback = ChatFeedback(
+            user_id=user_id,
+            session_id=session_id,
+            rating=rating,
+            comment=comment,
+            session_title=session_title,
+        )
+        self.db.add(feedback)
+        self.db.commit()
+        self.db.refresh(feedback)
+        return feedback
 
