@@ -22,9 +22,9 @@
 
 .password-input-wrapper input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #dc2626; /* Red */
   background: rgba(51, 65, 85, 0.8);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .password-input-wrapper input::placeholder {

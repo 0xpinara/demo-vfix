@@ -11,8 +11,8 @@
 
 .chat-bubble {
   position: absolute;
-  background: rgba(99, 102, 241, 0.18);
-  border: 2px solid rgba(99, 102, 241, 0.35);
+  background: rgba(220, 38, 38, 0.18); /* Red */
+  border: 2px solid rgba(220, 38, 38, 0.35); /* Red */
   border-radius: 25px;
   padding: 14px 20px;
   font-size: 13px;
@@ -20,7 +20,7 @@
   white-space: nowrap;
   animation: float-bubble linear infinite;
   backdrop-filter: blur(12px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25); /* Red */
   will-change: transform, opacity;
 }
 

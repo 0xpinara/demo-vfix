@@ -32,10 +32,10 @@
 }
 
 .step.active .step-number {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  border-color: var(--primary);
+  background: #dc2626; /* Red */
+  border-color: #dc2626;
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
 .step-line {
@@ -85,9 +85,9 @@
 
 .form-group select:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #dc2626; /* Red */
   background: rgba(51, 65, 85, 0.8);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .skill-levels {
@@ -110,15 +110,15 @@
 }
 
 .skill-btn:hover {
-  border-color: var(--primary);
-  background: rgba(99, 102, 241, 0.1);
+  border-color: #dc2626; /* Red */
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .skill-btn.active {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  border-color: var(--primary);
+  background: #dc2626; /* Red */
+  border-color: #dc2626;
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
 .skill-hint {
@@ -150,15 +150,15 @@
 }
 
 .tool-chip:hover {
-  border-color: var(--primary);
-  background: rgba(99, 102, 241, 0.1);
+  border-color: #dc2626; /* Red */
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .tool-chip.active {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  border-color: var(--primary);
+  background: #dc2626; /* Red */
+  border-color: #dc2626;
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
 .product-row {
@@ -179,7 +179,7 @@
 
 .product-row input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #dc2626; /* Red */
   background: rgba(51, 65, 85, 0.8);
 }
 
@@ -217,9 +217,9 @@
 }
 
 .add-product-btn:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-  background: rgba(99, 102, 241, 0.1);
+  border-color: #dc2626; /* Red */
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
 }
 
 .form-actions {
@@ -256,9 +256,9 @@
 
 .password-input-wrapper input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: #dc2626; /* Red */
   background: rgba(51, 65, 85, 0.8);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .password-input-wrapper input::placeholder {
