@@ -4,7 +4,8 @@ from app.services.repositories import (
     ProductRepository,
     PasswordResetTokenRepository,
     SessionRepository,
-    LoginHistoryRepository
+    LoginHistoryRepository,
+    AppointmentRepository,
 )
 
 __all__ = [
@@ -13,5 +14,6 @@ __all__ = [
     "ProductRepository",
     "PasswordResetTokenRepository",
     "SessionRepository",
-    "LoginHistoryRepository"
+    "LoginHistoryRepository",
+    "AppointmentRepository",
 ]

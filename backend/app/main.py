@@ -24,7 +24,7 @@ from app.core.security import verify_token, limiter, AUTH_RATE_LIMITS, get_rate_
 from app.services import AuthService
 from app.core.logger import setup_logging
 from app.core.dependencies import get_current_user
-from app.api.v1.routes import chat, admin
+from app.api.v1.routes import chat, admin, appointments
 
 load_dotenv()
 
@@ -463,6 +463,9 @@ async def get_login_history(
 
 # Chat and feedback endpoints
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
+
+# Appointment and Technician endpoints
+app.include_router(appointments.router, prefix="/api/v1/appointments", tags=["Appointments"])
 
 # Admin dashboard endpoints
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])

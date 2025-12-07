@@ -4,7 +4,10 @@ import Login from './pages/login/Login'
 import Register from './pages/register/Register'
 import Dashboard from './pages/Dashboard'
 import ChatPage from './pages/ChatPage'
+import TechnicianAppointments from './pages/technician/Appointments'
+import CustomerAppointments from './pages/user/Appointments'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { AppointmentProvider } from './context/AppointmentContext'
 
 // Admin Pages
 import GeneralStatistics from './pages/admin/GeneralStatistics'
@@ -111,6 +114,23 @@ function AppRoutes() {
       
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route
+        path="/technician/appointments"
+        element={
+          <ProtectedRoute>
+            <TechnicianAppointments />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer/appointments"
+        element={
+          <ProtectedRoute>
+            <CustomerAppointments />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }
@@ -118,7 +138,9 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <AppRoutes />
+      <AppointmentProvider>
+        <AppRoutes />
+      </AppointmentProvider>
     </AuthProvider>
   )
 }
