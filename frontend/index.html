@@ -8,6 +8,13 @@
     <!-- Favicon and logo -->
     <link rel="icon" type="image/svg+xml+jpg+png" href="/logo.png" />
     <link rel="alternate icon" href="/logo.png" />
+    <script>
+      // Check if we should show homepage or React app
+      const shouldShowHomepage = window.location.pathname === '/' && !window.location.search.includes('app');
+      if (shouldShowHomepage) {
+        window.location.href = '/homepage.html';
+      }
+    </script>
   </head>
   <body class="antialiased">
     <div id="root"></div>
