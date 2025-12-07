@@ -42,7 +42,7 @@ class UserRegister(UserBase):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str  # Can be email or username
     password: str
 
 

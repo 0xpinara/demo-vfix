@@ -24,7 +24,7 @@ from app.core.security import verify_token, limiter, AUTH_RATE_LIMITS, get_rate_
 from app.services import AuthService
 from app.core.logger import setup_logging
 from app.core.dependencies import get_current_user
-from app.api.v1.routes import chat
+from app.api.v1.routes import chat, admin
 
 load_dotenv()
 
@@ -179,7 +179,7 @@ async def register(request: Request, user_data: schemas.UserRegister, db: Sessio
 @get_rate_limit_decorator(AUTH_RATE_LIMITS["login"])
 async def login(request: Request, credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     """
-    Login with email and password.
+    Login with email/username and password.
     
     Returns JWT access token on successful authentication.
     """
@@ -187,11 +187,12 @@ async def login(request: Request, credentials: schemas.UserLogin, db: Session = 
         auth_service = AuthService(db)
         user, access_token, jti = auth_service.login_user(credentials.email, credentials.password, request)
         
-        logger.info(f"User logged in: {user.email}")
+        logger.info(f"User logged in: {user.email} (role: {user.role})")
         
         return {
             "access_token": access_token,
-            "token_type": "bearer"
+            "token_type": "bearer",
+            "role": user.role
         }
     except ValueError as e:
         error_message = str(e)
@@ -463,11 +464,13 @@ async def get_login_history(
 # Chat and feedback endpoints
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 
-# TODO: Appointments, Technicians, Admin endpoints will be added by team
-# from app.api.v1.routes import appointments, technicians, admin
+# Admin dashboard endpoints
+app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
+
+# TODO: Appointments, Technicians endpoints will be added by team
+# from app.api.v1.routes import appointments, technicians
 # app.include_router(appointments.router, prefix="/api/v1/appointments", tags=["Appointments"])
 # app.include_router(technicians.router, prefix="/api/v1/technicians", tags=["Technicians"])
-# app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,0 +1,54 @@
+/* Star Rating Styles */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stars-container {
+  display: flex;
+  align-items: center;
+}
+
+.star {
+  transition: all 0.2s ease;
+}
+
+.star-filled {
+  fill: #f59e0b;
+  color: #f59e0b;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.4));
+}
+
+.star-empty {
+  fill: transparent;
+  color: rgba(148, 163, 184, 0.4);
+}
+
+.star-half-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.star-half-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.star-half-mask {
+  position: relative;
+  overflow: hidden;
+}
+
+.rating-value {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Large rating display */
+.star-rating-lg .rating-value {
+  font-size: 1.25rem;
+  color: #f59e0b;
+}
+

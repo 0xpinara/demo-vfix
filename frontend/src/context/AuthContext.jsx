@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 
 const AuthContext = createContext(null)
@@ -38,12 +37,12 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password })
-      const { access_token } = response.data
+      const { access_token, role } = response.data
       setToken(access_token)
       localStorage.setItem('token', access_token)
       api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
       await fetchUser()
-      return { success: true }
+      return { success: true, role }
     } catch (error) {
       return {
         success: false,

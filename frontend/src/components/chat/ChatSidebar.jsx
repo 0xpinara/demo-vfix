@@ -1,7 +1,8 @@
 // ChatSidebar.jsx
 import React from "react";
-import { Plus, Download, Wrench, Star } from "lucide-react";
+import { Plus, Download, Wrench, Star, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const ChatSidebar = ({
   sidebarOpen,
@@ -12,9 +13,24 @@ const ChatSidebar = ({
   setCurrentSessionId,
   onOpenFeedback,
   feedbackBySession = {},
+  user,
 }) => {
   const currentMessages =
     sessions.find((s) => s.id === currentSessionId)?.messages || [];
+
+  const navigate = useNavigate();
+
+  const userInitials = React.useMemo(() => {
+    if (!user) return "U";
+    if (user.full_name) {
+      const parts = user.full_name.trim().split(" ").filter(Boolean);
+      if (parts.length === 1) return parts[0][0]?.toUpperCase() || "U";
+      return `${parts[0][0] || ""}${parts[parts.length - 1][0] || ""}`.toUpperCase();
+    }
+    if (user.username) return user.username[0]?.toUpperCase() || "U";
+    if (user.email) return user.email[0]?.toUpperCase() || "U";
+    return "U";
+  }, [user]);
 
   return (
     <div
@@ -98,15 +114,23 @@ const ChatSidebar = ({
           Sohbeti İndir
         </Button>
 
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
-          <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-indigo-500/50">
-            <Wrench className="h-5 w-5" />
+        {/* User quick access */}
+        <Button
+          variant="outline"
+          className="w-full justify-start gap-3 border-slate-700 hover:bg-slate-800 text-slate-200"
+          onClick={() => navigate("/dashboard")}
+        >
+          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+            {userInitials}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-semibold text-white">V-FIX</div>
-            <div className="text-xs text-slate-400">AI Teknisyen Asistanı</div>
+          <div className="flex flex-col text-left">
+            <span className="text-sm font-semibold truncate">
+              {user?.full_name || user?.username || user?.email || "Kullanıcı"}
+            </span>
+            <span className="text-xs text-slate-400">Profil & Dashboard</span>
           </div>
-        </div>
+          <User className="h-4 w-4 ml-auto text-slate-400" />
+        </Button>
       </div>
     </div>
   );
