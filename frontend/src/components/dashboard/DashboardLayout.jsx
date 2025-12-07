@@ -7,9 +7,8 @@ function DashboardLayout({ children, title }) {
       <aside className="dashboard-sidebar">
         <h1 className="sidebar-logo">V-Fix</h1>
         <nav>
-          <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>Dashboard</NavLink>
-          <NavLink to="/customer/appointments" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>My Appointments</NavLink>
-          <NavLink to="/technician/appointments" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>Bekleyen Randevular</NavLink>
+          <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>Ana Sayfa</NavLink>
+          <NavLink to="/appointments" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>Bekleyen Randevular</NavLink>
           <NavLink to="/chat" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>Sohbet</NavLink>
           {/* Add other links like Profile, Settings etc. here */}
         </nav>

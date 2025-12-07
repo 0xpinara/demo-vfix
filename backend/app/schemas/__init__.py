@@ -30,7 +30,6 @@ from app.schemas.admin_schema import (
     ImprovementDataListResponse,
 )
 from app.schemas.appointment_schema import (
-    ProductInfo,
     UserInfo,
     AppointmentCreate,
     AppointmentResponse,

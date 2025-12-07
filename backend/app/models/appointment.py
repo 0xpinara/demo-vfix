@@ -3,6 +3,8 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from ..database import Base
+from .user import GUID
+
 
 class AppointmentStatus(str, enum.Enum):
     """
@@ -22,8 +24,8 @@ class Appointment(Base):
     __tablename__ = "appointments"
 
     id = Column(Integer, primary_key=True, index=True)
-    customer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    technician_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    customer_id = Column(GUID, ForeignKey("users.id"), nullable=False)
+    technician_id = Column(GUID, ForeignKey("users.id"), nullable=True)
     
     product_brand = Column(String, nullable=False)
     product_model = Column(String, nullable=False)

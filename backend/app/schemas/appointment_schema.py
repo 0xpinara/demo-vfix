@@ -1,22 +1,16 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
+from uuid import UUID
 from ..models.appointment import AppointmentStatus
 
 # --- Nested Schemas for rich responses ---
 
-class ProductInfo(BaseModel):
-    """Product details related to an appointment."""
-    brand: str
-    model: str
-    issue: str
-
-    model_config = {"from_attributes": True}
-
 class UserInfo(BaseModel):
     """Basic user information for embedding in other responses."""
-    id: int
-    name: str
+    id: UUID
+    full_name: Optional[str] = None
+    username: str
 
     model_config = {"from_attributes": True}
 
@@ -35,7 +29,7 @@ class AppointmentUpdate(BaseModel):
     Schema for updating an appointment.
     All fields are optional for partial updates (PATCH).
     """
-    technician_id: Optional[int] = Field(None, description="ID of the technician assigned to the job.")
+    technician_id: Optional[UUID] = Field(None, description="ID of the technician assigned to the job.")
     scheduled_for: Optional[datetime] = Field(None, description="New date and time for rescheduling.")
     status: Optional[AppointmentStatus] = Field(None, description="Updated status of the appointment (e.g., 'completed', 'cancelled').")
     location: Optional[str] = Field(None, description="Updated location for the service.")
@@ -53,7 +47,7 @@ class AppointmentReschedule(BaseModel):
 
 class AppointmentAssign(BaseModel):
     """Schema for assigning a technician and scheduling an appointment."""
-    technician_id: int = Field(..., description="ID of the technician to assign.")
+    technician_id: UUID = Field(..., description="ID of the technician to assign.")
     scheduled_for: datetime = Field(..., description="The scheduled date and time for the appointment.")
 
 
@@ -67,7 +61,9 @@ class AppointmentResponse(BaseModel):
     id: int
     scheduled_for: datetime
     status: AppointmentStatus
-    product: ProductInfo
+    product_brand: str
+    product_model: str
+    product_issue: str
     location: Optional[str] = None
     customer: Optional[UserInfo] = None
     technician: Optional[UserInfo] = None
