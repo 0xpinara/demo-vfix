@@ -8,7 +8,11 @@ function Logo() {
       animate={{ scale: 1 }}
       transition={{ delay: 0.2, type: 'spring' }}
     >
-      <span className="logo-icon">V</span>
+      <img 
+        src="/logo.png" 
+        alt="V-Fix Logo" 
+        className="logo-image"
+      />
     </motion.div>
   )
 }

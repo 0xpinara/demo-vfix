@@ -43,11 +43,11 @@ class AuthService:
         """
         # Check if user already exists
         if self.user_repo.exists_by_email_or_username(user_data.email, user_data.username):
-            raise ValueError("User with this email or username already exists")
+            raise ValueError("Bu e-posta veya kullanıcı adı zaten kullanılıyor")
         
         # Validate GDPR consent
         if not user_data.gdpr_consent:
-            raise ValueError("GDPR consent is required")
+            raise ValueError("GDPR onayı gereklidir")
         
         # Hash password
         hashed_password = get_password_hash(user_data.password)
@@ -126,7 +126,7 @@ class AuthService:
                     user_agent=user_agent,
                     device_name=device_name
                 )
-                raise ValueError("Account is temporarily locked due to too many failed login attempts. Please try again later.")
+                raise ValueError("Hesap çok fazla başarısız giriş denemesi nedeniyle geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.")
             else:
                 # Lockout expired, reset
                 user.locked_until = None
@@ -144,7 +144,7 @@ class AuthService:
                 user_agent=user_agent,
                 device_name=device_name
             )
-            raise ValueError("Invalid credentials")
+            raise ValueError("Geçersiz e-posta veya şifre")
         
         # Check if account is inactive
         if not user.is_active:
@@ -157,7 +157,7 @@ class AuthService:
                 user_agent=user_agent,
                 device_name=device_name
             )
-            raise ValueError("Account is inactive")
+            raise ValueError("Hesap aktif değil")
         
         # Verify password
         if not verify_password(password, user.hashed_password):
@@ -183,7 +183,7 @@ class AuthService:
                 device_name=device_name
             )
             
-            raise ValueError("Invalid credentials")
+            raise ValueError("Geçersiz e-posta veya şifre")
         
         # Successful login - reset failed attempts
         if user.failed_login_attempts > 0 or user.locked_until:
@@ -220,7 +220,7 @@ class AuthService:
         # Check if product exists
         product = self.product_repo.get_by_barcode(barcode)
         if not product:
-            raise ValueError("Invalid barcode")
+            raise ValueError("Geçersiz barkod")
         
         # Get or create guest user
         guest_email = f"guest_{barcode}@vfix.local"

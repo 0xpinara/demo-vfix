@@ -9,6 +9,7 @@ import StepIndicator from '../../components/register/StepIndicator'
 import Step1AccountInfo from '../../components/register/Step1AccountInfo'
 import Step2PersonalInfo from '../../components/register/Step2PersonalInfo'
 import Step3AdditionalDetails from '../../components/register/Step3AdditionalDetails'
+import AirConditioner from '../../components/auth/AirConditioner'
 import './Register.css'
 
 function Register() {
@@ -31,6 +32,8 @@ function Register() {
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { register } = useAuth()
   const navigate = useNavigate()
 
@@ -49,27 +52,27 @@ function Register() {
     const newErrors = {}
     
     if (stepNum === 1) {
-      if (!formData.email) newErrors.email = 'Email is required'
-      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid'
-      if (!formData.username) newErrors.username = 'Username is required'
-      else if (formData.username.length < 3) newErrors.username = 'Username must be at least 3 characters'
-      if (!formData.password) newErrors.password = 'Password is required'
-      else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters'
+      if (!formData.email) newErrors.email = 'E-posta gereklidir'
+      else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Geçersiz e-posta adresi'
+      if (!formData.username) newErrors.username = 'Kullanıcı adı gereklidir'
+      else if (formData.username.length < 3) newErrors.username = 'Kullanıcı adı en az 3 karakter olmalıdır'
+      if (!formData.password) newErrors.password = 'Şifre gereklidir'
+      else if (formData.password.length < 8) newErrors.password = 'Şifre en az 8 karakter olmalıdır'
       else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(formData.password)) {
-        newErrors.password = 'Password must contain letters and numbers'
+        newErrors.password = 'Şifre harf ve rakam içermelidir'
       }
       if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match'
+        newErrors.confirmPassword = 'Şifreler eşleşmiyor'
       }
     }
     
     if (stepNum === 2) {
-      if (!formData.full_name) newErrors.full_name = 'Full name is required'
-      if (!formData.age_verified) newErrors.age_verified = 'You must verify your age'
+      if (!formData.full_name) newErrors.full_name = 'Ad soyad gereklidir'
+      if (!formData.age_verified) newErrors.age_verified = 'Yaşınızı doğrulamanız gerekmektedir'
     }
     
     if (stepNum === 3 && !formData.gdpr_consent) {
-      newErrors.gdpr_consent = 'GDPR consent is required'
+      newErrors.gdpr_consent = 'GDPR onayı gereklidir'
     }
 
     setErrors(newErrors)
@@ -151,8 +154,13 @@ function Register() {
   }
 
   return (
-    <AuthLayout title="Create Account" subtitle="Join V-Fix and get started" className="register-card">
+    <AuthLayout title="Hesap Oluştur" subtitle="V-Fix'e katılın ve başlayın" className="register-card" backgroundType="register">
       <div className="register-wrapper">
+        <AirConditioner 
+          isPasswordFocused={isPasswordFocused} 
+          passwordValue={formData.password} 
+          showPassword={showPassword} 
+        />
         <StepIndicator currentStep={step} totalSteps={3} />
 
         <form onSubmit={handleSubmit} className="auth-form">
@@ -164,6 +172,8 @@ function Register() {
                 errors={errors}
                 onInputChange={handleInputChange}
                 onNext={handleNext}
+                onPasswordFocusChange={setIsPasswordFocused}
+                onShowPasswordChange={setShowPassword}
               />
             )}
 
@@ -197,9 +207,9 @@ function Register() {
           </AnimatePresence>
 
           <p className="auth-footer">
-            Already have an account?{' '}
+            Zaten hesabınız var mı?{' '}
             <Link to="/login" className="auth-link">
-              Sign in
+              Giriş yapın
             </Link>
           </p>
         </form>

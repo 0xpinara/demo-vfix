@@ -21,40 +21,47 @@ function Step3AdditionalDetails({
       exit={{ opacity: 0, x: -20 }}
       className="form-step"
     >
-      <h2>Additional Details</h2>
+      <h2>Ek Bilgiler</h2>
 
       <div className="form-group">
-        <label htmlFor="referral_source">How did you hear about us?</label>
+        <label htmlFor="referral_source">Bizi nereden duydunuz?</label>
         <select
           id="referral_source"
           name="referral_source"
           value={formData.referral_source}
           onChange={onInputChange}
         >
-          <option value="">Select an option</option>
-          <option value="google">Google Search</option>
-          <option value="social">Social Media</option>
-          <option value="friend">Friend/Family</option>
-          <option value="ad">Advertisement</option>
-          <option value="other">Other</option>
+          <option value="">Bir seçenek seçin</option>
+          <option value="google">Google Arama</option>
+          <option value="social">Sosyal Medya</option>
+          <option value="friend">Arkadaş/Aile</option>
+          <option value="ad">Reklam</option>
+          <option value="other">Diğer</option>
         </select>
       </div>
 
       <div className="form-group">
         <label>
           <FiTool className="input-icon" />
-          Available Tools
+          Mevcut Araçlar
         </label>
         <div className="tools-grid">
-          {['screwdriver', 'multimeter', 'wrench', 'pliers', 'drill', 'soldering iron'].map((tool) => (
+          {[
+            { key: 'screwdriver', label: 'Tornavida' },
+            { key: 'multimeter', label: 'Multimetre' },
+            { key: 'wrench', label: 'İngiliz Anahtarı' },
+            { key: 'pliers', label: 'Pense' },
+            { key: 'drill', label: 'Matkap' },
+            { key: 'soldering iron', label: 'Lehim Makinesi' }
+          ].map((tool) => (
             <button
-              key={tool}
+              key={tool.key}
               type="button"
-              className={`tool-chip ${formData.available_tools.includes(tool) ? 'active' : ''}`}
-              onClick={() => toggleTool(tool)}
+              className={`tool-chip ${formData.available_tools.includes(tool.key) ? 'active' : ''}`}
+              onClick={() => toggleTool(tool.key)}
             >
-              {formData.available_tools.includes(tool) && <FiCheck />}
-              {tool}
+              {formData.available_tools.includes(tool.key) && <FiCheck />}
+              {tool.label}
             </button>
           ))}
         </div>
@@ -63,13 +70,13 @@ function Step3AdditionalDetails({
       <div className="form-group">
         <label>
           <FiPackage className="input-icon" />
-          Owned Products
+          Sahip Olunan Ürünler
         </label>
         {formData.owned_products.map((product, index) => (
           <div key={index} className="product-row">
             <input
               type="text"
-              placeholder="Brand"
+              placeholder="Marka"
               value={product.brand}
               onChange={(e) => updateProduct(index, 'brand', e.target.value)}
             />
@@ -93,7 +100,7 @@ function Step3AdditionalDetails({
           className="add-product-btn"
           onClick={addProduct}
         >
-          + Add Product
+          + Ürün Ekle
         </button>
       </div>
 
@@ -107,7 +114,7 @@ function Step3AdditionalDetails({
             required
           />
           <span>
-            I agree to the GDPR terms and conditions and privacy policy
+            GDPR şartlarını ve koşullarını kabul ediyorum
           </span>
         </label>
         {errors.gdpr_consent && <span className="field-error">{errors.gdpr_consent}</span>}
@@ -117,10 +124,10 @@ function Step3AdditionalDetails({
 
       <div className="form-actions">
         <AuthButton type="button" onClick={onBack} className="secondary">
-          Back
+          Geri
         </AuthButton>
         <AuthButton type="submit" loading={loading}>
-          Create Account
+          Hesap Oluştur
         </AuthButton>
       </div>
     </motion.div>

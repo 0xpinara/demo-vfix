@@ -1,0 +1,132 @@
+.appliances-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  margin: 0 auto 1.5rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.appliance-container {
+  width: 150px;
+  height: 180px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.appliance-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+.appliance-container:nth-child(2) .appliance-svg {
+  animation-delay: 0.3s;
+}
+
+.appliance-container:nth-child(3) .appliance-svg {
+  animation-delay: 0.6s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.eye-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.eye {
+  transition: all 0.15s ease-out;
+}
+
+.eye.closed {
+  transform: scaleY(0.1);
+}
+
+.eye.peeking {
+  transform: scaleY(0.5);
+  animation: peek 1.5s ease-in-out infinite;
+}
+
+@keyframes peek {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(0.7); }
+}
+
+.eyelid {
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+  pointer-events: none;
+}
+
+.eyelid.visible {
+  opacity: 1;
+}
+
+.eyelid-top {
+  fill: #dde2e7;
+  stroke: #b8c4ce;
+}
+
+.eye-pupil {
+  transition: all 0.2s ease-out;
+}
+
+.smoke {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.smoke.active {
+  opacity: 1;
+}
+
+.smoke-particle {
+  fill: #e0e0e0;
+  opacity: 0.6;
+  animation: smoke-rise 3s ease-out infinite;
+}
+
+.smoke-particle:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.smoke-particle:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.smoke-particle:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+.smoke-particle:nth-child(4) {
+  animation-delay: 0.9s;
+}
+
+.smoke-particle:nth-child(5) {
+  animation-delay: 1.2s;
+}
+
+@keyframes smoke-rise {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-30px) translateX(5px) scale(1.2);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-60px) translateX(-5px) scale(1.5);
+    opacity: 0;
+  }
+}
+

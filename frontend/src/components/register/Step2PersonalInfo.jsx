@@ -10,11 +10,11 @@ function Step2PersonalInfo({ formData, errors, onInputChange, setFormData, onBac
       exit={{ opacity: 0, x: -20 }}
       className="form-step"
     >
-      <h2>Personal Information</h2>
+      <h2>Kişisel Bilgiler</h2>
       <div className="form-group">
         <label htmlFor="full_name">
           <FiUser className="input-icon" />
-          Full Name
+          Ad Soyad
         </label>
         <input
           type="text"
@@ -22,7 +22,7 @@ function Step2PersonalInfo({ formData, errors, onInputChange, setFormData, onBac
           name="full_name"
           value={formData.full_name}
           onChange={onInputChange}
-          placeholder="Your full name"
+          placeholder="Adınız ve soyadınız"
           required
         />
         {errors.full_name && <span className="field-error">{errors.full_name}</span>}
@@ -31,7 +31,7 @@ function Step2PersonalInfo({ formData, errors, onInputChange, setFormData, onBac
       <div className="form-group">
         <label htmlFor="address">
           <FiMapPin className="input-icon" />
-          Address
+          Adres
         </label>
         <input
           type="text"
@@ -39,14 +39,14 @@ function Step2PersonalInfo({ formData, errors, onInputChange, setFormData, onBac
           name="address"
           value={formData.address}
           onChange={onInputChange}
-          placeholder="Your address"
+          placeholder="Adresiniz"
         />
       </div>
 
       <div className="form-group">
         <label htmlFor="phone">
           <FiPhone className="input-icon" />
-          Phone Number
+          Telefon Numarası
         </label>
         <input
           type="tel"
@@ -59,21 +59,21 @@ function Step2PersonalInfo({ formData, errors, onInputChange, setFormData, onBac
       </div>
 
       <div className="form-group">
-        <label htmlFor="preferred_contact_method">Preferred Contact Method</label>
+        <label htmlFor="preferred_contact_method">Tercih Edilen İletişim Yöntemi</label>
         <select
           id="preferred_contact_method"
           name="preferred_contact_method"
           value={formData.preferred_contact_method}
           onChange={onInputChange}
         >
-          <option value="email">Email</option>
-          <option value="phone">Phone</option>
+          <option value="email">E-posta</option>
+          <option value="phone">Telefon</option>
           <option value="sms">SMS</option>
         </select>
       </div>
 
       <div className="form-group">
-        <label htmlFor="skill_level">Skill Level</label>
+        <label htmlFor="skill_level">Beceri Seviyesi</label>
         <div className="skill-levels">
           {[1, 2, 3, 4, 5].map((level) => (
             <button
@@ -86,7 +86,7 @@ function Step2PersonalInfo({ formData, errors, onInputChange, setFormData, onBac
             </button>
           ))}
         </div>
-        <p className="skill-hint">1 = Beginner, 5 = Expert</p>
+        <p className="skill-hint">1 = Başlangıç, 5 = Uzman</p>
       </div>
 
       <div className="form-group">
@@ -98,17 +98,17 @@ function Step2PersonalInfo({ formData, errors, onInputChange, setFormData, onBac
             onChange={onInputChange}
             required
           />
-          <span>I confirm that I am at least 18 years old</span>
+          <span>18 yaşından büyük olduğumu onaylıyorum</span>
         </label>
         {errors.age_verified && <span className="field-error">{errors.age_verified}</span>}
       </div>
 
       <div className="form-actions">
         <AuthButton type="button" onClick={onBack} className="secondary">
-          Back
+          Geri
         </AuthButton>
         <AuthButton type="button" onClick={onNext}>
-          Continue
+          Devam Et
         </AuthButton>
       </div>
     </motion.div>

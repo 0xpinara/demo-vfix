@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-Fix | AI Destekli Beyaz Eşya Tamir Asistanı</title>
+    <meta name="description" content="Ev aletlerinizi teşhis etmek ve tamir etmek için akıllı asistanınız. Gelişmiş görüntü-dil modelleri ile güçlendirilmiştir.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0a0a0b;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.65);
+            --text-subtle: rgba(255, 255, 255, 0.4);
+            --accent-cyan: #00d4ff;
+            --accent-orange: #ff6b35;
+            --accent-purple: #a855f7;
+            --accent-green: #10b981;
+            --accent-red: #e53935;
+            --border-main: rgba(255, 255, 255, 0.12);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --content-padding: clamp(20px, 4vw, 50px);
+            --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ::selection {
+            background: var(--accent-red);
+            color: var(--text-primary);
+        }
+
+        /* ASCII Canvas Container */
+        .ascii-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        #ascii-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .ascii-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                180deg,
+                rgba(10, 10, 11, 0.3) 0%,
+                rgba(10, 10, 11, 0.1) 30%,
+                rgba(10, 10, 11, 0.1) 70%,
+                rgba(10, 10, 11, 0.8) 100%
+            );
+            pointer-events: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            padding: var(--content-padding);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 16px rgba(229, 57, 53, 0.4));
+        }
+
+        .logo-text {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent-red) 0%, var(--text-primary) 50%, #333 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-subtle);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #ab000d 100%);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(229, 57, 53, 0.3);
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(229, 57, 53, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: var(--content-padding);
+            padding-top: 0;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(229, 57, 53, 0.1);
+            border: 1px solid rgba(229, 57, 53, 0.3);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #ff6659;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 32px;
+            width: fit-content;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(36px, 5vw, 64px);
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: 24px;
+        }
+
+        .hero-title .highlight {
+            background: linear-gradient(135deg, var(--accent-red), #ff6659);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 480px;
+            margin-bottom: 40px;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-main);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--text-primary);
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .terminal-window {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-main);
+            border-radius: 16px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 520px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                0 20px 80px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(229, 57, 53, 0.1);
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f57; }
+        .terminal-dot.yellow { background: #febc2e; }
+        .terminal-dot.green { background: #28c840; }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-subtle);
+        }
+
+        .terminal-body {
+            padding: 24px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .terminal-line {
+            margin-bottom: 8px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: typeIn 0.5s ease forwards;
+        }
+
+        .terminal-line:nth-child(1) { animation-delay: 0.5s; }
+        .terminal-line:nth-child(2) { animation-delay: 1s; }
+        .terminal-line:nth-child(3) { animation-delay: 1.5s; }
+        .terminal-line:nth-child(4) { animation-delay: 2s; }
+        .terminal-line:nth-child(5) { animation-delay: 2.5s; }
+        .terminal-line:nth-child(6) { animation-delay: 3s; }
+
+        @keyframes typeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .terminal-prompt {
+            color: var(--accent-red);
+        }
+
+        .terminal-command {
+            color: var(--text-primary);
+        }
+
+        .terminal-response {
+            color: var(--text-secondary);
+            padding-left: 20px;
+        }
+
+        .terminal-success {
+            color: var(--accent-green);
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--accent-red);
+            margin-left: 4px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Features Section */
+        .features {
+            position: relative;
+            z-index: 10;
+            padding: calc(var(--content-padding) * 2) var(--content-padding);
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-main);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(229, 57, 53, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid var(--border-main);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .feature-icon svg {
+            width: 28px;
+            height: 28px;
+            stroke: var(--accent-red);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .feature-title {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .feature-description {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            z-index: 10;
+            padding: var(--content-padding);
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .footer-text {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-subtle);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-link {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-subtle);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+
+        /* ASCII Controls */
+        .ascii-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--border-main);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            min-width: 180px;
+        }
+
+        .ascii-controls.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-slider {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border-main);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .control-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .settings-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--border-main);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-subtle);
+            font-size: 18px;
+        }
+
+        .settings-toggle:hover {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .settings-toggle.active {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-content {
+                text-align: center;
+                align-items: center;
+            }
+
+            .hero-description {
+                max-width: 600px;
+            }
+
+            .hero-actions {
+                justify-content: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 32px;
+                letter-spacing: -1px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                text-align: center;
+            }
+
+            .terminal-window {
+                max-width: 100%;
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ASCII Animation Background -->
+    <div class="ascii-container">
+        <canvas id="ascii-canvas"></canvas>
+        <div class="ascii-overlay"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <a href="/" class="logo">
+                <div class="logo-icon">
+                    <img src="/logo.png" alt="V-Fix Logo" />
+                </div>
+                <span class="logo-text">V-Fix</span>
+            </a>
+            <nav class="nav-links">
+                <a href="#features" class="nav-link">Özellikler</a>
+                <a href="#how-it-works" class="nav-link">Nasıl Çalışır</a>
+                <a href="#about" class="nav-link">Hakkında</a>
+                <a href="/" class="btn-primary">Teşhise Başla</a>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-dot"></span>
+                        VLM Destekli • Türkçe Destekli
+                    </div>
+                    <h1 class="hero-title">
+                        Beyaz Eşya tamiri için <span class="highlight">AI asistanınız</span>
+                    </h1>
+                    <p class="hero-description">
+                        Bir fotoğraf çekin, sorunu açıklayın ve anında teşhis rehberliği alın. 
+                        V-Fix, ev aletlerinizi tamir etmenize yardımcı olmak için gelişmiş görüntü-dil modelleri kullanır.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="/" class="btn-primary">V-Fix'i Ücretsiz Dene</a>
+                        <a href="#how-it-works" class="btn-secondary">Demo İzle</a>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                            <span class="terminal-title">v-fix — teşhis oturumu</span>
+                        </div>
+                        <div class="terminal-body">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">kullanici@v-fix:~$</span>
+                                <span class="terminal-command"> yukle camasir_makinesi.jpg</span>
+                            </div>
+                            <div class="terminal-line terminal-response">
+                                → Görüntü VLM ile analiz ediliyor...
+                            </div>
+                            <div class="terminal-line terminal-response">
+                                → Model tespit edildi: Samsung WW80T554DAW
+                            </div>
+                            <div class="terminal-line terminal-response">
+                                → Sorun tespit edildi: Hata kodu 4E (su temini)
+                            </div>
+                            <div class="terminal-line terminal-success">
+                                ✓ 3 tamir çözümü bulundu
+                            </div>
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">kullanici@v-fix:~$</span>
+                                <span class="terminal-cursor"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="2" y="6" width="20" height="14" rx="2" ry="2"/>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <circle cx="12" cy="13" r="3"/>
+                            <line x1="2" y1="2" x2="6" y2="6"/>
+                            <line x1="18" y1="2" x2="22" y2="6"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Görsel Teşhis</h3>
+                    <p class="feature-description">
+                        Ev aletinizin veya hata kodunun fotoğrafını yükleyin, VLM'imiz anında marka, model ve sorunu tespit eder.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Adım Adım Tamir</h3>
+                    <p class="feature-description">
+                        Belirli ev aletiniz ve sorununuz için özelleştirilmiş detaylı tamir talimatları alın, güvenlik uyarıları dahil.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Türkçe Dil Desteği</h3>
+                    <p class="feature-description">
+                        Türk kullanıcılar için tam yerelleştirilmiş. Sorununuzu Türkçe açıklayın ve ana dilinizde yanıtlar alın.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <span class="footer-text">© 2025 V-Fix.</span>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Gizlilik</a>
+                <a href="#" class="footer-link">Şartlar</a>
+                <a href="#" class="footer-link">GitHub</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Settings Toggle -->
+    <button class="settings-toggle" id="settings-toggle" title="ASCII Ayarları">⚙</button>
+
+    <!-- ASCII Controls Panel -->
+    <div class="ascii-controls" id="ascii-controls">
+        <div class="control-group">
+            <div class="control-label">Hücre Boyutu</div>
+            <input type="range" class="control-slider" id="cell-size" min="6" max="24" value="12">
+        </div>
+        <div class="control-group">
+            <div class="control-label">Metin Opaklığı</div>
+            <input type="range" class="control-slider" id="text-opacity" min="20" max="100" value="80">
+        </div>
+        <div class="control-group">
+            <div class="control-label">Işık Yarıçapı</div>
+            <input type="range" class="control-slider" id="light-radius" min="100" max="500" value="280">
+        </div>
+        <div class="control-group">
+            <div class="control-label">Işık Yoğunluğu</div>
+            <input type="range" class="control-slider" id="light-intensity" min="0" max="100" value="80">
+        </div>
+    </div>
+
+    <script>
+        // ASCII Renderer with Animated Colors AND Light Ball Effect
+        class ASCIIRenderer {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                
+                // Configuration
+                this.config = {
+                    cellSize: 12,
+                    textOpacity: 0.8,
+                    lightRadius: 280,
+                    lightIntensity: 0.8,
+                    chars: ' .,:;+*?%S#@',
+                    font: 'JetBrains Mono, monospace'
+                };
+
+                // Mouse position for light ball effect
+                this.mouse = { x: -1000, y: -1000 };
+                this.targetMouse = { x: -1000, y: -1000 };
+
+                // Animation state
+                this.time = 0;
+                this.noiseScale = 0.02;
+                this.noiseSpeed = 0.0005;
+
+                // Bind methods
+                this.resize = this.resize.bind(this);
+                this.animate = this.animate.bind(this);
+                this.handleMouseMove = this.handleMouseMove.bind(this);
+                this.handleMouseLeave = this.handleMouseLeave.bind(this);
+
+                // Initialize
+                this.init();
+            }
+
+            init() {
+                this.resize();
+                window.addEventListener('resize', this.resize);
+                window.addEventListener('mousemove', this.handleMouseMove);
+                document.addEventListener('mouseleave', this.handleMouseLeave);
+                this.animate();
+            }
+
+            resize() {
+                const dpr = Math.min(window.devicePixelRatio, 2);
+                this.canvas.width = window.innerWidth * dpr;
+                this.canvas.height = window.innerHeight * dpr;
+                this.canvas.style.width = window.innerWidth + 'px';
+                this.canvas.style.height = window.innerHeight + 'px';
+                this.ctx.scale(dpr, dpr);
+                
+                this.width = window.innerWidth;
+                this.height = window.innerHeight;
+                this.cols = Math.ceil(this.width / this.config.cellSize);
+                this.rows = Math.ceil(this.height / this.config.cellSize);
+            }
+
+            handleMouseMove(e) {
+                this.targetMouse.x = e.clientX;
+                this.targetMouse.y = e.clientY;
+            }
+
+            handleMouseLeave() {
+                this.targetMouse.x = -1000;
+                this.targetMouse.y = -1000;
+            }
+
+            // Perlin-like noise
+            noise(x, y, z) {
+                const p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+                const perm = [...p, ...p];
+                
+                const X = Math.floor(x) & 255;
+                const Y = Math.floor(y) & 255;
+                const Z = Math.floor(z) & 255;
+                
+                const xf = x - Math.floor(x);
+                const yf = y - Math.floor(y);
+                const zf = z - Math.floor(z);
+                
+                const u = this.fade(xf);
+                const v = this.fade(yf);
+                const w = this.fade(zf);
+                
+                const A = perm[X] + Y;
+                const AA = perm[A] + Z;
+                const AB = perm[A + 1] + Z;
+                const B = perm[X + 1] + Y;
+                const BA = perm[B] + Z;
+                const BB = perm[B + 1] + Z;
+                
+                return this.lerp(w,
+                    this.lerp(v,
+                        this.lerp(u, this.grad(perm[AA], xf, yf, zf), this.grad(perm[BA], xf - 1, yf, zf)),
+                        this.lerp(u, this.grad(perm[AB], xf, yf - 1, zf), this.grad(perm[BB], xf - 1, yf - 1, zf))
+                    ),
+                    this.lerp(v,
+                        this.lerp(u, this.grad(perm[AA + 1], xf, yf, zf - 1), this.grad(perm[BA + 1], xf - 1, yf, zf - 1)),
+                        this.lerp(u, this.grad(perm[AB + 1], xf, yf - 1, zf - 1), this.grad(perm[BB + 1], xf - 1, yf - 1, zf - 1))
+                    )
+                );
+            }
+
+            fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+            lerp(t, a, b) { return a + t * (b - a); }
+            grad(hash, x, y, z) {
+                const h = hash & 15;
+                const u = h < 8 ? x : y;
+                const v = h < 4 ? y : h === 12 || h === 14 ? x : z;
+                return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+            }
+
+            // Generate animated patterns
+            getPatternValue(x, y, time) {
+                const n1 = this.noise(x * this.noiseScale, y * this.noiseScale, time);
+                const n2 = this.noise(x * this.noiseScale * 2, y * this.noiseScale * 2, time * 1.5) * 0.5;
+                const n3 = this.noise(x * this.noiseScale * 4, y * this.noiseScale * 4, time * 2) * 0.25;
+                
+                const gridX = Math.sin(x * 0.1 + time * 0.5) * 0.2;
+                const gridY = Math.cos(y * 0.08 + time * 0.3) * 0.2;
+                const wave = Math.sin(x * 0.05 + y * 0.03 + time) * 0.3;
+                
+                return (n1 + n2 + n3 + gridX + gridY + wave + 1) / 2;
+            }
+
+            getColorForPosition(x, y, baseValue, col, row) {
+                // Calculate distance from mouse (light ball effect)
+                const dx = x - this.mouse.x;
+                const dy = y - this.mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                // Light ball with smooth falloff
+                const lightRadius = this.config.lightRadius;
+                const normalizedDist = dist / lightRadius;
+                const lightInfluence = Math.max(0, Math.pow(1 - Math.min(normalizedDist, 1), 2.5));
+                const intensity = lightInfluence * this.config.lightIntensity;
+
+                // === BASE ANIMATED COLORS (always visible, shifting over time) ===
+                const timeShift = this.time * 0.001;
+                const baseHue = 0 + Math.sin(timeShift + col * 0.05) * 15 + Math.cos(timeShift * 0.7 + row * 0.03) * 10;
+                const baseSat = 60 + baseValue * 30 + Math.sin(timeShift * 1.5 + col * 0.02) * 15;
+                const baseLight = 35 + baseValue * 35 + Math.sin(timeShift * 0.8 + row * 0.04) * 12;
+
+                // === LIGHT BALL EFFECT (additive brightness when hovering) ===
+                if (intensity > 0.01) {
+                    // Inner core - almost white/bright
+                    if (intensity > 0.75) {
+                        const coreIntensity = (intensity - 0.75) / 0.25;
+                        const coreLight = this.lerp(coreIntensity, 75, 98);
+                        const coreSat = this.lerp(coreIntensity, 50, 10);
+                        const coreHue = this.lerp(coreIntensity, baseHue, 40);
+                        return `hsla(${coreHue}, ${coreSat}%, ${coreLight}%, 1)`;
+                    }
+                    
+                    // Middle ring - very bright, warm colors
+                    if (intensity > 0.35) {
+                        const midIntensity = (intensity - 0.35) / 0.4;
+                        const midHue = this.lerp(midIntensity, baseHue, 30);
+                        const midLight = this.lerp(midIntensity, baseLight + 30, 75);
+                        const midSat = this.lerp(midIntensity, baseSat + 10, 70);
+                        return `hsla(${midHue}, ${midSat}%, ${midLight}%, ${0.9 + midIntensity * 0.1})`;
+                    }
+                    
+                    // Outer glow - enhanced base colors
+                    const outerIntensity = intensity / 0.35;
+                    const outerLight = baseLight + outerIntensity * 40;
+                    const outerSat = baseSat + outerIntensity * 15;
+                    return `hsla(${baseHue}, ${outerSat}%, ${outerLight}%, ${this.config.textOpacity + outerIntensity * 0.15})`;
+                }
+
+                // === DEFAULT STATE (animated base colors, no hover) ===
+                return `hsla(${baseHue}, ${baseSat}%, ${baseLight}%, ${this.config.textOpacity * 0.9})`;
+            }
+
+            animate() {
+                this.time += 16;
+
+                // Smooth mouse interpolation
+                this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.12;
+                this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.12;
+
+                // Clear
+                this.ctx.fillStyle = '#0a0a0b';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                // Font
+                const fontSize = this.config.cellSize;
+                this.ctx.font = `${fontSize}px ${this.config.font}`;
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+
+                const timeOffset = this.time * this.noiseSpeed;
+                
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        const x = col * this.config.cellSize + this.config.cellSize / 2;
+                        const y = row * this.config.cellSize + this.config.cellSize / 2;
+
+                        const value = this.getPatternValue(col, row, timeOffset);
+                        
+                        // Boost character density near light
+                        const dx = x - this.mouse.x;
+                        const dy = y - this.mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const lightBoost = Math.pow(Math.max(0, 1 - dist / this.config.lightRadius), 2) * 0.5;
+                        
+                        const charIndex = Math.floor((value + lightBoost) * (this.config.chars.length - 1));
+                        const char = this.config.chars[Math.min(Math.max(0, charIndex), this.config.chars.length - 1)];
+
+                        // Get color with both animation AND light ball effect
+                        this.ctx.fillStyle = this.getColorForPosition(x, y, value, col, row);
+                        this.ctx.fillText(char, x, y);
+                    }
+                }
+
+                requestAnimationFrame(this.animate);
+            }
+
+            updateConfig(key, value) {
+                this.config[key] = value;
+                if (key === 'cellSize') {
+                    this.resize();
+                }
+            }
+
+            destroy() {
+                window.removeEventListener('resize', this.resize);
+                window.removeEventListener('mousemove', this.handleMouseMove);
+                document.removeEventListener('mouseleave', this.handleMouseLeave);
+            }
+        }
+
+        // Initialize
+        const canvas = document.getElementById('ascii-canvas');
+        const renderer = new ASCIIRenderer(canvas);
+
+        // Settings Panel
+        const settingsToggle = document.getElementById('settings-toggle');
+        const controlsPanel = document.getElementById('ascii-controls');
+        let controlsVisible = false;
+
+        settingsToggle.addEventListener('click', () => {
+            controlsVisible = !controlsVisible;
+            controlsPanel.classList.toggle('visible', controlsVisible);
+            settingsToggle.classList.toggle('active', controlsVisible);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (controlsVisible && 
+                !controlsPanel.contains(e.target) && 
+                !settingsToggle.contains(e.target)) {
+                controlsVisible = false;
+                controlsPanel.classList.remove('visible');
+                settingsToggle.classList.remove('active');
+            }
+        });
+
+        // Sliders
+        document.getElementById('cell-size').addEventListener('input', (e) => {
+            renderer.updateConfig('cellSize', parseInt(e.target.value));
+        });
+
+        document.getElementById('text-opacity').addEventListener('input', (e) => {
+            renderer.updateConfig('textOpacity', parseInt(e.target.value) / 100);
+        });
+
+        document.getElementById('light-radius').addEventListener('input', (e) => {
+            renderer.updateConfig('lightRadius', parseInt(e.target.value));
+        });
+
+        document.getElementById('light-intensity').addEventListener('input', (e) => {
+            renderer.updateConfig('lightIntensity', parseInt(e.target.value) / 100);
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
