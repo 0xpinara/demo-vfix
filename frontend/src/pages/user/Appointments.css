@@ -1,11 +1,31 @@
-.page-header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1.5rem;
+.appointments-page-container {
+  padding: 20px;
+  margin: 0 auto;
+  min-height: 100vh; /* Make it cover the full viewport height */
+  background-color: #121212; /* Dark background for the page */
+  color: #e0e0e0; /* Light text color */
 }
 
-.create-appointment-btn {
-  background-color: #dc2626;
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #333; /* Subtle separator */
+}
+
+.page-title {
+  font-size: 2em;
+  color: #ff0000; /* Red title */
+  margin: 0;
+  flex-grow: 1; /* Allow title to take up available space */
+  text-align: center;
+}
+
+.create-appointment-btn,
+.back-to-dashboard-btn {
+  background-color: #ff0000; /* Red for primary action */
   color: white;
   border: none;
   border-radius: 8px;
@@ -14,9 +34,73 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
-.create-appointment-btn:hover {
-  background-color: #b91c1c;
+.create-appointment-btn:hover,
+.back-to-dashboard-btn:hover {
+  background-color: #cc0000; /* Darker red on hover */
   transform: translateY(-2px);
 }
+
+.back-to-dashboard-btn {
+  background-color: #4a5568; /* A darker, neutral color for the back button */
+  margin-right: 15px; /* Space between back and create button */
+}
+
+.back-to-dashboard-btn:hover {
+  background-color: #2d3748; /* Darken on hover */
+}
+
+.appointments-main-content {
+  padding: 20px 0;
+  /* Further styling for calendar/list layout can go here if needed */
+}
+
+.appointments-main-content p {
+  color: #e0e0e0; /* Ensure error/loading messages are visible */
+}
+
+/* Styles for AppointmentViewToggle might need adjustments to fit this new page layout */
+/* For example, if AppointmentViewToggle has a fixed width, it might need to be responsive */
+.appointment-view-toggle-container {
+  background-color: #1e1e1e; /* Slightly lighter dark background for the toggle content */
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.appointment-view-toggle-container .view-toggle-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.appointment-view-toggle-container .toggle-button {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.appointment-view-toggle-container .toggle-button.active {
+    background-color: #ff0000;
+    color: white;
+    border-color: #ff0000;
+}
+
+.appointment-view-toggle-container .toggle-button:hover {
+    background-color: #555;
+}
+
+/* Ensure calendar and list components inside AppointmentViewToggle are styled correctly */
+/* These styles might need to be adjusted in AppointmentCalendar.css and AppointmentList.css as well */
+/* but for now, this ensures the main page layout is good */

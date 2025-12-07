@@ -19,18 +19,18 @@ export function AppointmentProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadAppointments = useCallback(async (userType) => {
+  const loadAppointments = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       // Use the central API service directly, consistent with AuthContext
-      const response = await api.get(`/appointments/${userType}`);
+      const response = await api.get(`/appointments/`);
       setAppointments(response.data);
     } catch (err) {
       // Better error handling to display backend messages
       const errorMessage = err.response?.data?.detail || err.message;
       setError(errorMessage);
-      console.error(`Failed to fetch ${userType} appointments:`, err);
+      console.error(`Failed to fetch appointments:`, err);
     } finally {
       setLoading(false);
     }

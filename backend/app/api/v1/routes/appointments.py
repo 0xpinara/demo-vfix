@@ -85,43 +85,25 @@ def search_appointments(
     return appointments
 
 
-@router.get("/user", response_model=List[schemas.AppointmentResponse])
-
-
-def get_user_appointments(
+@router.get("/", response_model=List[schemas.AppointmentResponse])
+def get_appointments(
     current_user: models.User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
     skip: int = 0,
     limit: int = 100,
 ):
     """
-    Get all appointments for the currently logged-in user.
-
+    Get all appointments for the currently logged-in user or technician.
     """
-    if not hasattr(current_user, 'role') or current_user.role not in ["user", "admin"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized for this resource")
-    if current_user.role == "admin":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admins should use the search endpoint: GET /api/v1/appointments/")
-    return service.get_appointments_for_customer(customer_id=current_user.id, skip=skip, limit=limit)
-
-
-@router.get("/technician", response_model=List[schemas.AppointmentResponse])
-def get_technician_appointments(
-    current_user: models.User = Depends(get_current_user),
-    service: AppointmentService = Depends(get_appointment_service),
-    skip: int = 0,
-    limit: int = 100,
-):
-    """
-    Get all assigned jobs for the currently logged-in technician.
-    """
-    if not hasattr(current_user, 'role') or current_user.role not in ["technician", "admin"]:
+    if not hasattr(current_user, 'role') or current_user.role not in ["user", "technician", "admin"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized for this resource")
 
     if current_user.role == "admin":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admins should use the search endpoint: GET /api/v1/appointments/")
-
-    return service.get_appointments_for_technician(technician_id=current_user.id, skip=skip, limit=limit)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admins should use the search endpoint: GET /api/appointments/")
+    elif current_user.role == "user":
+        return service.get_appointments_for_customer(customer_id=current_user.id, skip=skip, limit=limit)
+    elif current_user.role == "technician":
+        return service.get_appointments_for_technician(technician_id=current_user.id, skip=skip, limit=limit)
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentResponse)

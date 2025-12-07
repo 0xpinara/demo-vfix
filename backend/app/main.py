@@ -465,7 +465,7 @@ async def get_login_history(
 app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 
 # Appointment and Technician endpoints
-app.include_router(appointments.router, prefix="/api/v1/appointments", tags=["Appointments"])
+app.include_router(appointments.router, prefix="/api/appointments", tags=["Appointments"])
 
 # Admin dashboard endpoints
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])

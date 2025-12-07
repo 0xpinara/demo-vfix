@@ -5,6 +5,8 @@ import './Appointments.css';
 function AppointmentList({ appointments, userType }) {
   const [filter, setFilter] = useState('upcoming'); // 'upcoming' or 'past'
 
+  // console.log("All: ", appointments)
+
   const filteredAppointments = appointments.filter(app => {
     const appointmentDate = new Date(app.scheduled_for);
     const now = new Date();
@@ -13,6 +15,8 @@ function AppointmentList({ appointments, userType }) {
     }
     return appointmentDate < now;
   }).sort((a, b) => new Date(a.scheduled_for) - new Date(b.scheduled_for));
+
+  // console.log("Filtered: ", filteredAppointments)
 
   return (
     <div className="appointments-container">

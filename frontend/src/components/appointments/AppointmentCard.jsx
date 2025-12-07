@@ -5,8 +5,8 @@ import RescheduleAppointmentModal from './RescheduleAppointmentModal';
 import UpdateStatusModal from './UpdateStatusModal';
 import { useAppointments } from '../../context/AppointmentContext';
 
-function AppointmentCard({ appointment, userType = 'customer' }) {
-  const { id, scheduled_for, status, product, technician, customer, location } = appointment;
+function AppointmentCard({ appointment, userType = 'user' }) {
+  const { id, scheduled_for, status, product_brand, product_model, product_issue, technician, customer, location } = appointment;
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState(false);
   const { deleteAppointment } = useAppointments();
@@ -16,7 +16,7 @@ function AppointmentCard({ appointment, userType = 'customer' }) {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const canReschedule = userType === 'customer' && status !== 'completed' && status !== 'cancelled';
+  const canReschedule = userType === 'user' && status !== 'completed' && status !== 'cancelled';
   const canUpdateStatus = userType === 'technician';
 
   const handleDelete = async () => {
@@ -29,13 +29,13 @@ function AppointmentCard({ appointment, userType = 'customer' }) {
     <>
       <div className={`appointment-card status-${status}`}>
         <div className="card-header">
-          <h3>{product.brand} {product.model}</h3>
+          <h3>{product_brand} {product_model}</h3>
           <span className="status-badge">{status}</span>
         </div>
         <div className="card-body">
           <p><FaCalendarAlt /> <strong>Tarih:</strong> {formatDate(scheduled_for)}</p>
-          <p><FaCog /> <strong>Problem:</strong> {product.issue}</p>
-          {userType === 'customer' && technician && (
+          <p><FaCog /> <strong>Problem:</strong> {product_issue}</p>
+          {userType === 'user' && technician && (
             <p><FaUser /> <strong>Teknisyen:</strong> {technician.name}</p>
           )}
           {userType === 'technician' && customer && (
