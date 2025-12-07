@@ -24,7 +24,7 @@ export function AppointmentProvider({ children }) {
       setLoading(true);
       setError(null);
       // Use the central API service directly, consistent with AuthContext
-      const response = await api.get(`/v1/appointments/${userType}`);
+      const response = await api.get(`/appointments/${userType}`);
       setAppointments(response.data);
     } catch (err) {
       // Better error handling to display backend messages
@@ -40,7 +40,7 @@ export function AppointmentProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.post('/v1/appointments/', appointmentData);
+      const response = await api.post('/appointments/', appointmentData);
       // Add new appointment to the start of the list to be immediately visible
       setAppointments(prev => [response.data, ...prev]);
       setLoading(false);
@@ -58,7 +58,7 @@ export function AppointmentProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.patch(`/v1/appointments/${appointmentId}/reschedule`, rescheduleData);
+      const response = await api.patch(`/appointments/${appointmentId}/reschedule`, rescheduleData);
       setAppointments(prev => prev.map(app => app.id === appointmentId ? response.data : app));
       setLoading(false);
       return { success: true };
@@ -75,7 +75,7 @@ export function AppointmentProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      await api.delete(`/v1/appointments/${appointmentId}`);
+      await api.delete(`/appointments/${appointmentId}`);
       setAppointments(prev => prev.filter(app => app.id !== appointmentId));
       setLoading(false);
       return { success: true };
@@ -92,7 +92,7 @@ export function AppointmentProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.patch(`/v1/appointments/${appointmentId}/status`, statusData);
+      const response = await api.patch(`/appointments/${appointmentId}/status`, statusData);
       setAppointments(prev => prev.map(app => app.id === appointmentId ? response.data : app));
       setLoading(false);
       return { success: true };

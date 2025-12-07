@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import AppointmentList from '../../components/appointments/AppointmentList';
 import { useAppointments } from '../../context/AppointmentContext';
 
@@ -12,13 +11,13 @@ function TechnicianAppointments() {
   }, [loadAppointments]);
 
   return (
-    <DashboardLayout title="Bekleyen Randevular">
+    <>
       {loading && <p>Randevular Yükleniyor...</p>}
       {error && <p style={{ color: 'red' }}>Hata: {error}</p>}
       {!loading && !error && (
         <AppointmentList appointments={appointments} userType="technician" />
       )}
-    </DashboardLayout>
+    </>
   );
 }
 

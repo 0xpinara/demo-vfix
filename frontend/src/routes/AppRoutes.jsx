@@ -4,6 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import ChatPage from "@/pages/ChatPage";
 import Login from "@/pages/login/Login";
 import Register from "@/pages/register/Register";
+import Dashboard from "@/pages/Dashboard";
+import AppointmentsPage from "@/pages/AppointmentsPage";
 
 // Admin Pages
 import GeneralStatistics from "@/pages/admin/GeneralStatistics";
@@ -68,6 +70,17 @@ export default function AppRoutes() {
           </ProtectedRoute>
         } />
         <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/appointments" element={
+          <ProtectedRoute>
+            <Route index element={<AppointmentsPage />} />
+          </ProtectedRoute>
+        }>
+        </Route>
+        <Route path="/chat" element={
           <ProtectedRoute>
             <ChatPage />
           </ProtectedRoute>

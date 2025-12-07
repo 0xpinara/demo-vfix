@@ -1,12 +1,15 @@
 .appointments-container {
   width: 100%;
+  background-color: #000000;
+  color: #ffffff;
+  padding: 2rem;
 }
 
 .filter-tabs {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 2rem;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 2px solid #333;
 }
 
 .filter-tab {
@@ -16,15 +19,15 @@
   background-color: transparent;
   font-size: 1rem;
   font-weight: 500;
-  color: #6c757d;
+  color: #aaa;
   position: relative;
   top: 2px;
   border-bottom: 2px solid transparent;
 }
 
 .filter-tab.active {
-  color: #0d6efd;
-  border-bottom-color: #0d6efd;
+  color: #dc2626;
+  border-bottom-color: #dc2626;
   font-weight: 600;
 }
 
@@ -35,38 +38,37 @@
 }
 
 .appointment-card {
-  background-color: #fff;
+  background-color: #111;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 1px solid #333;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  border-left: 5px solid #6c757d; /* Default border color */
 }
 
 .appointment-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
 }
 
 /* Status-specific border colors */
-.appointment-card.status-scheduled { border-left-color: #0d6efd; }
-.appointment-card.status-completed { border-left-color: #198754; }
-.appointment-card.status-cancelled { border-left-color: #dc3545; }
+.appointment-card.status-scheduled { border-left: 5px solid #dc2626; }
+.appointment-card.status-completed { border-left: 5px solid #4caf50; }
+.appointment-card.status-cancelled { border-left: 5px solid #777; }
 
 .card-header {
   padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f8f9fa;
+  background-color: #222;
 }
 
 .card-header h3 {
   margin: 0;
   font-size: 1.2rem;
-  color: #343a40;
+  color: #ffffff;
 }
 
 .status-badge {
@@ -76,12 +78,11 @@
   font-weight: 600;
   color: #fff;
   text-transform: capitalize;
-  background-color: #6c757d; /* Default */
 }
 
-.status-scheduled .status-badge { background-color: #0d6efd; }
-.status-completed .status-badge { background-color: #198754; }
-.status-cancelled .status-badge { background-color: #dc3545; }
+.status-scheduled .status-badge { background-color: #dc2626; }
+.status-completed .status-badge { background-color: #4caf50; }
+.status-cancelled .status-badge { background-color: #777; }
 
 .card-body {
   padding: 1.25rem;
@@ -90,7 +91,7 @@
 
 .card-body p {
   margin: 0 0 0.75rem 0;
-  color: #495057;
+  color: #aaa;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -98,7 +99,7 @@
 
 .card-footer {
   padding: 1rem 1.25rem;
-  background-color: #f8f9fa;
+  background-color: #222;
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
@@ -107,21 +108,33 @@
 .card-button {
   padding: 0.5rem 1rem;
   border-radius: 6px;
-  border: 1px solid #ced4da;
-  background-color: #fff;
+  border: 1px solid #777;
+  background-color: transparent;
+  color: #aaa;
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.2s ease;
 }
 
+.card-button:hover {
+  background-color: #333;
+  border-color: #aaa;
+  color: #ffffff;
+}
+
 .card-button.primary {
-  background-color: #0d6efd;
+  background-color: #dc2626;
   color: #fff;
-  border-color: #0d6efd;
+  border-color: #dc2626;
+}
+
+.card-button.primary:hover {
+  background-color: #b91c1c;
+  border-color: #b91c1c;
 }
 
 .no-appointments {
-  color: #6c757d;
+  color: #777;
   padding: 2rem;
   text-align: center;
   grid-column: 1 / -1;

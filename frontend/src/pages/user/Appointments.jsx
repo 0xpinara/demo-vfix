@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import AppointmentList from '../../components/appointments/AppointmentList';
 import { useAppointments } from '../../context/AppointmentContext';
 import CreateAppointmentModal from '../../components/appointments/CreateAppointmentModal';
@@ -15,7 +14,7 @@ function UserAppointments() {
   }, [loadAppointments]);
 
   return (
-    <DashboardLayout title="Randevularım">
+    <>
       <div className="page-header">
         <button className="create-appointment-btn" onClick={() => setIsModalOpen(true)}>
           + Yeni Randevu Oluştur
@@ -28,7 +27,7 @@ function UserAppointments() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
-    </DashboardLayout>
+    </>
   );
 }
 
