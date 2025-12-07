@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import AppointmentList from '../../components/appointments/AppointmentList';
-import { useAppointments } from '../../lib/AppointmentContext';
+import { useAppointments } from '../../context/AppointmentContext';
 import CreateAppointmentModal from '../../components/appointments/CreateAppointmentModal';
 import './Appointments.css';
 
-function CustomerAppointments() {
+function UserAppointments() {
   const { appointments, loading, error, loadAppointments } = useAppointments();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // Load appointments for the 'customer' user type
-    loadAppointments('customer');
+    // Load appointments for the 'user' user type
+    loadAppointments('user');
   }, [loadAppointments]);
 
   return (
@@ -23,7 +23,7 @@ function CustomerAppointments() {
       </div>
       {loading && appointments.length === 0 && <p>Randevular Yükleniyor...</p>}
       {error && !isModalOpen && <p style={{ color: 'red' }}>Hata: {error}</p>}
-      <AppointmentList appointments={appointments} userType="customer" />
+      <AppointmentList appointments={appointments} userType="user" />
       <CreateAppointmentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -32,4 +32,4 @@ function CustomerAppointments() {
   );
 }
 
-export default CustomerAppointments;
+export default UserAppointments;

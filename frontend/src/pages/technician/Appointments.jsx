@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import AppointmentList from '../../components/appointments/AppointmentList';
+<<<<<<< HEAD
 import { useAppointments } from '../../lib/AppointmentContext';
+=======
+import { useAppointments } from '../../context/AppointmentContext';
+>>>>>>> e959ab8 (SPRINT-3 : Proper Working Module for Customer)
 
 function TechnicianAppointments() {
   const { appointments, loading, error, loadAppointments } = useAppointments();

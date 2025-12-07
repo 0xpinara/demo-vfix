@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAppointments } from '../../lib/AppointmentContext';
+import { useAppointments } from '../../context/AppointmentContext';
 import './CreateAppointmentModal.css'; // Reusing the same CSS for simplicity
 
 function RescheduleAppointmentModal({ isOpen, onClose, appointment }) {

@@ -25,8 +25,8 @@ def create_appointment(
     Create a new appointment request for the logged-in customer.
     The appointment is created with a 'PENDING' status and no technician.
     """
-    if not hasattr(current_user, 'role') or current_user.role not in ["customer", "admin"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only customers or admins can create appointment requests.")
+    if not hasattr(current_user, 'role') or current_user.role not in ["user", "admin"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only users or admins can create appointment requests.")
 
     try:
         appointment = service.create_appointment_request(appointment_data=appointment_in, customer_id=current_user.id)
@@ -56,7 +56,7 @@ def search_appointments(
     - Technicians can only see their own appointments.
     - Customers can only see their own appointments.
     """
-    if not hasattr(current_user, 'role') or current_user.role == "user":
+    if not hasattr(current_user, 'role') or current_user.role == "guest":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to search appointments.")
 
     search_params = {
@@ -67,9 +67,9 @@ def search_appointments(
         "date_to": date_to,
     }
 
-    if current_user.role == "customer":
+    if current_user.role == "user":
         if technician_id or (customer_id and customer_id != current_user.id):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Customers can only view their own appointments.")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Users can only view their own appointments.")
         search_params["customer_id"] = current_user.id
 
     if current_user.role == "technician":
@@ -85,22 +85,23 @@ def search_appointments(
     return appointments
 
 
-@router.get("/customer", response_model=List[schemas.AppointmentResponse])
-def get_customer_appointments(
+@router.get("/user", response_model=List[schemas.AppointmentResponse])
+
+
+def get_user_appointments(
     current_user: models.User = Depends(get_current_user),
     service: AppointmentService = Depends(get_appointment_service),
     skip: int = 0,
     limit: int = 100,
 ):
     """
-    Get all appointments for the currently logged-in customer.
-    """
-    if not hasattr(current_user, 'role') or current_user.role not in ["customer", "admin"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized for this resource")
+    Get all appointments for the currently logged-in user.
 
+    """
+    if not hasattr(current_user, 'role') or current_user.role not in ["user", "admin"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized for this resource")
     if current_user.role == "admin":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admins should use the search endpoint: GET /api/v1/appointments/")
-
     return service.get_appointments_for_customer(customer_id=current_user.id, skip=skip, limit=limit)
 
 
@@ -238,10 +239,10 @@ def reschedule_appointment(
     service: AppointmentService = Depends(get_appointment_service),
 ):
     """
-    Allows a customer to reschedule their own appointment.
+    Allows a user to reschedule their own appointment.
     """
-    if not hasattr(current_user, 'role') or current_user.role != "customer":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only customers can reschedule their appointments.")
+    if not hasattr(current_user, 'role') or current_user.role != "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only users can reschedule their appointments.")
 
     try:
         updated_appointment = service.reschedule_appointment(
@@ -269,9 +270,9 @@ def delete_appointment(
     """
     Delete an appointment.
     - Admins can delete any appointment.
-    - Customers can delete their own appointments.
+    - Users can delete their own appointments.
     """
-    if not hasattr(current_user, 'role') or current_user.role not in ["admin", "customer"]:
+    if not hasattr(current_user, 'role') or current_user.role not in ["admin", "user"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to delete appointments.")
 
     try:

@@ -3,7 +3,7 @@ import { FaCalendarAlt, FaUser, FaCog, FaMapMarkerAlt } from 'react-icons/fa';
 import './Appointments.css';
 import RescheduleAppointmentModal from './RescheduleAppointmentModal';
 import UpdateStatusModal from './UpdateStatusModal';
-import { useAppointments } from '../../lib/AppointmentContext';
+import { useAppointments } from '../../context/AppointmentContext';
 
 function AppointmentCard({ appointment, userType = 'customer' }) {
   const { id, scheduled_for, status, product, technician, customer, location } = appointment;
@@ -70,4 +70,5 @@ function AppointmentCard({ appointment, userType = 'customer' }) {
       />
     </>
   );
-}export default AppointmentCard;
+}
+export default AppointmentCard;

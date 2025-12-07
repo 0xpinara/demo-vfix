@@ -4,8 +4,7 @@ import Login from './pages/login/Login'
 import Register from './pages/register/Register'
 import Dashboard from './pages/Dashboard'
 import ChatPage from './pages/ChatPage'
-import TechnicianAppointments from './pages/technician/Appointments'
-import CustomerAppointments from './pages/user/Appointments'
+import AppointmentsPage from './pages/AppointmentsPage'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { AppointmentProvider } from './context/AppointmentContext'
 
@@ -115,18 +114,10 @@ function AppRoutes() {
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
       <Route
-        path="/technician/appointments"
+        path="/appointments"
         element={
           <ProtectedRoute>
-            <TechnicianAppointments />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/customer/appointments"
-        element={
-          <ProtectedRoute>
-            <CustomerAppointments />
+            <AppointmentsPage />
           </ProtectedRoute>
         }
       />
