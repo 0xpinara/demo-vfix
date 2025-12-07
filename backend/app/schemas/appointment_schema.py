@@ -30,6 +30,10 @@ class AppointmentCreate(BaseModel):
     location: str = Field(..., description="Customer's address for the service.")
     scheduled_for: datetime = Field(..., description="Proposed date and time for the appointment.")
 
+class AppointmentAssign(BaseModel):
+    technician_id: str
+    scheduled_for: Optional[datetime] = None
+
 class AppointmentUpdate(BaseModel):
     """
     Schema for updating an appointment.
@@ -39,6 +43,16 @@ class AppointmentUpdate(BaseModel):
     scheduled_for: Optional[datetime] = Field(None, description="New date and time for rescheduling.")
     status: Optional[AppointmentStatus] = Field(None, description="Updated status of the appointment (e.g., 'completed', 'cancelled').")
     location: Optional[str] = Field(None, description="Updated location for the service.")
+
+
+class AppointmentStatusUpdate(BaseModel):
+    """Schema for updating the status of an appointment. Sent by the technician."""
+    status: AppointmentStatus = Field(..., description="The new status of the appointment.")
+
+
+class AppointmentReschedule(BaseModel):
+    """Schema for when a customer reschedules an appointment."""
+    scheduled_for: datetime = Field(..., description="The new desired date and time for the appointment.")
 
 
 # --- Schemas for API Responses (Output) ---

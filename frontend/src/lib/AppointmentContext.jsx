@@ -54,12 +54,66 @@ export function AppointmentProvider({ children }) {
     }
   }, []);
 
+  const rescheduleAppointment = useCallback(async (appointmentId, rescheduleData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.patch(`/appointments/${appointmentId}/reschedule`, rescheduleData);
+      setAppointments(prev => prev.map(app => app.id === appointmentId ? response.data : app));
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred.';
+      setError(errorMessage);
+      console.error('Failed to reschedule appointment:', err);
+      setLoading(false);
+      return { success: false, error: errorMessage };
+    }
+  }, []);
+
+  const deleteAppointment = useCallback(async (appointmentId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.delete(`/appointments/${appointmentId}`);
+      setAppointments(prev => prev.filter(app => app.id !== appointmentId));
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred.';
+      setError(errorMessage);
+      console.error('Failed to delete appointment:', err);
+      setLoading(false);
+      return { success: false, error: errorMessage };
+    }
+  }, []);
+
+  const updateAppointmentStatus = useCallback(async (appointmentId, statusData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.patch(`/appointments/${appointmentId}/status`, statusData);
+      setAppointments(prev => prev.map(app => app.id === appointmentId ? response.data : app));
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred.';
+      setError(errorMessage);
+      console.error('Failed to update appointment status:', err);
+      setLoading(false);
+      return { success: false, error: errorMessage };
+    }
+  }, []);
+
   const value = {
     appointments,
     loading,
     error,
     loadAppointments,
     createAppointment,
+    rescheduleAppointment,
+    deleteAppointment,
+    updateAppointmentStatus,
   };
 
   return (

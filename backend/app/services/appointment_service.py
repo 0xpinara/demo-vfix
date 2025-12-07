@@ -90,12 +90,50 @@ class AppointmentService:
         # The repo's update_by_id method includes validation for the technician_id.
         return self.repo.update_by_id(appointment_id, update_payload)
 
-    def delete_appointment(self, appointment_id: int) -> bool:
+    def update_appointment_status(self, appointment_id: int, new_status: models.AppointmentStatus, technician_id: str) -> Optional[models.Appointment]:
         """
-        Deletes an appointment by its ID.
-        Returns True if deletion was successful, False otherwise.
+        Allows a technician to update the status of an appointment assigned to them.
         """
-        logger.warning(f"Attempting to delete appointment {appointment_id}")
+        appointment = self.repo.get_by_id(appointment_id)
+        if not appointment:
+            raise ValueError("Appointment not found.")
+
+        if appointment.technician_id != technician_id:
+            raise PermissionError("You are not authorized to update this appointment.")
+
+        update_data = {"status": new_status}
+        logger.info(f"Technician {technician_id} updating status of appointment {appointment_id} to {new_status}")
+        return self.repo.update_by_id(appointment_id, update_data)
+
+    def reschedule_appointment(self, appointment_id: int, new_date: datetime, customer_id: str) -> Optional[models.Appointment]:
+        """
+        Allows a customer to reschedule their own appointment.
+        """
+        appointment = self.repo.get_by_id(appointment_id)
+        if not appointment:
+            raise ValueError("Appointment not found.")
+
+        if appointment.customer_id != customer_id:
+            raise PermissionError("You are not authorized to reschedule this appointment.")
+
+        update_data = {"scheduled_for": new_date}
+        logger.info(f"Customer {customer_id} rescheduling appointment {appointment_id} to {new_date}")
+        return self.repo.update_by_id(appointment_id, update_data)
+
+    def delete_appointment(self, appointment_id: int, user: models.User) -> bool:
+        """
+        Deletes an appointment by its ID, with authorization checks.
+        - Admins can delete any appointment.
+        - Customers can only delete their own appointments.
+        """
+        appointment = self.repo.get_by_id(appointment_id)
+        if not appointment:
+            return False  # Not found
+
+        if user.role == "customer" and appointment.customer_id != user.id:
+            raise PermissionError("Customers can only delete their own appointments.")
+        
+        logger.warning(f"User {user.id} ({user.role}) is deleting appointment {appointment_id}")
         return self.repo.delete_by_id(appointment_id)
 
     def search_appointments(self, search_params: dict, skip: int = 0, limit: int = 100) -> tuple[List[models.Appointment], int]:

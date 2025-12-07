@@ -33,9 +33,12 @@ from app.schemas.appointment_schema import (
     ProductInfo,
     UserInfo,
     AppointmentCreate,
+    AppointmentAssign,
     AppointmentResponse,
     AppointmentUpdate,
     AppointmentListResponse,
+    AppointmentReschedule,
+    AppointmentStatusUpdate,
 )
 
 
@@ -68,7 +71,10 @@ __all__ = [
     "ProductInfo",
     "UserInfo",
     "AppointmentCreate",
+    "AppointmentAssign",
     "AppointmentResponse",
     "AppointmentUpdate",
     "AppointmentListResponse",
+    "AppointmentReschedule",
+    "AppointmentStatusUpdate",
 ]

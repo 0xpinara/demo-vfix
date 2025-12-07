@@ -199,6 +199,67 @@ def assign_appointment(
     return appointment
 
 
+@router.patch("/{appointment_id}/status", response_model=schemas.AppointmentResponse)
+def update_appointment_status(
+    appointment_id: int,
+    status_in: schemas.AppointmentStatusUpdate,
+    current_user: models.User = Depends(get_current_user),
+    service: AppointmentService = Depends(get_appointment_service),
+):
+    """
+    Update the status of an appointment. (Technician only)
+    A technician can only update the status of their own assigned appointments.
+    """
+    if not hasattr(current_user, 'role') or current_user.role != "technician":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only technicians can update appointment status.")
+
+    try:
+        updated_appointment = service.update_appointment_status(
+            appointment_id=appointment_id, 
+            new_status=status_in.status, 
+            technician_id=current_user.id
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+    if not updated_appointment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found or not assigned to you.")
+
+    return updated_appointment
+
+
+@router.patch("/{appointment_id}/reschedule", response_model=schemas.AppointmentResponse)
+def reschedule_appointment(
+    appointment_id: int,
+    reschedule_in: schemas.AppointmentReschedule,
+    current_user: models.User = Depends(get_current_user),
+    service: AppointmentService = Depends(get_appointment_service),
+):
+    """
+    Allows a customer to reschedule their own appointment.
+    """
+    if not hasattr(current_user, 'role') or current_user.role != "customer":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only customers can reschedule their appointments.")
+
+    try:
+        updated_appointment = service.reschedule_appointment(
+            appointment_id=appointment_id,
+            new_date=reschedule_in.scheduled_for,
+            customer_id=current_user.id
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+    if not updated_appointment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found or you're not authorized to reschedule it.")
+
+    return updated_appointment
+
+
 @router.delete("/{appointment_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_appointment(
     appointment_id: int,
@@ -206,12 +267,19 @@ def delete_appointment(
     service: AppointmentService = Depends(get_appointment_service),
 ):
     """
-    Delete an appointment. (Admin only)
+    Delete an appointment.
+    - Admins can delete any appointment.
+    - Customers can delete their own appointments.
     """
-    if not hasattr(current_user, 'role') or current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only admins can delete appointments.")
+    if not hasattr(current_user, 'role') or current_user.role not in ["admin", "customer"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to delete appointments.")
 
-    if not service.delete_appointment(appointment_id):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found.")
+    try:
+        deleted = service.delete_appointment(appointment_id=appointment_id, user=current_user)
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found or you are not authorized to delete it.")
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

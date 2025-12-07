@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import DashboardLayout from '../../components/dashboard/DashboardLayout';
 import AppointmentList from '../../components/appointments/AppointmentList';
-import { useAppointments } from '../../context/AppointmentContext';
+import { useAppointments } from '../../lib/AppointmentContext';
 
 function TechnicianAppointments() {
   const { appointments, loading, error, loadAppointments } = useAppointments();
