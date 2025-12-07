@@ -1,0 +1,149 @@
+.clouds-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 100px;
+  animation: float-cloud linear infinite;
+}
+
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 100px;
+}
+
+.cloud.cloud1 {
+  width: 150px;
+  height: 50px;
+  top: 15%;
+  left: -150px;
+  animation-duration: 45s;
+  animation-delay: 0s;
+}
+
+.cloud.cloud1::before {
+  width: 60px;
+  height: 60px;
+  top: -30px;
+  left: 20px;
+}
+
+.cloud.cloud1::after {
+  width: 80px;
+  height: 50px;
+  top: -20px;
+  right: 20px;
+}
+
+.cloud.cloud2 {
+  width: 200px;
+  height: 60px;
+  top: 35%;
+  left: -200px;
+  animation-duration: 60s;
+  animation-delay: 5s;
+}
+
+.cloud.cloud2::before {
+  width: 80px;
+  height: 80px;
+  top: -40px;
+  left: 30px;
+}
+
+.cloud.cloud2::after {
+  width: 100px;
+  height: 60px;
+  top: -30px;
+  right: 30px;
+}
+
+.cloud.cloud3 {
+  width: 180px;
+  height: 55px;
+  top: 60%;
+  left: -180px;
+  animation-duration: 50s;
+  animation-delay: 10s;
+}
+
+.cloud.cloud3::before {
+  width: 70px;
+  height: 70px;
+  top: -35px;
+  left: 25px;
+}
+
+.cloud.cloud3::after {
+  width: 90px;
+  height: 55px;
+  top: -25px;
+  right: 25px;
+}
+
+.cloud.cloud4 {
+  width: 160px;
+  height: 48px;
+  top: 25%;
+  left: -160px;
+  animation-duration: 55s;
+  animation-delay: 15s;
+}
+
+.cloud.cloud4::before {
+  width: 65px;
+  height: 65px;
+  top: -32px;
+  left: 22px;
+}
+
+.cloud.cloud4::after {
+  width: 85px;
+  height: 48px;
+  top: -22px;
+  right: 22px;
+}
+
+.cloud.cloud5 {
+  width: 140px;
+  height: 45px;
+  top: 75%;
+  left: -140px;
+  animation-duration: 48s;
+  animation-delay: 20s;
+}
+
+.cloud.cloud5::before {
+  width: 58px;
+  height: 58px;
+  top: -28px;
+  left: 18px;
+}
+
+.cloud.cloud5::after {
+  width: 75px;
+  height: 45px;
+  top: -18px;
+  right: 18px;
+}
+
+@keyframes float-cloud {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(100vw + 250px));
+  }
+}
+
