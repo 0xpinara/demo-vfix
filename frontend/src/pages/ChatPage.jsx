@@ -6,6 +6,7 @@ import ChatHeader from "@/components/chat/ChatHeader";
 import AnimatedBackground from "@/components/layout/AnimatedBackground";
 import { useChat } from "@/hooks/useChat";
 import FeedbackModal from "@/components/chat/FeedbackModal";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ChatPage() {
   const {
@@ -30,6 +31,7 @@ export default function ChatPage() {
     feedbackLoading,
     feedbackError,
   } = useChat();
+  const { user } = useAuth();
 
   const [feedbackModal, setFeedbackModal] = useState({ open: false, sessionId: null });
   const [feedbackForm, setFeedbackForm] = useState({ rating: 0, comment: "" });
@@ -92,7 +94,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="flex h-screen bg-black">
       <ChatSidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -103,6 +105,7 @@ export default function ChatPage() {
         downloadChat={downloadChat}
         onOpenFeedback={openFeedback}
         feedbackBySession={feedbackBySession}
+        user={user}
       />
 
       <div className="flex-1 flex flex-col relative">

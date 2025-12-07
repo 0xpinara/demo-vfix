@@ -19,6 +19,16 @@ from app.schemas.chat_schema import (
     ChatFeedbackResponse,
     ChatFeedbackListResponse,
 )
+from app.schemas.admin_schema import (
+    GeneralStatistics,
+    StatisticsResponse,
+    UserFeedbackItem,
+    UserFeedbackListResponse,
+    TechnicianFeedbackItem,
+    TechnicianFeedbackListResponse,
+    ImprovementDataItem,
+    ImprovementDataListResponse,
+)
 
 __all__ = [
     "UserRegister",
@@ -38,4 +48,12 @@ __all__ = [
     "ChatFeedbackCreate",
     "ChatFeedbackResponse",
     "ChatFeedbackListResponse",
+    "GeneralStatistics",
+    "StatisticsResponse",
+    "UserFeedbackItem",
+    "UserFeedbackListResponse",
+    "TechnicianFeedbackItem",
+    "TechnicianFeedbackListResponse",
+    "ImprovementDataItem",
+    "ImprovementDataListResponse",
 ]

@@ -27,11 +27,11 @@ export default function ChatMessages({ msgs, busy, setInput }) {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="mb-8 inline-flex p-6 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl border border-indigo-500/30 shadow-2xl shadow-indigo-500/20"
+              className="mb-8 inline-flex p-6 bg-[#dc2626]/20 rounded-3xl border border-[#dc2626]/30 shadow-2xl shadow-red-500/20"
             >
-              <Wrench className="h-16 w-16 text-indigo-400" />
+              <Wrench className="h-16 w-16 text-[#dc2626]" />
             </motion.div>
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 text-white">
               V-FIX AI'ya Hoş Geldiniz
             </h2>
             <p className="text-slate-400 text-lg mb-10 leading-relaxed">
@@ -45,10 +45,10 @@ export default function ChatMessages({ msgs, busy, setInput }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                   onClick={() => setInput(prompt.text)}
-                  className="group p-5 text-left rounded-2xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/50 transition-all hover:shadow-lg hover:shadow-indigo-500/20"
+                  className="group p-5 text-left rounded-2xl bg-black/50 hover:bg-black/70 border border-white/10 hover:border-[#dc2626]/50 transition-all hover:shadow-lg hover:shadow-red-500/20"
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400 group-hover:bg-indigo-500/30 transition-all">
+                    <div className="p-2 bg-[#dc2626]/20 rounded-lg text-[#dc2626] group-hover:bg-[#dc2626]/30 transition-all">
                       {prompt.icon}
                     </div>
                     <div className="text-sm font-medium text-white">{prompt.text}</div>
@@ -80,16 +80,16 @@ export default function ChatMessages({ msgs, busy, setInput }) {
         {busy && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/50">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#dc2626] flex items-center justify-center shadow-lg shadow-red-500/50">
                 <span className="text-white font-bold">AI</span>
               </div>
               <div className="flex-1 space-y-3">
                 <div className="font-semibold text-sm text-slate-300">V-FIX</div>
                 <div className="flex items-center gap-3">
                   <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce" />
-                    <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce delay-100" />
-                    <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce delay-200" />
+                    <div className="w-2.5 h-2.5 bg-[#dc2626] rounded-full animate-bounce" />
+                    <div className="w-2.5 h-2.5 bg-[#dc2626] rounded-full animate-bounce delay-100" />
+                    <div className="w-2.5 h-2.5 bg-[#dc2626] rounded-full animate-bounce delay-200" />
                   </div>
                   <span className="text-sm text-slate-400">Düşünüyor...</span>
                 </div>

@@ -1,0 +1,37 @@
+/* Half Circle Progress Styles */
+.half-circle-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.half-circle-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.half-circle-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.half-circle-sublabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Size variations */
+.half-circle-sm .half-circle-label {
+  font-size: 0.75rem;
+}
+
+.half-circle-lg .half-circle-label {
+  font-size: 1rem;
+}
+

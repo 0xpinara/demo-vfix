@@ -17,7 +17,7 @@ const ChatInput = ({
   const fileInputRef = useRef(null);
 
   return (
-    <div className="relative z-10 border-t border-slate-800/50 bg-slate-900/30 backdrop-blur-xl">
+    <div className="relative z-10 border-t border-white/10 bg-black/90 backdrop-blur-xl">
       <div className="max-w-4xl mx-auto px-6 py-4">
         {/* Attached Images */}
         {attachedImages.length > 0 && (
@@ -50,9 +50,9 @@ const ChatInput = ({
             disabled={busy}
             style={{
               color: "#ffffff",
-              backgroundColor: "rgba(30, 41, 59, 0.8)",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
             }}
-            className="w-full pr-24 pl-14 py-7 text-lg border-slate-700 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 rounded-2xl transition-all"
+            className="w-full pr-24 pl-14 py-7 text-lg border-white/10 placeholder:text-slate-400 focus:border-[#dc2626] focus:ring-2 focus:ring-red-500/50 rounded-2xl transition-all"
           />
 
           {/* Hidden File Input */}
@@ -72,7 +72,7 @@ const ChatInput = ({
             disabled={busy}
             size="sm"
             variant="ghost"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white hover:bg-slate-700"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white hover:bg-black/50"
           >
             <Paperclip className="h-5 w-5" />
           </Button>
@@ -82,7 +82,7 @@ const ChatInput = ({
             type="submit"
             disabled={busy || (!input.trim() && attachedImages.length === 0)}
             size="sm"
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-indigo-500/30 px-6 py-2"
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#dc2626] hover:bg-[#b91c1c] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-red-500/30 px-6 py-2"
           >
             <Send className="h-5 w-5" />
           </Button>

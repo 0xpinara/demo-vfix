@@ -89,9 +89,9 @@ class AuthService:
         logger.info(f"User registered successfully: {user.email}")
         return user, access_token, jti
     
-    def login_user(self, email: str, password: str, request: Optional[Request] = None) -> tuple[models.User, str, str]:
+    def login_user(self, email_or_username: str, password: str, request: Optional[Request] = None) -> tuple[models.User, str, str]:
         """
-        Login user with email and password.
+        Login user with email/username and password.
         Implements account lockout protection and login history tracking.
         Returns (User, access_token, jti)
         """
@@ -101,16 +101,16 @@ class AuthService:
         else:
             device_name, user_agent, ip_address = None, None, None
         
-        # Try to get from cache first
-        cache_key = f"user:email:{email}"
-        cached_user = cache.get(cache_key)
+        # Try to get user by email first, then by username
+        user = self.user_repo.get_by_email(email_or_username)
+        if not user:
+            user = self.user_repo.get_by_username(email_or_username)
         
-        if cached_user:
-            user = self.user_repo.get_by_email(email)
-        else:
-            user = self.user_repo.get_by_email(email)
-            if user:
-                self._cache_user(user)
+        if user:
+            self._cache_user(user)
+        
+        # Use the identifier for logging purposes
+        email = email_or_username
         
         # Check if account is locked
         if user and user.locked_until:

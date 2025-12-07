@@ -21,9 +21,9 @@ export default function FeedbackModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm px-4">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl shadow-indigo-500/20">
-        <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-black/90 shadow-2xl shadow-red-500/20">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-slate-500">Sohbeti Değerlendir</p>
             <h3 className="text-lg font-semibold text-white">{sessionTitle || "Sohbet"}</h3>
@@ -47,7 +47,7 @@ export default function FeedbackModal({
                   type="button"
                   aria-label={`${value} yıldız`}
                   onClick={() => onRatingChange(value)}
-                  className="p-2 rounded-full hover:bg-slate-800 transition-colors"
+                  className="p-2 rounded-full hover:bg-black/50 transition-colors"
                 >
                   <Star
                     className={`h-7 w-7 ${
@@ -75,12 +75,12 @@ export default function FeedbackModal({
           {successMessage && <p className="text-sm text-green-400">{successMessage}</p>}
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t border-slate-800 px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-white/10 px-6 py-4">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="border-slate-700 text-slate-200 hover:bg-slate-800"
+            className="border-white/10 text-slate-200 hover:bg-black/50"
             disabled={loading}
           >
             Vazgeç
@@ -89,7 +89,7 @@ export default function FeedbackModal({
             type="button"
             onClick={onSubmit}
             disabled={loading}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+            className="bg-[#dc2626] hover:bg-[#b91c1c] text-white"
           >
             {loading ? "Gönderiliyor..." : "Gönder"}
           </Button>

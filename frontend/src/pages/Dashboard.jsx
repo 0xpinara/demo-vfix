@@ -16,11 +16,18 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Welcome to V-Fix</h1>
-        <button onClick={handleLogout} className="logout-btn">
-          <FiLogOut />
-          Logout
-        </button>
+        <div className="header-left">
+          <div className="logo-section">
+            <span className="logo-text">V-Fix</span>
+            <span className="welcome-text">Hoşgeldiniz</span>
+          </div>
+        </div>
+        <div className="header-right">
+          <button onClick={handleLogout} className="logout-btn">
+            <FiLogOut />
+            <span>Çıkış</span>
+          </button>
+        </div>
       </div>
 
       <motion.div

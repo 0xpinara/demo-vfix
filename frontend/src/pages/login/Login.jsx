@@ -28,7 +28,13 @@ function Login() {
     setLoading(false)
 
     if (result.success) {
-      navigate('/dashboard')
+      // Redirect based on user role
+      if (result.role === 'admin') {
+        navigate('/admin')
+      } else {
+        // Normal users go straight to chatbot
+        navigate('/chat')
+      }
     } else {
       setError(result.error)
     }
