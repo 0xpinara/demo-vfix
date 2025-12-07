@@ -2,53 +2,114 @@
 .star-rating {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-start;
+  gap: 0.75rem;
 }
 
 .stars-container {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  flex-wrap: nowrap;
+  line-height: 1;
+  position: relative;
+}
+
+.star-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .star {
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
 }
 
 .star-filled {
-  fill: #f59e0b;
-  color: #f59e0b;
+  color: #fbbf24;
+  animation: starPulse 2s ease-in-out infinite;
+}
+
+.star-filled svg {
+  fill: #fbbf24 !important;
+  stroke: #f59e0b !important;
   filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.4));
 }
 
 .star-empty {
-  fill: transparent;
-  color: rgba(148, 163, 184, 0.4);
+  color: #64748b;
+  opacity: 0.6;
 }
 
-.star-half-wrapper {
-  position: relative;
-  display: inline-flex;
+.star-empty svg {
+  fill: none !important;
+  stroke: #64748b !important;
+  opacity: 0.6;
 }
 
-.star-half-bg {
+.star-glow {
   position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.star-half-mask {
-  position: relative;
-  overflow: hidden;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: starGlow 2s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .rating-value {
-  color: var(--text-muted);
+  color: var(--text);
   font-weight: 600;
+  min-width: 35px;
+  margin-left: 0.5rem;
 }
 
-/* Large rating display */
+@keyframes starPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes starGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Size variations */
+.star-rating-sm .stars-container {
+  gap: 2px;
+}
+
+.star-rating-lg .stars-container {
+  gap: 6px;
+}
+
 .star-rating-lg .rating-value {
   font-size: 1.25rem;
   color: #f59e0b;
+  font-weight: 700;
 }
 

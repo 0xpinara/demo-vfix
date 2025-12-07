@@ -1,7 +1,7 @@
 .dashboard-container {
   min-height: 100vh;
   padding: 2rem;
-  background: var(--background);
+  background: #000000; /* Black background matching login */
 }
 
 .dashboard-header {
@@ -9,15 +9,38 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding: 1rem 0;
 }
 
-.dashboard-header h1 {
-  font-size: 2rem;
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-text {
+  font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin: 0;
+}
+
+.welcome-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
 }
 
 .logout-btn {
@@ -25,19 +48,21 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #dc2626; /* Solid red */
+  border: none;
   border-radius: 12px;
-  color: var(--text);
-  font-size: 1rem;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
 }
 
 .logout-btn:hover {
-  background: var(--surface-light);
-  border-color: var(--error);
-  color: var(--error);
+  background: #b91c1c; /* Darker red */
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
 }
 
 .dashboard-content {
@@ -46,26 +71,27 @@
 }
 
 .user-card {
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(0, 0, 0, 0.9); /* Black matching login */
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border */
   border-radius: 24px;
   padding: 3rem;
   text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
 }
 
 .user-avatar {
   width: 120px;
   height: 120px;
   margin: 0 auto 1.5rem;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: #dc2626; /* Red matching login */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 3rem;
   color: white;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
 }
 
 .user-card h2 {
@@ -93,6 +119,7 @@
   justify-content: space-between;
   padding: 1rem;
   background: rgba(51, 65, 85, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
 }
 

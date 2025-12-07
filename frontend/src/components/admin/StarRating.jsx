@@ -15,56 +15,41 @@ export default function StarRating({
   maxStars = 5
 }) {
   const sizes = {
-    sm: { iconSize: 14, fontSize: '0.75rem', gap: '2px' },
-    md: { iconSize: 18, fontSize: '0.875rem', gap: '3px' },
-    lg: { iconSize: 24, fontSize: '1rem', gap: '4px' }
+    sm: { iconClass: 'h-4 w-4', fontSize: '0.75rem', gap: '4px' },
+    md: { iconClass: 'h-5 w-5', fontSize: '0.875rem', gap: '4px' },
+    lg: { iconClass: 'h-7 w-7', fontSize: '1rem', gap: '6px' }
   };
   
   const config = sizes[size] || sizes.md;
   
-  // Calculate full, half, and empty stars
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  const emptyStars = maxStars - fullStars - (hasHalfStar ? 1 : 0);
+  // Clamp rating and render exactly maxStars items
+  const clamped = Math.max(0, Math.min(maxStars, Math.round(rating)));
+  const stars = Array.from({ length: maxStars }, (_, i) => i + 1);
+  
+  // Map size to Tailwind classes for consistency
+  const sizeClasses = {
+    sm: 'h-4 w-4',
+    md: 'h-5 w-5',
+    lg: 'h-7 w-7'
+  };
+  
+  const starSizeClass = sizeClasses[size] || sizeClasses.md;
   
   return (
-    <div className={`star-rating star-rating-${size}`} style={{ gap: config.gap }}>
+    <div className={`star-rating star-rating-${size}`}>
       <div className="stars-container" style={{ gap: config.gap }}>
-        {/* Full stars */}
-        {[...Array(fullStars)].map((_, i) => (
-          <Star
-            key={`full-${i}`}
-            size={config.iconSize}
-            className="star star-filled"
-          />
-        ))}
-        
-        {/* Half star (if applicable) */}
-        {hasHalfStar && (
-          <div className="star-half-wrapper" style={{ width: config.iconSize, height: config.iconSize }}>
+        {stars.map((value) => (
+          <div key={value} className="star-wrapper">
             <Star
-              size={config.iconSize}
-              className="star star-empty star-half-bg"
+              className={`star ${config.iconClass} ${
+                value <= clamped ? 'star-filled' : 'star-empty'
+              }`}
             />
-            <div className="star-half-mask" style={{ width: config.iconSize / 2 }}>
-              <Star
-                size={config.iconSize}
-                className="star star-filled"
-              />
-            </div>
+            {value <= clamped && <div className="star-glow" />}
           </div>
-        )}
-        
-        {/* Empty stars */}
-        {[...Array(emptyStars)].map((_, i) => (
-          <Star
-            key={`empty-${i}`}
-            size={config.iconSize}
-            className="star star-empty"
-          />
         ))}
       </div>
-      
+
       {showValue && (
         <span className="rating-value" style={{ fontSize: config.fontSize }}>
           {rating.toFixed(1)}

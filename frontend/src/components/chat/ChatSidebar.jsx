@@ -36,13 +36,13 @@ const ChatSidebar = ({
     <div
       className={`${
         sidebarOpen ? "w-72" : "w-0"
-      } transition-all duration-300 bg-slate-900/50 border-r border-slate-800/50 backdrop-blur-xl flex flex-col overflow-hidden`}
+      } transition-all duration-300 bg-black/90 border-r border-white/10 backdrop-blur-xl flex flex-col overflow-hidden`}
     >
       {/* Top Section: New Chat */}
-      <div className="p-4 border-b border-slate-800/50">
+      <div className="p-4 border-b border-white/10">
         <Button
           onClick={handleNewChat}
-          className="w-full justify-start gap-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20 transition-all hover:shadow-indigo-500/40"
+          className="w-full justify-start gap-3 bg-[#dc2626] hover:bg-[#b91c1c] text-white shadow-lg shadow-red-500/20 transition-all hover:shadow-red-500/40"
         >
           <Plus className="h-5 w-5" />
           Yeni Sohbet
@@ -60,10 +60,10 @@ const ChatSidebar = ({
               <div
                 key={session.id}
                 onClick={() => setCurrentSessionId(session.id)}
-                className={`p-3 rounded-xl border hover:bg-slate-800 transition-all cursor-pointer ${
+                className={`p-3 rounded-xl border border-white/10 hover:bg-black/50 transition-all cursor-pointer ${
                   currentSessionId === session.id
-                    ? "bg-slate-700/50"
-                    : "bg-slate-800/50"
+                    ? "bg-[#dc2626]/20 border-[#dc2626]/30"
+                    : "bg-black/30"
                 }`}
               >
                 <div className="text-sm text-white font-medium truncate">
@@ -103,7 +103,7 @@ const ChatSidebar = ({
       </div>
 
       {/* Bottom Section */}
-      <div className="p-4 border-t border-slate-800/50 space-y-3">
+      <div className="p-4 border-t border-white/10 space-y-3">
         <Button
           onClick={() => downloadChat(currentSessionId)}
           disabled={currentMessages.length === 0}
@@ -120,7 +120,7 @@ const ChatSidebar = ({
           className="w-full justify-start gap-3 border-slate-700 hover:bg-slate-800 text-slate-200"
           onClick={() => navigate("/dashboard")}
         >
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+          <div className="h-9 w-9 rounded-full bg-[#dc2626] flex items-center justify-center text-white font-semibold">
             {userInitials}
           </div>
           <div className="flex flex-col text-left">
