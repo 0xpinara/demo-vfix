@@ -29,6 +29,17 @@ from app.schemas.admin_schema import (
     ImprovementDataItem,
     ImprovementDataListResponse,
 )
+from app.schemas.appointment_schema import (
+    UserInfo,
+    AppointmentCreate,
+    AppointmentResponse,
+    AppointmentUpdate,
+    AppointmentListResponse,
+    AppointmentAssign,
+    AppointmentStatusUpdate,
+    AppointmentReschedule,
+)
+
 
 __all__ = [
     "UserRegister",
@@ -56,4 +67,13 @@ __all__ = [
     "TechnicianFeedbackListResponse",
     "ImprovementDataItem",
     "ImprovementDataListResponse",
+    "ProductInfo",
+    "UserInfo",
+    "AppointmentCreate",
+    "AppointmentResponse",
+    "AppointmentUpdate",
+    "AppointmentListResponse",
+    "AppointmentAssign",
+    "AppointmentStatusUpdate",
+    "AppointmentReschedule",
 ]

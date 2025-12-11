@@ -3,10 +3,11 @@ Repository pattern for data access with caching support.
 Abstracts database operations for better testing and scalability.
 """
 from typing import Optional, List
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from app import models
-from app.models import User, Product, PasswordResetToken, UserSession, LoginHistory, ChatFeedback
+from app.models import User, Product, PasswordResetToken, UserSession, LoginHistory, ChatFeedback, Appointment
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
@@ -364,3 +365,184 @@ class ChatFeedbackRepository:
         self.db.refresh(feedback)
         return feedback
 
+class AppointmentRepository:
+    """Repository for Appointment model operations with validation and optimized queries."""
+
+    def __init__(self, db: Session):
+        self.db = db
+        self.model = Appointment
+
+    def get_by_id(self, appointment_id: int) -> Optional[models.Appointment]:
+        """Get a single appointment by its ID, with related customer and technician info."""
+        return (
+            self.db.query(self.model)
+            .filter(self.model.id == appointment_id)
+            .options(joinedload(self.model.customer), joinedload(self.model.technician))
+            .first()
+        )
+
+    def get_by_customer_id(self, customer_id: str, skip: int = 0, limit: int = 100) -> List[models.Appointment]:
+        """Get paginated appointments for a specific customer."""
+        return (
+            self.db.query(self.model)
+            .filter(self.model.customer_id == customer_id)
+            .options(joinedload(self.model.technician))
+            .order_by(self.model.scheduled_for.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    def get_by_technician_id(self, technician_id: str, skip: int = 0, limit: int = 100) -> List[models.Appointment]:
+        """Get paginated appointments for a specific technician."""
+        return (
+            self.db.query(self.model)
+            .filter(self.model.technician_id == technician_id)
+            .options(joinedload(self.model.customer))
+            .order_by(self.model.scheduled_for.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    def search(
+        self,
+        *,
+        customer_id: Optional[str] = None,
+        technician_id: Optional[str] = None,
+        status: Optional[str] = None,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> tuple[List[models.Appointment], int]:
+        """Search and filter appointments with pagination. Returns a tuple of (items, total_count)."""
+        query = self.db.query(self.model)
+        if customer_id is not None:
+            query = query.filter(self.model.customer_id == customer_id)
+        if technician_id is not None:
+            query = query.filter(self.model.technician_id == technician_id)
+        if status is not None:
+            query = query.filter(self.model.status == status)
+        if date_from is not None:
+            query = query.filter(self.model.scheduled_for >= date_from)
+        if date_to is not None:
+            query = query.filter(self.model.scheduled_for <= date_to)
+
+        query = query.options(joinedload(self.model.customer), joinedload(self.model.technician))
+        total_count = query.count()
+        items = query.order_by(self.model.scheduled_for.desc()).offset(skip).limit(limit).all()
+        return items, total_count
+
+    def create(
+        self,
+        *,
+        customer_id: str,
+        technician_id: str,
+        scheduled_for: datetime,
+        notes: Optional[str] = None,
+        status: str = "SCHEDULED",
+    ) -> models.Appointment:
+        """
+        Create a new appointment after validating customer and technician.
+        Raises ValueError if customer or technician are invalid.
+        """
+        user_repo = UserRepository(self.db)
+        customer = user_repo.get_by_id(customer_id)
+        if not customer or not customer.is_active:
+            raise ValueError(f"Invalid or inactive customer ID: {customer_id}")
+
+        technician = user_repo.get_by_id(technician_id)
+        if not technician or not technician.is_active:
+            raise ValueError(f"Invalid or inactive technician ID: {technician_id}")
+        if getattr(technician, "role", "user") != "technician":
+            raise ValueError(f"User {technician_id} is not a technician.")
+
+        appointment = self.model(
+            customer_id=customer_id,
+            technician_id=technician_id,
+            scheduled_for=scheduled_for,
+            notes=notes,
+            status=status,
+        )
+        self.db.add(appointment)
+        self.db.commit()
+        self.db.refresh(appointment)
+        logger.info(f"Created appointment {appointment.id} for customer {customer_id}")
+        return appointment
+
+    def update_by_id(self, appointment_id: int, update_data: dict) -> Optional[models.Appointment]:
+        """
+        Update an existing appointment by ID, with validation for user fields.
+        Raises ValueError if customer or technician IDs in update_data are invalid.
+        """
+        db_appointment = self.get_by_id(appointment_id)
+        if not db_appointment:
+            return None
+
+        if "customer_id" in update_data:
+            user_repo = UserRepository(self.db)
+            customer = user_repo.get_by_id(update_data["customer_id"])
+            if not customer or not customer.is_active:
+                raise ValueError(f"Invalid or inactive customer ID: {update_data['customer_id']}")
+
+        if "technician_id" in update_data:
+            user_repo = UserRepository(self.db)
+            technician = user_repo.get_by_id(update_data["technician_id"])
+            if not technician or not technician.is_active:
+                raise ValueError(f"Invalid or inactive technician ID: {update_data['technician_id']}")
+            if getattr(technician, "role", "user") != "technician":
+                raise ValueError(f"User {update_data['technician_id']} is not a technician.")
+
+        for key, value in update_data.items():
+            if hasattr(db_appointment, key):
+                setattr(db_appointment, key, value)
+
+        self.db.commit()
+        self.db.refresh(db_appointment)
+        logger.info(f"Updated appointment {db_appointment.id}")
+        return db_appointment
+
+    def update_by_customer_id(self, customer_id: str, update_data: dict) -> int:
+        """Bulk update appointments for a customer. Returns the number of updated rows."""
+        safe_update_data = {k: v for k, v in update_data.items() if k not in ["id", "customer_id"]}
+        if not safe_update_data:
+            return 0
+        updated_count = self.db.query(self.model).filter(self.model.customer_id == customer_id).update(safe_update_data, synchronize_session=False)
+        self.db.commit()
+        logger.info(f"Updated {updated_count} appointments for customer {customer_id}")
+        return updated_count
+
+    def update_by_technician_id(self, technician_id: str, update_data: dict) -> int:
+        """Bulk update appointments for a technician. Returns the number of updated rows."""
+        safe_update_data = {k: v for k, v in update_data.items() if k not in ["id", "customer_id", "technician_id"]}
+        if not safe_update_data:
+            return 0
+        updated_count = self.db.query(self.model).filter(self.model.technician_id == technician_id).update(safe_update_data, synchronize_session=False)
+        self.db.commit()
+        logger.info(f"Updated {updated_count} appointments for technician {technician_id}")
+        return updated_count
+
+    def delete_by_id(self, appointment_id: int) -> bool:
+        """Delete an appointment by its ID. Returns True if deleted, False otherwise."""
+        db_appointment = self.db.query(self.model).filter(self.model.id == appointment_id).first()
+        if db_appointment:
+            self.db.delete(db_appointment)
+            self.db.commit()
+            logger.warning(f"Deleted appointment: {appointment_id}")
+            return True
+        return False
+
+    def delete_by_customer_id(self, customer_id: str) -> int:
+        """Bulk delete appointments for a customer. Returns the number of deleted rows."""
+        deleted_count = self.db.query(self.model).filter(self.model.customer_id == customer_id).delete(synchronize_session=False)
+        self.db.commit()
+        logger.warning(f"Deleted {deleted_count} appointments for customer {customer_id}")
+        return deleted_count
+
+    def delete_by_technician_id(self, technician_id: str) -> int:
+        """Bulk delete appointments for a technician. Returns the number of deleted rows."""
+        deleted_count = self.db.query(self.model).filter(self.model.technician_id == technician_id).delete(synchronize_session=False)
+        self.db.commit()
+        logger.warning(f"Deleted {deleted_count} appointments for technician {technician_id}")
+        return deleted_count
