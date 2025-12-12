@@ -1,4 +1,4 @@
 # Routes package
-from app.api.v1.routes import admin, chat
+from app.api.v1.routes import admin, chat, auth, users, appointments, system
 
-__all__ = ["admin", "chat"]
+__all__ = ["admin", "chat", "auth", "users", "appointments", "system"]
