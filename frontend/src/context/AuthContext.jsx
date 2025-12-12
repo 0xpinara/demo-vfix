@@ -73,6 +73,8 @@ export function AuthProvider({ children }) {
     setToken(null)
     setUser(null)
     localStorage.removeItem('token')
+    // Note: We keep REMEMBER_ME_EMAIL_KEY so user's email is still remembered
+    // Only remove it if you want to clear on logout
     delete api.defaults.headers.common['Authorization']
   }
 

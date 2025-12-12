@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import AuthLayout from '../../components/auth/AuthLayout'
@@ -9,6 +9,8 @@ import AppliancesGroup from '../../components/auth/Appliances'
 import { FiMail, FiLock } from 'react-icons/fi'
 import './Login.css'
 
+const REMEMBER_ME_EMAIL_KEY = 'vfix_remembered_email'
+
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -16,8 +18,18 @@ function Login() {
   const [loading, setLoading] = useState(false)
   const [isPasswordFocused, setIsPasswordFocused] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem(REMEMBER_ME_EMAIL_KEY)
+    if (rememberedEmail) {
+      setEmail(rememberedEmail)
+      setRememberMe(true)
+    }
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -28,6 +40,13 @@ function Login() {
     setLoading(false)
 
     if (result.success) {
+      // Handle remember me functionality
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_ME_EMAIL_KEY, email)
+      } else {
+        localStorage.removeItem(REMEMBER_ME_EMAIL_KEY)
+      }
+
       // Redirect based on user role
       if (result.role === 'admin') {
         navigate('/admin')
@@ -112,7 +131,11 @@ function Login() {
 
         <div className="form-options">
           <label className="checkbox-label">
-            <input type="checkbox" />
+            <input 
+              type="checkbox" 
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
             <span>Beni hatırla</span>
           </label>
           <Link to="/password-reset" className="forgot-link">
