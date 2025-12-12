@@ -14,18 +14,27 @@
     <style>
         :root {
             --bg-dark: #0a0a0b;
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --bg-card-hover: rgba(255, 255, 255, 0.05);
             --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.65);
-            --text-subtle: rgba(255, 255, 255, 0.4);
-            --accent-cyan: #00d4ff;
-            --accent-orange: #ff6b35;
-            --accent-purple: #a855f7;
-            --accent-green: #10b981;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-subtle: rgba(255, 255, 255, 0.45);
+            
             --accent-red: #e53935;
+            --accent-red-light: #ff6659;
+            --accent-red-dark: #ab000d;
+            --accent-gold: #D4A574;
+            --accent-silver: #A8B2C1;
+            --accent-green: #4ADE80;
+            
             --border-main: rgba(255, 255, 255, 0.12);
             --border-subtle: rgba(255, 255, 255, 0.06);
-            --content-padding: clamp(20px, 4vw, 50px);
-            --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+            --border-red: rgba(229, 57, 53, 0.3);
+            
+            --content-padding: clamp(20px, 5vw, 50px);
+            --section-spacing: clamp(80px, 12vw, 140px);
+            
+            --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
             --font-display: 'Space Grotesk', sans-serif;
             --font-body: 'Outfit', sans-serif;
         }
@@ -48,26 +57,35 @@
             line-height: 1.6;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         ::selection {
             background: var(--accent-red);
-            color: var(--text-primary);
+            color: white;
         }
 
-        /* ASCII Canvas Container */
+        /* ============================================
+           ASCII VIDEO CONTAINER STYLES
+           ============================================ */
+        
+        .ascii-section {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            overflow: hidden;
+        }
+
         .ascii-container {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 0;
-            overflow: hidden;
         }
 
-        #ascii-canvas {
+        .ascii-canvas {
             width: 100%;
             height: 100%;
             display: block;
@@ -79,74 +97,344 @@
             left: 0;
             width: 100%;
             height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ascii-overlay-gradient {
             background: linear-gradient(
                 180deg,
                 rgba(10, 10, 11, 0.3) 0%,
                 rgba(10, 10, 11, 0.1) 30%,
                 rgba(10, 10, 11, 0.1) 70%,
-                rgba(10, 10, 11, 0.8) 100%
+                rgba(10, 10, 11, 0.9) 100%
             );
+        }
+
+        .ascii-overlay-left {
+            background: linear-gradient(
+                90deg,
+                rgba(10, 10, 11, 0.95) 0%,
+                rgba(10, 10, 11, 0.5) 30%,
+                transparent 100%
+            );
+        }
+
+        .ascii-overlay-right {
+            background: linear-gradient(
+                270deg,
+                rgba(10, 10, 11, 0.95) 0%,
+                rgba(10, 10, 11, 0.5) 30%,
+                transparent 100%
+            );
+        }
+
+        /* Hidden video elements */
+        .video-source {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
             pointer-events: none;
         }
 
-        /* Main Content */
-        .main-content {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
+        /* ============================================
+           SETTINGS PANEL
+           ============================================ */
+        
+        .settings-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--border-main);
+            border-radius: 12px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
-        /* Header */
-        .header {
-            padding: var(--content-padding);
+        .settings-toggle:hover {
+            border-color: var(--accent-red);
+            transform: scale(1.05);
+        }
+
+        .settings-toggle svg {
+            width: 22px;
+            height: 22px;
+            stroke: var(--text-subtle);
+            fill: none;
+            transition: all 0.3s ease;
+        }
+
+        .settings-toggle:hover svg {
+            stroke: var(--accent-red);
+        }
+
+        .settings-toggle.active svg {
+            transform: rotate(90deg);
+        }
+
+        .settings-panel {
+            position: fixed;
+            bottom: 84px;
+            right: 24px;
+            z-index: 999;
+            background: rgba(10, 10, 11, 0.95);
+            border: 1px solid var(--border-main);
+            border-radius: 16px;
+            padding: 0;
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            min-width: 320px;
+            overflow: hidden;
+        }
+
+        .settings-panel.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .settings-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-subtle);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
+        .settings-title {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .settings-close {
+            width: 28px;
+            height: 28px;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .settings-close:hover {
+            border-color: var(--accent-red);
+            background: rgba(229, 57, 53, 0.1);
+        }
+
+        .settings-close svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--text-subtle);
+        }
+
+        .settings-close:hover svg {
+            stroke: var(--accent-red);
+        }
+
+        .settings-body {
+            padding: 20px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .setting-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-label label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .setting-label span {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .setting-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--border-main);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .setting-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .setting-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: var(--accent-red);
+        }
+
+        .setting-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .setting-slider::-moz-range-thumb:hover {
+            transform: scale(1.1);
+            background: var(--accent-red);
+        }
+
+        /* ============================================
+           LAYOUT COMPONENTS
+           ============================================ */
+        
+        .main-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr minmax(300px, 600px) minmax(300px, 600px) 1fr;
+            border-left: 1px solid var(--border-main);
+        }
+
+        .grid-spacer {
+            border-right: 1px solid var(--border-main);
+            border-bottom: 1px solid var(--border-main);
+        }
+
+        .grid-content {
+            border-right: 1px solid var(--border-main);
+            border-bottom: 1px solid var(--border-main);
+        }
+
+        .grid-content-full {
+            grid-column: 2 / 4;
+            border-right: 1px solid var(--border-main);
+            border-bottom: 1px solid var(--border-main);
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-spacer {
+                display: none;
+            }
+            
+            .grid-content,
+            .grid-content-full {
+                grid-column: 1;
+            }
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 20px var(--content-padding);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(10,10,11,0.9) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .header > * {
+            pointer-events: auto;
+        }
+
         .logo {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             text-decoration: none;
             color: var(--text-primary);
         }
 
         .logo-icon {
-            width: 48px;
-            height: 48px;
-            position: relative;
+            width: 40px;
+            height: 40px;
         }
 
         .logo-icon img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 4px 16px rgba(229, 57, 53, 0.4));
         }
 
         .logo-text {
             font-family: var(--font-display);
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, var(--accent-red) 0%, var(--text-primary) 50%, #333 100%);
+            background: linear-gradient(135deg, #fff 0%, var(--accent-silver) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: 28px;
             align-items: center;
         }
 
         .nav-link {
             font-family: var(--font-mono);
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-subtle);
             text-decoration: none;
             text-transform: uppercase;
@@ -159,67 +447,118 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent-red) 0%, #ab000d 100%);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--accent-red) 0%, var(--accent-red-dark) 100%);
+            color: white;
             padding: 12px 24px;
             border-radius: 8px;
             font-family: var(--font-mono);
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             text-decoration: none;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(229, 57, 53, 0.3);
-            display: inline-block;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(229, 57, 53, 0.4);
+            box-shadow: 0 8px 30px rgba(229, 57, 53, 0.3);
         }
 
-        /* Hero Section */
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--border-main);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-red);
+            background: rgba(229, 57, 53, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+        
         .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-ascii {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
             flex: 1;
             display: flex;
             align-items: center;
-            padding: var(--content-padding);
-            padding-top: 0;
+            padding: 120px var(--content-padding) 80px;
         }
 
         .hero-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 60px;
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             width: 100%;
+            align-items: center;
         }
 
-        .hero-content {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        @media (max-width: 1024px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .hero-text {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             background: rgba(229, 57, 53, 0.1);
-            border: 1px solid rgba(229, 57, 53, 0.3);
-            padding: 8px 16px;
+            border: 1px solid var(--border-red);
+            padding: 10px 18px;
             border-radius: 100px;
             font-family: var(--font-mono);
-            font-size: 12px;
-            color: #ff6659;
+            font-size: 11px;
+            color: var(--accent-red-light);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 32px;
-            width: fit-content;
+            letter-spacing: 1.5px;
+            margin-bottom: 28px;
             backdrop-filter: blur(10px);
         }
 
@@ -232,13 +571,13 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
         }
 
         .hero-title {
             font-family: var(--font-display);
-            font-size: clamp(36px, 5vw, 64px);
+            font-size: clamp(36px, 5vw, 56px);
             font-weight: 600;
             color: var(--text-primary);
             line-height: 1.1;
@@ -247,74 +586,73 @@
         }
 
         .hero-title .highlight {
-            background: linear-gradient(135deg, var(--accent-red), #ff6659);
+            background: linear-gradient(135deg, var(--accent-red-light), var(--accent-red));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .hero-description {
             font-size: 18px;
             color: var(--text-secondary);
             max-width: 480px;
-            margin-bottom: 40px;
+            margin-bottom: 36px;
             line-height: 1.7;
         }
 
         .hero-actions {
             display: flex;
             gap: 16px;
-            align-items: center;
+            margin-bottom: 40px;
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-primary);
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-family: var(--font-mono);
-            font-size: 13px;
-            font-weight: 500;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            border: 1px solid var(--border-main);
-            cursor: pointer;
+        @media (max-width: 768px) {
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .hero-actions .btn-primary,
+            .hero-actions .btn-secondary {
+                width: 100%;
+                text-align: center;
+            }
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--text-primary);
+        .hero-trust {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
         }
 
-        /* Hero Visual */
-        .hero-visual {
-            position: relative;
+        .trust-item {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-subtle);
         }
 
+        .trust-item svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--accent-green);
+        }
+
+        /* Terminal Window */
         .terminal-window {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid var(--border-main);
             border-radius: 16px;
             overflow: hidden;
-            width: 100%;
-            max-width: 520px;
             backdrop-filter: blur(20px);
-            box-shadow: 
-                0 0 0 1px rgba(255, 255, 255, 0.05),
-                0 20px 80px rgba(0, 0, 0, 0.5),
-                0 0 100px rgba(229, 57, 53, 0.1);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
         }
 
         .terminal-header {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 16px 20px;
+            padding: 14px 18px;
             background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid var(--border-subtle);
         }
@@ -333,61 +671,44 @@
             flex: 1;
             text-align: center;
             font-family: var(--font-mono);
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-subtle);
         }
 
         .terminal-body {
             padding: 24px;
             font-family: var(--font-mono);
-            font-size: 14px;
-            line-height: 1.8;
+            font-size: 13px;
+            line-height: 2;
         }
 
         .terminal-line {
-            margin-bottom: 8px;
             opacity: 0;
-            transform: translateY(10px);
-            animation: typeIn 0.5s ease forwards;
+            transform: translateY(8px);
+            animation: typeIn 0.4s ease forwards;
         }
 
-        .terminal-line:nth-child(1) { animation-delay: 0.5s; }
-        .terminal-line:nth-child(2) { animation-delay: 1s; }
-        .terminal-line:nth-child(3) { animation-delay: 1.5s; }
-        .terminal-line:nth-child(4) { animation-delay: 2s; }
-        .terminal-line:nth-child(5) { animation-delay: 2.5s; }
-        .terminal-line:nth-child(6) { animation-delay: 3s; }
+        .terminal-line:nth-child(1) { animation-delay: 0.3s; }
+        .terminal-line:nth-child(2) { animation-delay: 0.7s; }
+        .terminal-line:nth-child(3) { animation-delay: 1.1s; }
+        .terminal-line:nth-child(4) { animation-delay: 1.5s; }
+        .terminal-line:nth-child(5) { animation-delay: 1.9s; }
+        .terminal-line:nth-child(6) { animation-delay: 2.3s; }
 
         @keyframes typeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .terminal-prompt {
-            color: var(--accent-red);
-        }
-
-        .terminal-command {
-            color: var(--text-primary);
-        }
-
-        .terminal-response {
-            color: var(--text-secondary);
-            padding-left: 20px;
-        }
-
-        .terminal-success {
-            color: var(--accent-green);
-        }
+        .terminal-prompt { color: var(--accent-red); }
+        .terminal-command { color: var(--text-primary); }
+        .terminal-response { color: var(--text-secondary); padding-left: 16px; }
+        .terminal-success { color: var(--accent-green); }
 
         .terminal-cursor {
             display: inline-block;
             width: 8px;
             height: 16px;
             background: var(--accent-red);
-            margin-left: 4px;
             animation: blink 1s infinite;
         }
 
@@ -396,57 +717,240 @@
             51%, 100% { opacity: 0; }
         }
 
-        /* Features Section */
-        .features {
+        /* ============================================
+           CONTENT SECTIONS
+           ============================================ */
+        
+        .section {
             position: relative;
-            z-index: 10;
-            padding: calc(var(--content-padding) * 2) var(--content-padding);
-            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
         }
 
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--accent-red);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 24px;
+            height: 1px;
+            background: var(--accent-red);
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            max-width: 500px;
+        }
+
+        .section-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            max-width: 500px;
+            line-height: 1.7;
+        }
+
+        .content-padding {
+            padding: var(--content-padding);
+        }
+
+        .content-block {
+            padding: var(--content-padding);
+        }
+
+        /* Quote Block */
+        .quote-block {
+            border-left: 2px solid var(--accent-red);
+            padding-left: 24px;
+            margin: 32px 0;
+        }
+
+        .quote-text {
+            font-size: 18px;
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        /* Stats Section */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .stat-item {
+            padding: 32px var(--content-padding);
+            text-align: center;
+            border-right: 1px solid var(--border-subtle);
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-number {
+            font-family: var(--font-display);
+            font-size: 36px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-number .accent {
+            color: var(--accent-red);
+        }
+
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stat-item:nth-child(2) {
+                border-right: none;
+            }
+        }
+
+        /* Steps Section */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .step-item {
+            padding: 32px var(--content-padding);
+            border-right: 1px solid var(--border-subtle);
+            position: relative;
+        }
+
+        .step-item:last-child {
+            border-right: none;
+        }
+
+        .step-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 28px;
+            height: 28px;
+            background: var(--accent-red);
+            color: white;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 20px;
+        }
+
+        .step-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: var(--accent-red);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .step-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1024px) {
+            .steps-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .step-item:nth-child(2) {
+                border-right: none;
+            }
+            
+            .step-item:nth-child(4) {
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .steps-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .step-item {
+                border-right: none;
+            }
+        }
+
+        /* Feature Cards */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            max-width: 1200px;
-            margin: 0 auto;
+            border-top: 1px solid var(--border-subtle);
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 32px;
-            transition: all 0.4s ease;
+            padding: 36px var(--content-padding);
+            border-right: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            transition: background 0.3s ease;
         }
 
         .feature-card:hover {
-            background: rgba(255, 255, 255, 0.04);
-            border-color: var(--border-main);
-            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .feature-card:nth-child(3n) {
+            border-right: none;
         }
 
         .feature-icon {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, rgba(229, 57, 53, 0.1), rgba(168, 85, 247, 0.1));
-            border: 1px solid var(--border-main);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             margin-bottom: 20px;
-            font-size: 24px;
         }
 
         .feature-icon svg {
-            width: 28px;
-            height: 28px;
+            width: 100%;
+            height: 100%;
             stroke: var(--accent-red);
             fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+            stroke-width: 1.5;
         }
 
         .feature-title {
@@ -458,201 +962,515 @@
         }
 
         .feature-description {
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-secondary);
             line-height: 1.6;
         }
 
-        /* Footer */
-        .footer {
-            position: relative;
-            z-index: 10;
-            padding: var(--content-padding);
+        @media (max-width: 900px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-card {
+                border-right: none;
+            }
+        }
+
+        /* Brands Section */
+        .brands-track {
+            display: flex;
+            gap: 48px;
+            padding: 32px var(--content-padding);
+            animation: scrollBrands 25s linear infinite;
             border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .brands-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollBrands {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .brand-item {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-subtle);
+            white-space: nowrap;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .brand-item:hover {
+            color: var(--text-primary);
+            opacity: 1;
+        }
+
+        /* Enterprise Cards */
+        .enterprise-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .enterprise-card {
+            padding: 40px var(--content-padding);
+            border-right: 1px solid var(--border-subtle);
+            text-align: center;
+            transition: background 0.3s ease;
+        }
+
+        .enterprise-card:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .enterprise-card:last-child {
+            border-right: none;
+        }
+
+        .enterprise-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            background: rgba(229, 57, 53, 0.1);
+            border: 1px solid var(--border-red);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .enterprise-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--accent-red);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .enterprise-title {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .enterprise-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .enterprise-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .enterprise-features li {
+            font-size: 13px;
+            color: var(--text-subtle);
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .enterprise-features li:last-child {
+            border-bottom: none;
+        }
+
+        .enterprise-features li svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--accent-red);
+            flex-shrink: 0;
+        }
+
+        .btn-outline {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--accent-red);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        @media (max-width: 900px) {
+            .enterprise-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .enterprise-card {
+                border-right: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+        }
+
+        /* FAQ Section */
+        .faq-container {
+            max-width: 800px;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 24px 0;
+            background: transparent;
+            border: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+            text-align: left;
         }
 
-        .footer-text {
-            font-family: var(--font-mono);
-            font-size: 12px;
+        .faq-question-text {
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .faq-question:hover .faq-question-text {
+            color: var(--accent-red);
+        }
+
+        .faq-icon {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border-main);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-icon svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--text-subtle);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+
+        .faq-item.active .faq-icon svg {
+            stroke: white;
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+        }
+
+        .faq-answer-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            padding-bottom: 24px;
+            padding-right: 50px;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px var(--content-padding);
+            text-align: center;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .cta-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-family: var(--font-display);
+            font-size: clamp(28px, 4vw, 38px);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .cta-description {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        @media (max-width: 600px) {
+            .cta-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 60px var(--content-padding) 40px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 50px;
+        }
+
+        .footer-brand .logo {
+            margin-bottom: 16px;
+        }
+
+        .footer-tagline {
+            font-size: 14px;
             color: var(--text-subtle);
+            line-height: 1.7;
+            max-width: 280px;
+        }
+
+        .footer-column h4 {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--accent-red);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 20px;
         }
 
         .footer-links {
-            display: flex;
-            gap: 24px;
+            list-style: none;
         }
 
-        .footer-link {
-            font-family: var(--font-mono);
-            font-size: 12px;
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            font-size: 14px;
             color: var(--text-subtle);
             text-decoration: none;
             transition: color 0.3s ease;
         }
 
-        .footer-link:hover {
+        .footer-links a:hover {
             color: var(--text-primary);
         }
 
-        /* ASCII Controls */
-        .ascii-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 100;
+        .footer-bottom {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid var(--border-main);
-            border-radius: 12px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            min-width: 180px;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-subtle);
         }
 
-        .ascii-controls.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .control-label {
+        .footer-copyright {
             font-family: var(--font-mono);
-            font-size: 10px;
+            font-size: 12px;
             color: var(--text-subtle);
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .control-slider {
-            width: 100%;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--border-main);
-            border-radius: 2px;
-            outline: none;
+        .footer-socials {
+            display: flex;
+            gap: 12px;
         }
 
-        .control-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            background: var(--accent-red);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .control-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        .settings-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 99;
-            width: 44px;
-            height: 44px;
-            background: rgba(0, 0, 0, 0.8);
+        .social-link {
+            width: 36px;
+            height: 36px;
             border: 1px solid var(--border-main);
-            border-radius: 50%;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             transition: all 0.3s ease;
-            color: var(--text-subtle);
-            font-size: 18px;
         }
 
-        .settings-toggle:hover {
+        .social-link:hover {
             border-color: var(--accent-red);
-            color: var(--accent-red);
+            background: rgba(229, 57, 53, 0.1);
         }
 
-        .settings-toggle.active {
-            opacity: 0;
-            pointer-events: none;
+        .social-link svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-subtle);
+            fill: none;
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
+        .social-link:hover svg {
+            stroke: var(--accent-red);
+        }
+
+        @media (max-width: 900px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
                 gap: 40px;
             }
+        }
 
-            .hero-content {
-                text-align: center;
-                align-items: center;
-            }
-
-            .hero-description {
-                max-width: 600px;
-            }
-
-            .hero-actions {
-                justify-content: center;
-            }
-
-            .features-grid {
+        @media (max-width: 600px) {
+            .footer-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
             }
         }
 
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
+        /* ASCII Section Layouts */
+        .ascii-content-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 500px;
+        }
 
-            .hero-title {
-                font-size: 32px;
-                letter-spacing: -1px;
-            }
+        .ascii-content-section.reverse {
+            direction: rtl;
+        }
 
-            .hero-actions {
-                flex-direction: column;
-                width: 100%;
-            }
+        .ascii-content-section.reverse > * {
+            direction: ltr;
+        }
 
-            .btn-primary, .btn-secondary {
-                width: 100%;
-                text-align: center;
-            }
+        .ascii-content-section .ascii-side {
+            position: relative;
+            min-height: 400px;
+        }
 
-            .terminal-window {
-                max-width: 100%;
-            }
+        .ascii-content-section .text-side {
+            display: flex;
+            align-items: center;
+            border-right: 1px solid var(--border-main);
+        }
 
-            .footer {
-                flex-direction: column;
-                gap: 16px;
-                text-align: center;
+        .ascii-content-section.reverse .text-side {
+            border-right: none;
+            border-left: 1px solid var(--border-main);
+        }
+
+        @media (max-width: 900px) {
+            .ascii-content-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .ascii-content-section .text-side {
+                border-right: none;
+                order: 2;
+            }
+            
+            .ascii-content-section .ascii-side {
+                order: 1;
+                min-height: 300px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- ASCII Animation Background -->
-    <div class="ascii-container">
-        <canvas id="ascii-canvas"></canvas>
-        <div class="ascii-overlay"></div>
+    <!-- Hidden Video Elements -->
+    <video id="video-laundry" class="video-source" autoplay loop muted playsinline>
+        <source src="/laundry.mp4" type="video/mp4">
+    </video>
+    <video id="video-fridge" class="video-source" autoplay loop muted playsinline>
+        <source src="/fridge.mp4" type="video/mp4">
+    </video>
+    <video id="video-dishwasher" class="video-source" autoplay loop muted playsinline>
+        <source src="/dishwasher.mp4" type="video/mp4">
+    </video>
+    <video id="video-oven" class="video-source" autoplay loop muted playsinline>
+        <source src="/oven.mp4" type="video/mp4">
+    </video>
+    <video id="video-ac" class="video-source" autoplay loop muted playsinline>
+        <source src="/ac.mp4" type="video/mp4">
+    </video>
+
+    <!-- Settings Toggle Button -->
+    <button class="settings-toggle" id="settings-toggle" aria-label="ASCII Settings">
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+    </button>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <span class="settings-title">ASCII Settings</span>
+            <button class="settings-close" id="settings-close">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="settings-body">
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <label for="cellSize">Cell Size</label>
+                        <span id="cellSizeValue">10</span>
+                    </div>
+                    <input type="range" id="cellSize" class="setting-slider" min="6" max="24" value="10">
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <label for="textOpacity">Text Opacity</label>
+                        <span id="textOpacityValue">100</span>
+                    </div>
+                    <input type="range" id="textOpacity" class="setting-slider" min="10" max="100" value="100">
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <label for="colorIntensity">Color Intensity</label>
+                        <span id="colorIntensityValue">60</span>
+                    </div>
+                    <input type="range" id="colorIntensity" class="setting-slider" min="0" max="100" value="60">
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -661,66 +1479,89 @@
         <header class="header">
             <a href="/" class="logo">
                 <div class="logo-icon">
-                    <img src="/logo.png" alt="V-Fix Logo" />
+                    <img src="/logo.png" alt="V-Fix Logo">
                 </div>
                 <span class="logo-text">V-Fix</span>
             </a>
             <nav class="nav-links">
                 <a href="#features" class="nav-link">Özellikler</a>
                 <a href="#how-it-works" class="nav-link">Nasıl Çalışır</a>
-                <a href="#about" class="nav-link">Hakkında</a>
+                <a href="#enterprise" class="nav-link">İşletmeler</a>
+                <a href="#faq" class="nav-link">SSS</a>
                 <a href="/welcome" class="btn-primary">Teşhise Başla</a>
             </nav>
         </header>
 
-        <!-- Hero Section -->
+        <!-- Hero Section with ASCII Video Background -->
         <section class="hero">
-            <div class="hero-grid">
-                <div class="hero-content">
-                    <div class="hero-badge">
-                        <span class="badge-dot"></span>
-                        VLM Destekli • Türkçe Destekli
-                    </div>
-                    <h1 class="hero-title">
-                        Beyaz Eşya tamiri için <span class="highlight">AI asistanınız</span>
-                    </h1>
-                    <p class="hero-description">
-                        Bir fotoğraf çekin, sorunu açıklayın ve anında teşhis rehberliği alın. 
-                        V-Fix, ev aletlerinizi tamir etmenize yardımcı olmak için gelişmiş görüntü-dil modelleri kullanır.
-                    </p>
-                    <div class="hero-actions">
-                        <a href="/welcome" class="btn-primary">V-Fix'i Ücretsiz Dene</a>
-                        <a href="#how-it-works" class="btn-secondary">Demo İzle</a>
-                    </div>
+            <div class="hero-ascii">
+                <div class="ascii-container" data-video="video-laundry" data-id="hero">
+                    <canvas class="ascii-canvas"></canvas>
                 </div>
-                <div class="hero-visual">
-                    <div class="terminal-window">
-                        <div class="terminal-header">
-                            <span class="terminal-dot red"></span>
-                            <span class="terminal-dot yellow"></span>
-                            <span class="terminal-dot green"></span>
-                            <span class="terminal-title">v-fix — teşhis oturumu</span>
+                <div class="ascii-overlay ascii-overlay-gradient"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-grid">
+                    <div class="hero-text">
+                        <div class="hero-badge">
+                            <span class="badge-dot"></span>
+                            VLM Destekli • Türkçe
                         </div>
-                        <div class="terminal-body">
-                            <div class="terminal-line">
-                                <span class="terminal-prompt">kullanici@v-fix:~$</span>
-                                <span class="terminal-command"> yukle camasir_makinesi.jpg</span>
+                        <h1 class="hero-title">
+                            Beyaz Eşya Tamiri için <span class="highlight">AI Asistanınız</span>
+                        </h1>
+                        <p class="hero-description">
+                            Fotoğraf çekin, sorunu açıklayın ve anında teşhis rehberliği alın. 
+                            V-Fix, ev aletlerinizi tamir etmenize yardımcı olmak için gelişmiş görüntü-dil modelleri kullanır.
+                        </p>
+                        <div class="hero-actions">
+                            <a href="/welcome" class="btn-primary">V-Fix'i Ücretsiz Dene</a>
+                            <a href="#how-it-works" class="btn-secondary">Nasıl Çalışır?</a>
+                        </div>
+                        <div class="hero-trust">
+                            <div class="trust-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Ücretsiz teşhis</span>
                             </div>
-                            <div class="terminal-line terminal-response">
-                                → Görüntü VLM ile analiz ediliyor...
+                            <div class="trust-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>7/24 destek</span>
                             </div>
-                            <div class="terminal-line terminal-response">
-                                → Model tespit edildi: Samsung WW80T554DAW
+                            <div class="trust-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>%95 doğruluk</span>
                             </div>
-                            <div class="terminal-line terminal-response">
-                                → Sorun tespit edildi: Hata kodu 4E (su temini)
+                        </div>
+                    </div>
+                    <div class="hero-terminal">
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-dot red"></span>
+                                <span class="terminal-dot yellow"></span>
+                                <span class="terminal-dot green"></span>
+                                <span class="terminal-title">v-fix — teşhis oturumu</span>
                             </div>
-                            <div class="terminal-line terminal-success">
-                                ✓ 3 tamir çözümü bulundu
-                            </div>
-                            <div class="terminal-line">
-                                <span class="terminal-prompt">kullanici@v-fix:~$</span>
-                                <span class="terminal-cursor"></span>
+                            <div class="terminal-body">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="terminal-command"> vfix upload camasir_makinesi.jpg</span>
+                                </div>
+                                <div class="terminal-line terminal-response">
+                                    → Görüntü VLM ile analiz ediliyor...
+                                </div>
+                                <div class="terminal-line terminal-response">
+                                    → Model: Samsung WW80T554DAW
+                                </div>
+                                <div class="terminal-line terminal-response">
+                                    → Hata kodu 4E (su temini sorunu)
+                                </div>
+                                <div class="terminal-line terminal-success">
+                                    ✓ 3 çözüm önerisi hazır
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="terminal-cursor"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -728,370 +1569,1075 @@
             </div>
         </section>
 
-        <!-- Features Section -->
-        <section class="features" id="features">
+        <!-- Stats Bar -->
+        <section class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number"><span class="accent">500</span>+</div>
+                <div class="stat-label">Cihaz Desteği</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><span class="accent">10K</span>+</div>
+                <div class="stat-label">Teşhis Tamamlandı</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><span class="accent">%95</span></div>
+                <div class="stat-label">Doğruluk Oranı</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number"><span class="accent">50</span>+</div>
+                <div class="stat-label">Marka Desteği</div>
+            </div>
+        </section>
+
+        <!-- Intelligence Section with ASCII Video -->
+        <section class="section" id="features">
+            <div class="ascii-content-section">
+                <div class="text-side">
+                    <div class="content-block">
+                        <span class="section-label">Teknoloji</span>
+                        <h2 class="section-title">Yapay Zeka ile Görsel Teşhis</h2>
+                        <p class="section-description">
+                            En güçlü yapay zeka modelleri yazılı kelimeler üzerinde eğitilir. Ancak gerçek zeka, dil aşar. V-Fix, görsel-dil modellerini kullanarak ev aletlerinizin sorunlarını anında tespit eder.
+                        </p>
+                        <div class="quote-block">
+                            <p class="quote-text">
+                                Gerçek anlamda akıllı makineler, kelimelerden dünyalara geçmeli. Algılama, tahmin etme ve doğaçlama kapasitesi edinmeliler.
+                            </p>
+                        </div>
+                        <p class="section-description">
+                            Fotoğrafınızı yükleyin, VLM teknolojimiz marka, model ve sorunu otomatik olarak tespit etsin.
+                        </p>
+                    </div>
+                </div>
+                <div class="ascii-side">
+                    <div class="ascii-container" data-video="video-fridge" data-id="fridge">
+                        <canvas class="ascii-canvas"></canvas>
+                    </div>
+                    <div class="ascii-overlay ascii-overlay-left"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works">
+            <div class="content-padding">
+                <span class="section-label">Süreç</span>
+                <h2 class="section-title">Nasıl Çalışır?</h2>
+            </div>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <span class="step-number">1</span>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="12" cy="13" r="4"/>
+                            <line x1="12" y1="3" x2="12" y2="6"/>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">Fotoğraf Yükle</h3>
+                    <p class="step-description">Ev aletinizin veya hata kodunun fotoğrafını çekin ve yükleyin.</p>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">2</span>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4"/>
+                            <path d="M12 8h.01"/>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">AI Analiz</h3>
+                    <p class="step-description">VLM teknolojimiz marka, model ve sorunu otomatik tespit eder.</p>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">3</span>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">Çözüm Al</h3>
+                    <p class="step-description">Size özel tamir talimatları ve güvenlik uyarıları alın.</p>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">4</span>
+                    <div class="step-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <h3 class="step-title">Profesyonel Destek</h3>
+                    <p class="step-description">Gerekirse teknisyen randevusu alın, AI teşhisi ile hızlı çözüm.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dishwasher Section with ASCII -->
+        <section class="section">
+            <div class="ascii-content-section reverse">
+                <div class="text-side">
+                    <div class="content-block">
+                        <span class="section-label">Özellikler</span>
+                        <h2 class="section-title">Adım Adım Tamir Rehberi</h2>
+                        <p class="section-description">
+                            Her tamir, güvenlik önlemleriyle başlar. V-Fix, size özel detaylı talimatlar sunar. Hangi parçaların gerektiğini, hangi araçları kullanacağınızı ve her adımda nelere dikkat etmeniz gerektiğini öğrenin.
+                        </p>
+                        <div class="quote-block">
+                            <p class="quote-text">
+                                Doğru bilgi ile donanmış bir ev sahibi, basit arızaları kolayca çözebilir. V-Fix, bu bilgiyi herkes için erişilebilir kılar.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="ascii-side">
+                    <div class="ascii-container" data-video="video-dishwasher" data-id="dishwasher">
+                        <canvas class="ascii-canvas"></canvas>
+                    </div>
+                    <div class="ascii-overlay ascii-overlay-right"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section>
+            <div class="content-padding">
+                <span class="section-label">Yetenekler</span>
+                <h2 class="section-title">Neden V-Fix?</h2>
+            </div>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <svg viewBox="0 0 24 24">
-                            <rect x="2" y="6" width="20" height="14" rx="2" ry="2"/>
-                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            <circle cx="12" cy="13" r="3"/>
-                            <line x1="2" y1="2" x2="6" y2="6"/>
-                            <line x1="18" y1="2" x2="22" y2="6"/>
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
                         </svg>
                     </div>
                     <h3 class="feature-title">Görsel Teşhis</h3>
-                    <p class="feature-description">
-                        Ev aletinizin veya hata kodunun fotoğrafını yükleyin, VLM'imiz anında marka, model ve sorunu tespit eder.
-                    </p>
+                    <p class="feature-description">Fotoğraf yükleyin, VLM teknolojimiz anında marka, model ve sorunu tespit etsin.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <svg viewBox="0 0 24 24">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                         </svg>
                     </div>
                     <h3 class="feature-title">Adım Adım Tamir</h3>
-                    <p class="feature-description">
-                        Belirli ev aletiniz ve sorununuz için özelleştirilmiş detaylı tamir talimatları alın, güvenlik uyarıları dahil.
-                    </p>
+                    <p class="feature-description">Detaylı talimatlar ve güvenlik uyarıları ile size özel tamir rehberi.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <svg viewBox="0 0 24 24">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                            <path d="M8 10h.01M12 10h.01M16 10h.01"/>
                         </svg>
                     </div>
-                    <h3 class="feature-title">Türkçe Dil Desteği</h3>
-                    <p class="feature-description">
-                        Türk kullanıcılar için tam yerelleştirilmiş. Sorununuzu Türkçe açıklayın ve ana dilinizde yanıtlar alın.
-                    </p>
+                    <h3 class="feature-title">Türkçe Destek</h3>
+                    <p class="feature-description">Türk kullanıcılar için tam yerelleştirilmiş. Sorununuzu Türkçe açıklayın.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Hata Kodu Tanıma</h3>
+                    <p class="feature-description">Tüm popüler markaların hata kodlarını otomatik tanır ve açıklar.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Güvenlik Öncelikli</h3>
+                    <p class="feature-description">Her tamir için güvenlik uyarıları ve önlemler dahil.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">7/24 Erişim</h3>
+                    <p class="feature-description">İstediğiniz zaman, istediğiniz yerden AI desteği alın.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Brands Carousel -->
+        <section>
+            <div class="content-padding">
+                <span class="section-label">Markalar</span>
+                <h2 class="section-title">50+ Marka Desteği</h2>
+            </div>
+            <div class="brands-track">
+                <span class="brand-item">Arçelik</span>
+                <span class="brand-item">Samsung</span>
+                <span class="brand-item">Bosch</span>
+                <span class="brand-item">Beko</span>
+                <span class="brand-item">Siemens</span>
+                <span class="brand-item">LG</span>
+                <span class="brand-item">Vestel</span>
+                <span class="brand-item">Whirlpool</span>
+                <span class="brand-item">Electrolux</span>
+                <span class="brand-item">Profilo</span>
+                <span class="brand-item">Indesit</span>
+                <span class="brand-item">Hotpoint</span>
+                <span class="brand-item">Arçelik</span>
+                <span class="brand-item">Samsung</span>
+                <span class="brand-item">Bosch</span>
+                <span class="brand-item">Beko</span>
+                <span class="brand-item">Siemens</span>
+                <span class="brand-item">LG</span>
+                <span class="brand-item">Vestel</span>
+                <span class="brand-item">Whirlpool</span>
+                <span class="brand-item">Electrolux</span>
+                <span class="brand-item">Profilo</span>
+                <span class="brand-item">Indesit</span>
+                <span class="brand-item">Hotpoint</span>
+            </div>
+        </section>
+
+        <!-- Enterprise Section with ASCII -->
+        <section class="section" id="enterprise">
+            <div class="ascii-content-section">
+                <div class="text-side">
+                    <div class="content-block">
+                        <span class="section-label">Profesyonel</span>
+                        <h2 class="section-title">Teknisyen ve İşletmeler İçin</h2>
+                        <p class="section-description">
+                            V-Fix sadece son kullanıcılar için değil. Teknisyenler ve işletmeler için güçlü yönetim araçları sunuyoruz.
+                        </p>
+                        <p class="section-description">
+                            Müşteri sorunlarını merkezi olarak yönetin, AI teşhislerini inceleyin, randevuları koordine edin ve performansınızı takip edin.
+                        </p>
+                    </div>
+                </div>
+                <div class="ascii-side">
+                    <div class="ascii-container" data-video="video-oven" data-id="oven">
+                        <canvas class="ascii-canvas"></canvas>
+                    </div>
+                    <div class="ascii-overlay ascii-overlay-left"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enterprise Cards -->
+        <section>
+            <div class="enterprise-grid">
+                <div class="enterprise-card">
+                    <div class="enterprise-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <h3 class="enterprise-title">Müşteri</h3>
+                    <p class="enterprise-description">AI teşhisi ile hızlı çözüm, chat desteği ve teknisyen randevusu.</p>
+                    <ul class="enterprise-features">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Fotoğraf yükleme ve AI teşhis
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Chat ile sorun çözme
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Teknisyen randevusu alma
+                        </li>
+                    </ul>
+                    <a href="/welcome" class="btn-outline">Başla</a>
+                </div>
+                <div class="enterprise-card">
+                    <div class="enterprise-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                    </div>
+                    <h3 class="enterprise-title">Teknisyen</h3>
+                    <p class="enterprise-description">Müşteri sorunlarını görüntüleyin, randevuları yönetin.</p>
+                    <ul class="enterprise-features">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Chat geçmişlerini inceleme
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Randevu yönetimi ve takvimi
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            AI teşhislerini onaylama
+                        </li>
+                    </ul>
+                    <a href="/technician/login" class="btn-outline">Giriş Yap</a>
+                </div>
+                <div class="enterprise-card">
+                    <div class="enterprise-icon">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                    </div>
+                    <h3 class="enterprise-title">Admin</h3>
+                    <p class="enterprise-description">Sistem geneli istatistikler, kullanıcı ve performans yönetimi.</p>
+                    <ul class="enterprise-features">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Genel istatistikler ve analitik
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Tüm chat'leri görüntüleme
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Geri bildirim yönetimi
+                        </li>
+                    </ul>
+                    <a href="/admin/login" class="btn-outline">Dashboard</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- AC Section with ASCII -->
+        <section class="section">
+            <div class="ascii-content-section reverse">
+                <div class="text-side">
+                    <div class="content-block">
+                        <span class="section-label">Destek</span>
+                        <h2 class="section-title">Her Cihaz İçin Çözüm</h2>
+                        <p class="section-description">
+                            Çamaşır makinesi, buzdolabı, bulaşık makinesi, fırın, klima, mikrodalga ve daha fazlası. V-Fix, 500+ farklı cihaz modelini destekliyor.
+                        </p>
+                        <p class="section-description">
+                            Arçelik'ten Samsung'a, Bosch'tan Vestel'e kadar tüm popüler markaların hata kodlarını tanıyor ve çözüm sunuyoruz.
+                        </p>
+                    </div>
+                </div>
+                <div class="ascii-side">
+                    <div class="ascii-container" data-video="video-ac" data-id="ac">
+                        <canvas class="ascii-canvas"></canvas>
+                    </div>
+                    <div class="ascii-overlay ascii-overlay-right"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq">
+            <div class="content-padding">
+                <span class="section-label">SSS</span>
+                <h2 class="section-title">Sık Sorulan Sorular</h2>
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">V-Fix nasıl çalışır?</span>
+                            <span class="faq-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer">
+                            <p class="faq-answer-text">Fotoğrafınızı yükleyin, AI teknolojimiz sorunu tespit eder ve size adım adım tamir talimatları sunar. Gerekirse teknisyen desteği de alabilirsiniz.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Hangi cihazları destekliyorsunuz?</span>
+                            <span class="faq-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer">
+                            <p class="faq-answer-text">Buzdolabı, çamaşır makinesi, bulaşık makinesi, fırın, klima, mikrodalga, televizyon ve daha fazlası. 500+ farklı cihaz modelini destekliyoruz.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Ücretsiz mi?</span>
+                            <span class="faq-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer">
+                            <p class="faq-answer-text">Temel teşhis ve çözüm önerileri tamamen ücretsizdir. Profesyonel teknisyen desteği için ücretli planlarımız mevcuttur.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">AI teşhisi ne kadar doğru?</span>
+                            <span class="faq-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer">
+                            <p class="faq-answer-text">%95 doğruluk oranı ile çalışıyoruz. 10,000+ başarılı teşhis ile kanıtlanmış teknoloji.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <button class="faq-question">
+                            <span class="faq-question-text">Verilerim güvende mi?</span>
+                            <span class="faq-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </span>
+                        </button>
+                        <div class="faq-answer">
+                            <p class="faq-answer-text">Kesinlikle. Tüm verileriniz şifrelenir ve GDPR uyumludur. Fotoğraflarınız sadece teşhis için kullanılır.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2 class="cta-title">Hemen Başlayın</h2>
+                <p class="cta-description">Ev aletinizin sorununu AI ile teşhis edin. Ücretsiz, hızlı ve Türkçe.</p>
+                <div class="cta-actions">
+                    <a href="/welcome" class="btn-primary">V-Fix'i Ücretsiz Dene</a>
+                    <a href="#faq" class="btn-secondary">Sorularınız mı var?</a>
                 </div>
             </div>
         </section>
 
         <!-- Footer -->
         <footer class="footer">
-            <span class="footer-text">© 2025 V-Fix.</span>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Gizlilik</a>
-                <a href="#" class="footer-link">Şartlar</a>
-                <a href="#" class="footer-link">GitHub</a>
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="logo">
+                        <div class="logo-icon">
+                            <img src="/logo.png" alt="V-Fix Logo">
+                        </div>
+                        <span class="logo-text">V-Fix</span>
+                    </a>
+                    <p class="footer-tagline">AI destekli beyaz eşya tamir asistanınız. Fotoğraf çekin, sorunu teşhis edin, çözüm bulun.</p>
+                </div>
+                <div class="footer-column">
+                    <h4>Ürün</h4>
+                    <ul class="footer-links">
+                        <li><a href="#features">Özellikler</a></li>
+                        <li><a href="#how-it-works">Nasıl Çalışır</a></li>
+                        <li><a href="#enterprise">İşletmeler İçin</a></li>
+                        <li><a href="#faq">SSS</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Şirket</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Hakkımızda</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Kariyer</a></li>
+                        <li><a href="#">İletişim</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Yasal</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Gizlilik Politikası</a></li>
+                        <li><a href="#">Kullanım Şartları</a></li>
+                        <li><a href="#">KVKK</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span class="footer-copyright">© 2025 V-Fix. Tüm hakları saklıdır.</span>
+                <div class="footer-socials">
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="GitHub">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="LinkedIn">
+                        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                            <rect x="2" y="9" width="4" height="12"/>
+                            <circle cx="4" cy="4" r="2"/>
+                        </svg>
+                    </a>
+                </div>
             </div>
         </footer>
     </div>
 
-    <!-- Settings Toggle -->
-    <button class="settings-toggle" id="settings-toggle" title="ASCII Ayarları">⚙</button>
-
-    <!-- ASCII Controls Panel -->
-    <div class="ascii-controls" id="ascii-controls">
-        <div class="control-group">
-            <div class="control-label">Hücre Boyutu</div>
-            <input type="range" class="control-slider" id="cell-size" min="6" max="24" value="12">
-        </div>
-        <div class="control-group">
-            <div class="control-label">Metin Opaklığı</div>
-            <input type="range" class="control-slider" id="text-opacity" min="20" max="100" value="80">
-        </div>
-        <div class="control-group">
-            <div class="control-label">Işık Yarıçapı</div>
-            <input type="range" class="control-slider" id="light-radius" min="100" max="500" value="280">
-        </div>
-        <div class="control-group">
-            <div class="control-label">Işık Yoğunluğu</div>
-            <input type="range" class="control-slider" id="light-intensity" min="0" max="100" value="80">
-        </div>
-    </div>
-
+    <!-- ============================================
+         WebGL ASCII VIDEO RENDERER
+         ============================================ -->
     <script>
-        // ASCII Renderer with Animated Colors AND Light Ball Effect
-        class ASCIIRenderer {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
-                
-                // Configuration
-                this.config = {
-                    cellSize: 12,
-                    textOpacity: 0.8,
-                    lightRadius: 280,
-                    lightIntensity: 0.8,
-                    chars: ' .,:;+*?%S#@',
-                    font: 'JetBrains Mono, monospace'
-                };
-
-                // Mouse position for light ball effect
-                this.mouse = { x: -1000, y: -1000 };
-                this.targetMouse = { x: -1000, y: -1000 };
-
-                // Animation state
-                this.time = 0;
-                this.noiseScale = 0.02;
-                this.noiseSpeed = 0.0005;
-
-                // Bind methods
-                this.resize = this.resize.bind(this);
-                this.animate = this.animate.bind(this);
-                this.handleMouseMove = this.handleMouseMove.bind(this);
-                this.handleMouseLeave = this.handleMouseLeave.bind(this);
-
-                // Initialize
-                this.init();
+    /**
+     * WebGL ASCII Video Renderer
+     * Converts video frames to ASCII art in real-time using GPU shaders
+     */
+    class ASCIIVideoRenderer {
+        constructor(container, videoElement, config = {}) {
+            this.container = container;
+            this.video = videoElement;
+            this.canvas = container.querySelector('.ascii-canvas');
+            this.id = container.dataset.id || 'default';
+            
+            // Configuration
+            this.config = {
+                cellSize: config.cellSize || 10,
+                textOpacity: config.textOpacity || 1.0,
+                colorIntensity: config.colorIntensity || 0.6,
+                charset: ' .,:-=+*#%@',
+                fontFamily: 'JetBrains Mono, monospace',
+                baseColor: { r: 229, g: 57, b: 53 }, // Red accent
+                ...config
+            };
+            
+            this.gl = null;
+            this.program = null;
+            this.videoTexture = null;
+            this.glyphTexture = null;
+            this.isInitialized = false;
+            this.animationId = null;
+            this.isVisible = false;
+            
+            this.init();
+        }
+        
+        async init() {
+            // Setup WebGL context
+            this.gl = this.canvas.getContext('webgl', {
+                alpha: true,
+                antialias: false,
+                premultipliedAlpha: false
+            });
+            
+            if (!this.gl) {
+                console.error('WebGL not supported, falling back to 2D');
+                this.initFallback2D();
+                return;
             }
-
-            init() {
-                this.resize();
-                window.addEventListener('resize', this.resize);
-                window.addEventListener('mousemove', this.handleMouseMove);
-                document.addEventListener('mouseleave', this.handleMouseLeave);
-                this.animate();
-            }
-
-            resize() {
-                const dpr = Math.min(window.devicePixelRatio, 2);
-                this.canvas.width = window.innerWidth * dpr;
-                this.canvas.height = window.innerHeight * dpr;
-                this.canvas.style.width = window.innerWidth + 'px';
-                this.canvas.style.height = window.innerHeight + 'px';
-                this.ctx.scale(dpr, dpr);
-                
-                this.width = window.innerWidth;
-                this.height = window.innerHeight;
-                this.cols = Math.ceil(this.width / this.config.cellSize);
-                this.rows = Math.ceil(this.height / this.config.cellSize);
-            }
-
-            handleMouseMove(e) {
-                this.targetMouse.x = e.clientX;
-                this.targetMouse.y = e.clientY;
-            }
-
-            handleMouseLeave() {
-                this.targetMouse.x = -1000;
-                this.targetMouse.y = -1000;
-            }
-
-            // Perlin-like noise
-            noise(x, y, z) {
-                const p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
-                const perm = [...p, ...p];
-                
-                const X = Math.floor(x) & 255;
-                const Y = Math.floor(y) & 255;
-                const Z = Math.floor(z) & 255;
-                
-                const xf = x - Math.floor(x);
-                const yf = y - Math.floor(y);
-                const zf = z - Math.floor(z);
-                
-                const u = this.fade(xf);
-                const v = this.fade(yf);
-                const w = this.fade(zf);
-                
-                const A = perm[X] + Y;
-                const AA = perm[A] + Z;
-                const AB = perm[A + 1] + Z;
-                const B = perm[X + 1] + Y;
-                const BA = perm[B] + Z;
-                const BB = perm[B + 1] + Z;
-                
-                return this.lerp(w,
-                    this.lerp(v,
-                        this.lerp(u, this.grad(perm[AA], xf, yf, zf), this.grad(perm[BA], xf - 1, yf, zf)),
-                        this.lerp(u, this.grad(perm[AB], xf, yf - 1, zf), this.grad(perm[BB], xf - 1, yf - 1, zf))
-                    ),
-                    this.lerp(v,
-                        this.lerp(u, this.grad(perm[AA + 1], xf, yf, zf - 1), this.grad(perm[BA + 1], xf - 1, yf, zf - 1)),
-                        this.lerp(u, this.grad(perm[AB + 1], xf, yf - 1, zf - 1), this.grad(perm[BB + 1], xf - 1, yf - 1, zf - 1))
-                    )
-                );
-            }
-
-            fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-            lerp(t, a, b) { return a + t * (b - a); }
-            grad(hash, x, y, z) {
-                const h = hash & 15;
-                const u = h < 8 ? x : y;
-                const v = h < 4 ? y : h === 12 || h === 14 ? x : z;
-                return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
-            }
-
-            // Generate animated patterns
-            getPatternValue(x, y, time) {
-                const n1 = this.noise(x * this.noiseScale, y * this.noiseScale, time);
-                const n2 = this.noise(x * this.noiseScale * 2, y * this.noiseScale * 2, time * 1.5) * 0.5;
-                const n3 = this.noise(x * this.noiseScale * 4, y * this.noiseScale * 4, time * 2) * 0.25;
-                
-                const gridX = Math.sin(x * 0.1 + time * 0.5) * 0.2;
-                const gridY = Math.cos(y * 0.08 + time * 0.3) * 0.2;
-                const wave = Math.sin(x * 0.05 + y * 0.03 + time) * 0.3;
-                
-                return (n1 + n2 + n3 + gridX + gridY + wave + 1) / 2;
-            }
-
-            getColorForPosition(x, y, baseValue, col, row) {
-                // Calculate distance from mouse (light ball effect)
-                const dx = x - this.mouse.x;
-                const dy = y - this.mouse.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                
-                // Light ball with smooth falloff
-                const lightRadius = this.config.lightRadius;
-                const normalizedDist = dist / lightRadius;
-                const lightInfluence = Math.max(0, Math.pow(1 - Math.min(normalizedDist, 1), 2.5));
-                const intensity = lightInfluence * this.config.lightIntensity;
-
-                // === BASE ANIMATED COLORS (always visible, shifting over time) ===
-                const timeShift = this.time * 0.001;
-                const baseHue = 0 + Math.sin(timeShift + col * 0.05) * 15 + Math.cos(timeShift * 0.7 + row * 0.03) * 10;
-                const baseSat = 60 + baseValue * 30 + Math.sin(timeShift * 1.5 + col * 0.02) * 15;
-                const baseLight = 35 + baseValue * 35 + Math.sin(timeShift * 0.8 + row * 0.04) * 12;
-
-                // === LIGHT BALL EFFECT (additive brightness when hovering) ===
-                if (intensity > 0.01) {
-                    // Inner core - almost white/bright
-                    if (intensity > 0.75) {
-                        const coreIntensity = (intensity - 0.75) / 0.25;
-                        const coreLight = this.lerp(coreIntensity, 75, 98);
-                        const coreSat = this.lerp(coreIntensity, 50, 10);
-                        const coreHue = this.lerp(coreIntensity, baseHue, 40);
-                        return `hsla(${coreHue}, ${coreSat}%, ${coreLight}%, 1)`;
-                    }
-                    
-                    // Middle ring - very bright, warm colors
-                    if (intensity > 0.35) {
-                        const midIntensity = (intensity - 0.35) / 0.4;
-                        const midHue = this.lerp(midIntensity, baseHue, 30);
-                        const midLight = this.lerp(midIntensity, baseLight + 30, 75);
-                        const midSat = this.lerp(midIntensity, baseSat + 10, 70);
-                        return `hsla(${midHue}, ${midSat}%, ${midLight}%, ${0.9 + midIntensity * 0.1})`;
-                    }
-                    
-                    // Outer glow - enhanced base colors
-                    const outerIntensity = intensity / 0.35;
-                    const outerLight = baseLight + outerIntensity * 40;
-                    const outerSat = baseSat + outerIntensity * 15;
-                    return `hsla(${baseHue}, ${outerSat}%, ${outerLight}%, ${this.config.textOpacity + outerIntensity * 0.15})`;
-                }
-
-                // === DEFAULT STATE (animated base colors, no hover) ===
-                return `hsla(${baseHue}, ${baseSat}%, ${baseLight}%, ${this.config.textOpacity * 0.9})`;
-            }
-
-            animate() {
-                this.time += 16;
-
-                // Smooth mouse interpolation
-                this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.12;
-                this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.12;
-
-                // Clear
-                this.ctx.fillStyle = '#0a0a0b';
-                this.ctx.fillRect(0, 0, this.width, this.height);
-
-                // Font
-                const fontSize = this.config.cellSize;
-                this.ctx.font = `${fontSize}px ${this.config.font}`;
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-
-                const timeOffset = this.time * this.noiseSpeed;
-                
-                for (let row = 0; row < this.rows; row++) {
-                    for (let col = 0; col < this.cols; col++) {
-                        const x = col * this.config.cellSize + this.config.cellSize / 2;
-                        const y = row * this.config.cellSize + this.config.cellSize / 2;
-
-                        const value = this.getPatternValue(col, row, timeOffset);
-                        
-                        // Boost character density near light
-                        const dx = x - this.mouse.x;
-                        const dy = y - this.mouse.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        const lightBoost = Math.pow(Math.max(0, 1 - dist / this.config.lightRadius), 2) * 0.5;
-                        
-                        const charIndex = Math.floor((value + lightBoost) * (this.config.chars.length - 1));
-                        const char = this.config.chars[Math.min(Math.max(0, charIndex), this.config.chars.length - 1)];
-
-                        // Get color with both animation AND light ball effect
-                        this.ctx.fillStyle = this.getColorForPosition(x, y, value, col, row);
-                        this.ctx.fillText(char, x, y);
-                    }
-                }
-
-                requestAnimationFrame(this.animate);
-            }
-
-            updateConfig(key, value) {
-                this.config[key] = value;
-                if (key === 'cellSize') {
-                    this.resize();
-                }
-            }
-
-            destroy() {
-                window.removeEventListener('resize', this.resize);
-                window.removeEventListener('mousemove', this.handleMouseMove);
-                document.removeEventListener('mouseleave', this.handleMouseLeave);
+            
+            // Create shader program
+            this.createShaderProgram();
+            
+            // Create textures
+            this.createGlyphTexture();
+            this.createVideoTexture();
+            
+            // Setup geometry
+            this.setupGeometry();
+            
+            // Setup resize observer
+            this.setupResizeObserver();
+            
+            // Setup intersection observer for visibility
+            this.setupIntersectionObserver();
+            
+            // Wait for video to be ready
+            await this.waitForVideo();
+            
+            this.isInitialized = true;
+            this.resize();
+            
+            // Start render loop if visible
+            if (this.isVisible) {
+                this.startRenderLoop();
             }
         }
-
-        // Initialize
-        const canvas = document.getElementById('ascii-canvas');
-        const renderer = new ASCIIRenderer(canvas);
-
-        // Settings Panel
+        
+        createShaderProgram() {
+            const gl = this.gl;
+            
+            // Vertex shader
+            const vsSource = `
+                attribute vec2 a_position;
+                attribute vec2 a_texCoord;
+                varying vec2 v_texCoord;
+                
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                    v_texCoord = a_texCoord;
+                }
+            `;
+            
+            // Fragment shader - ASCII rendering
+            const fsSource = `
+                precision mediump float;
+                
+                uniform sampler2D u_video;
+                uniform sampler2D u_glyphs;
+                uniform vec2 u_resolution;
+                uniform float u_cellSize;
+                uniform float u_textOpacity;
+                uniform float u_colorIntensity;
+                uniform float u_glyphCount;
+                uniform vec3 u_baseColor;
+                
+                varying vec2 v_texCoord;
+                
+                void main() {
+                    // Calculate grid position
+                    vec2 cellCount = floor(u_resolution / u_cellSize);
+                    vec2 cellPos = floor(v_texCoord * cellCount);
+                    vec2 cellUV = fract(v_texCoord * cellCount);
+                    
+                    // Sample video at cell center
+                    vec2 sampleUV = (cellPos + 0.5) / cellCount;
+                    vec4 videoColor = texture2D(u_video, sampleUV);
+                    
+                    // Calculate luminance
+                    float luminance = dot(videoColor.rgb, vec3(0.299, 0.587, 0.114));
+                    
+                    // Map luminance to glyph index
+                    float glyphIndex = floor(luminance * (u_glyphCount - 1.0));
+                    
+                    // Sample glyph texture
+                    float glyphU = (glyphIndex + cellUV.x) / u_glyphCount;
+                    float glyphV = cellUV.y;
+                    vec4 glyphColor = texture2D(u_glyphs, vec2(glyphU, glyphV));
+                    
+                    // Mix video color with base color based on intensity
+                    vec3 tintColor = mix(u_baseColor / 255.0, videoColor.rgb, u_colorIntensity);
+                    
+                    // Apply glyph as alpha mask
+                    float alpha = glyphColor.r * u_textOpacity;
+                    
+                    // Brighten based on luminance
+                    vec3 finalColor = tintColor * (0.5 + luminance * 0.8);
+                    
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `;
+            
+            // Compile shaders
+            const vs = this.compileShader(gl.VERTEX_SHADER, vsSource);
+            const fs = this.compileShader(gl.FRAGMENT_SHADER, fsSource);
+            
+            // Create program
+            this.program = gl.createProgram();
+            gl.attachShader(this.program, vs);
+            gl.attachShader(this.program, fs);
+            gl.linkProgram(this.program);
+            
+            if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+                console.error('Shader program link error:', gl.getProgramInfoLog(this.program));
+                return;
+            }
+            
+            // Get attribute and uniform locations
+            this.locations = {
+                position: gl.getAttribLocation(this.program, 'a_position'),
+                texCoord: gl.getAttribLocation(this.program, 'a_texCoord'),
+                video: gl.getUniformLocation(this.program, 'u_video'),
+                glyphs: gl.getUniformLocation(this.program, 'u_glyphs'),
+                resolution: gl.getUniformLocation(this.program, 'u_resolution'),
+                cellSize: gl.getUniformLocation(this.program, 'u_cellSize'),
+                textOpacity: gl.getUniformLocation(this.program, 'u_textOpacity'),
+                colorIntensity: gl.getUniformLocation(this.program, 'u_colorIntensity'),
+                glyphCount: gl.getUniformLocation(this.program, 'u_glyphCount'),
+                baseColor: gl.getUniformLocation(this.program, 'u_baseColor')
+            };
+        }
+        
+        compileShader(type, source) {
+            const gl = this.gl;
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            
+            return shader;
+        }
+        
+        createGlyphTexture() {
+            const gl = this.gl;
+            const charset = this.config.charset;
+            const cellSize = 64; // High resolution for glyph texture
+            
+            // Create canvas for glyph rendering
+            const glyphCanvas = document.createElement('canvas');
+            glyphCanvas.width = cellSize * charset.length;
+            glyphCanvas.height = cellSize;
+            const ctx = glyphCanvas.getContext('2d');
+            
+            // Clear with black
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, glyphCanvas.width, glyphCanvas.height);
+            
+            // Draw each character
+            ctx.fillStyle = '#fff';
+            ctx.font = `${cellSize * 0.8}px ${this.config.fontFamily}`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            for (let i = 0; i < charset.length; i++) {
+                const x = i * cellSize + cellSize / 2;
+                const y = cellSize / 2;
+                ctx.fillText(charset[i], x, y);
+            }
+            
+            // Create WebGL texture
+            this.glyphTexture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, this.glyphTexture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, glyphCanvas);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        }
+        
+        createVideoTexture() {
+            const gl = this.gl;
+            
+            this.videoTexture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, this.videoTexture);
+            
+            // Initialize with placeholder
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
+            
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        }
+        
+        setupGeometry() {
+            const gl = this.gl;
+            
+            // Fullscreen quad
+            const positions = new Float32Array([
+                -1, -1,
+                 1, -1,
+                -1,  1,
+                 1,  1
+            ]);
+            
+            const texCoords = new Float32Array([
+                0, 1,
+                1, 1,
+                0, 0,
+                1, 0
+            ]);
+            
+            // Position buffer
+            this.positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+            
+            // TexCoord buffer
+            this.texCoordBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+        }
+        
+        setupResizeObserver() {
+            this.resizeObserver = new ResizeObserver(() => {
+                this.resize();
+            });
+            this.resizeObserver.observe(this.container);
+        }
+        
+        setupIntersectionObserver() {
+            this.intersectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    this.isVisible = entry.isIntersecting;
+                    
+                    if (this.isVisible && this.isInitialized) {
+                        this.video.play().catch(() => {});
+                        this.startRenderLoop();
+                    } else {
+                        this.stopRenderLoop();
+                        this.video.pause();
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            this.intersectionObserver.observe(this.container);
+        }
+        
+        async waitForVideo() {
+            return new Promise((resolve) => {
+                if (this.video.readyState >= 2) {
+                    resolve();
+                } else {
+                    this.video.addEventListener('loadeddata', () => resolve(), { once: true });
+                }
+            });
+        }
+        
+        resize() {
+            const rect = this.container.getBoundingClientRect();
+            const dpr = Math.min(window.devicePixelRatio, 2);
+            
+            this.canvas.width = rect.width * dpr;
+            this.canvas.height = rect.height * dpr;
+            this.canvas.style.width = rect.width + 'px';
+            this.canvas.style.height = rect.height + 'px';
+            
+            if (this.gl) {
+                this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+        
+        startRenderLoop() {
+            if (this.animationId) return;
+            
+            const render = () => {
+                if (!this.isVisible) return;
+                
+                this.render();
+                this.animationId = requestAnimationFrame(render);
+            };
+            
+            render();
+        }
+        
+        stopRenderLoop() {
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
+        }
+        
+        render() {
+            if (!this.isInitialized || !this.gl) return;
+            
+            const gl = this.gl;
+            
+            // Clear
+            gl.clearColor(0.04, 0.04, 0.04, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            
+            // Update video texture
+            if (this.video.readyState >= 2) {
+                gl.bindTexture(gl.TEXTURE_2D, this.videoTexture);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
+            }
+            
+            // Use program
+            gl.useProgram(this.program);
+            
+            // Enable blending
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            
+            // Bind position buffer
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+            gl.enableVertexAttribArray(this.locations.position);
+            gl.vertexAttribPointer(this.locations.position, 2, gl.FLOAT, false, 0, 0);
+            
+            // Bind texCoord buffer
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+            gl.enableVertexAttribArray(this.locations.texCoord);
+            gl.vertexAttribPointer(this.locations.texCoord, 2, gl.FLOAT, false, 0, 0);
+            
+            // Bind textures
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.videoTexture);
+            gl.uniform1i(this.locations.video, 0);
+            
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, this.glyphTexture);
+            gl.uniform1i(this.locations.glyphs, 1);
+            
+            // Set uniforms
+            gl.uniform2f(this.locations.resolution, this.canvas.width, this.canvas.height);
+            gl.uniform1f(this.locations.cellSize, this.config.cellSize * window.devicePixelRatio);
+            gl.uniform1f(this.locations.textOpacity, this.config.textOpacity);
+            gl.uniform1f(this.locations.colorIntensity, this.config.colorIntensity);
+            gl.uniform1f(this.locations.glyphCount, this.config.charset.length);
+            gl.uniform3f(this.locations.baseColor, 
+                this.config.baseColor.r, 
+                this.config.baseColor.g, 
+                this.config.baseColor.b
+            );
+            
+            // Draw
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+        
+        updateConfig(newConfig) {
+            Object.assign(this.config, newConfig);
+        }
+        
+        // Fallback 2D Canvas renderer
+        initFallback2D() {
+            const ctx = this.canvas.getContext('2d');
+            this.ctx = ctx;
+            this.isFallback = true;
+            
+            this.setupResizeObserver();
+            this.setupIntersectionObserver();
+            
+            this.waitForVideo().then(() => {
+                this.isInitialized = true;
+                this.resize();
+                if (this.isVisible) {
+                    this.startRenderLoop();
+                }
+            });
+        }
+        
+        destroy() {
+            this.stopRenderLoop();
+            
+            if (this.resizeObserver) {
+                this.resizeObserver.disconnect();
+            }
+            
+            if (this.intersectionObserver) {
+                this.intersectionObserver.disconnect();
+            }
+            
+            if (this.gl) {
+                this.gl.deleteTexture(this.videoTexture);
+                this.gl.deleteTexture(this.glyphTexture);
+                this.gl.deleteBuffer(this.positionBuffer);
+                this.gl.deleteBuffer(this.texCoordBuffer);
+                this.gl.deleteProgram(this.program);
+            }
+        }
+    }
+    
+    /**
+     * ASCII Renderer Manager
+     * Manages multiple ASCII renderers and provides global configuration
+     */
+    class ASCIIRendererManager {
+        constructor() {
+            this.renderers = [];
+            this.globalConfig = {
+                cellSize: 10,
+                textOpacity: 1.0,
+                colorIntensity: 0.6
+            };
+        }
+        
+        init() {
+            // Find all ASCII containers and initialize renderers
+            const containers = document.querySelectorAll('.ascii-container[data-video]');
+            
+            containers.forEach(container => {
+                const videoId = container.dataset.video;
+                const video = document.getElementById(videoId);
+                
+                if (video) {
+                    const renderer = new ASCIIVideoRenderer(container, video, this.globalConfig);
+                    this.renderers.push(renderer);
+                }
+            });
+        }
+        
+        updateGlobalConfig(key, value) {
+            this.globalConfig[key] = value;
+            
+            this.renderers.forEach(renderer => {
+                renderer.updateConfig({ [key]: value });
+            });
+        }
+        
+        destroy() {
+            this.renderers.forEach(renderer => renderer.destroy());
+            this.renderers = [];
+        }
+    }
+    
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        // Create global manager
+        const manager = new ASCIIRendererManager();
+        window.ASCIIManager = manager;
+        
+        // Initialize renderers
+        manager.init();
+        
+        // Settings Panel functionality
         const settingsToggle = document.getElementById('settings-toggle');
-        const controlsPanel = document.getElementById('ascii-controls');
-        let controlsVisible = false;
-
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsClose = document.getElementById('settings-close');
+        
         settingsToggle.addEventListener('click', () => {
-            controlsVisible = !controlsVisible;
-            controlsPanel.classList.toggle('visible', controlsVisible);
-            settingsToggle.classList.toggle('active', controlsVisible);
+            settingsPanel.classList.toggle('visible');
+            settingsToggle.classList.toggle('active');
         });
-
+        
+        settingsClose.addEventListener('click', () => {
+            settingsPanel.classList.remove('visible');
+            settingsToggle.classList.remove('active');
+        });
+        
+        // Close panel when clicking outside
         document.addEventListener('click', (e) => {
-            if (controlsVisible && 
-                !controlsPanel.contains(e.target) && 
-                !settingsToggle.contains(e.target)) {
-                controlsVisible = false;
-                controlsPanel.classList.remove('visible');
+            if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) {
+                settingsPanel.classList.remove('visible');
                 settingsToggle.classList.remove('active');
             }
         });
-
-        // Sliders
-        document.getElementById('cell-size').addEventListener('input', (e) => {
-            renderer.updateConfig('cellSize', parseInt(e.target.value));
+        
+        // Settings sliders
+        const cellSizeSlider = document.getElementById('cellSize');
+        const cellSizeValue = document.getElementById('cellSizeValue');
+        const textOpacitySlider = document.getElementById('textOpacity');
+        const textOpacityValue = document.getElementById('textOpacityValue');
+        const colorIntensitySlider = document.getElementById('colorIntensity');
+        const colorIntensityValue = document.getElementById('colorIntensityValue');
+        
+        cellSizeSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            cellSizeValue.textContent = value;
+            manager.updateGlobalConfig('cellSize', value);
         });
-
-        document.getElementById('text-opacity').addEventListener('input', (e) => {
-            renderer.updateConfig('textOpacity', parseInt(e.target.value) / 100);
+        
+        textOpacitySlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            textOpacityValue.textContent = value;
+            manager.updateGlobalConfig('textOpacity', value / 100);
         });
-
-        document.getElementById('light-radius').addEventListener('input', (e) => {
-            renderer.updateConfig('lightRadius', parseInt(e.target.value));
+        
+        colorIntensitySlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            colorIntensityValue.textContent = value;
+            manager.updateGlobalConfig('colorIntensity', value / 100);
         });
-
-        document.getElementById('light-intensity').addEventListener('input', (e) => {
-            renderer.updateConfig('lightIntensity', parseInt(e.target.value) / 100);
-        });
-
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+        
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const item = button.parentElement;
+                const isActive = item.classList.contains('active');
+                
+                // Close all
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+                
+                // Open clicked if wasn't active
+                if (!isActive) {
+                    item.classList.add('active');
                 }
             });
         });
+        
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    });
     </script>
 </body>
 </html>
-
