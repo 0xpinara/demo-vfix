@@ -5,6 +5,7 @@ import Register from './pages/register/Register'
 import Dashboard from './pages/Dashboard'
 import ChatPage from './pages/ChatPage'
 import AppointmentsPage from './pages/AppointmentsPage'
+import NotFound from './pages/NotFound'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { AppointmentProvider } from './context/AppointmentContext'
 
@@ -111,8 +112,6 @@ function AppRoutes() {
         }
       />
       
-      {/* Default redirect */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
       <Route
         path="/appointments"
         element={
@@ -121,7 +120,9 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      
+      {/* 404 Page - Catch all unmatched routes */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
