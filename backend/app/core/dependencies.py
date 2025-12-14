@@ -60,3 +60,89 @@ def get_current_user(
             detail="Not authenticated"
         )
     return user
+
+
+# ============================================================================
+# ENTERPRISE RBAC DEPENDENCIES
+# ============================================================================
+
+def require_enterprise_user(
+    current_user: models.User = Depends(get_current_user)
+) -> models.User:
+    """Dependency to ensure user belongs to an enterprise"""
+    if not current_user.enterprise_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enterprise access required"
+        )
+    return current_user
+
+
+def require_enterprise_admin(
+    current_user: models.User = Depends(get_current_user)
+) -> models.User:
+    """Dependency to ensure user is an enterprise admin"""
+    if not current_user.enterprise_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enterprise access required"
+        )
+    if current_user.enterprise_role != "enterprise_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enterprise admin access required"
+        )
+    return current_user
+
+
+def require_branch_manager(
+    current_user: models.User = Depends(get_current_user)
+) -> models.User:
+    """Dependency to ensure user is a branch manager or higher"""
+    if not current_user.enterprise_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enterprise access required"
+        )
+    if current_user.enterprise_role not in ["branch_manager", "enterprise_admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Branch manager access required"
+        )
+    return current_user
+
+
+def require_technician(
+    current_user: models.User = Depends(get_current_user)
+) -> models.User:
+    """Dependency to ensure user is a technician or higher"""
+    if not current_user.enterprise_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enterprise access required"
+        )
+    valid_roles = ["technician", "senior_technician", "branch_manager", "enterprise_admin"]
+    if current_user.enterprise_role not in valid_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Technician access required"
+        )
+    return current_user
+
+
+def require_senior_technician(
+    current_user: models.User = Depends(get_current_user)
+) -> models.User:
+    """Dependency to ensure user is a senior technician or higher"""
+    if not current_user.enterprise_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Enterprise access required"
+        )
+    valid_roles = ["senior_technician", "branch_manager", "enterprise_admin"]
+    if current_user.enterprise_role not in valid_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Senior technician access required"
+        )
+    return current_user

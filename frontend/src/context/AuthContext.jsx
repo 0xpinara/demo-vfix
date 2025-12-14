@@ -37,12 +37,12 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password })
-      const { access_token, role } = response.data
+      const { access_token, role, enterprise_id, enterprise_role } = response.data
       setToken(access_token)
       localStorage.setItem('token', access_token)
       api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
       await fetchUser()
-      return { success: true, role }
+      return { success: true, role, enterprise_id, enterprise_role }
     } catch (error) {
       return {
         success: false,

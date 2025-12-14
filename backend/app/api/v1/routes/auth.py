@@ -70,7 +70,9 @@ async def login(request: Request, credentials: schemas.UserLogin, db: Session = 
         return {
             "access_token": access_token,
             "token_type": "bearer",
-            "role": user.role
+            "role": user.role,
+            "enterprise_id": str(user.enterprise_id) if user.enterprise_id else None,
+            "enterprise_role": user.enterprise_role
         }
     except ValueError as e:
         error_message = str(e)

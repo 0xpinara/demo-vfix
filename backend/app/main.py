@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from app.database import get_db, engine, Base
 from app.core.security import get_rate_limit_handler
 from app.core.logger import setup_logging
-from app.api.v1.routes import chat, admin, appointments, auth, users, system
+from app.api.v1.routes import chat, admin, appointments, auth, users, system, enterprise
 
 load_dotenv()
 
@@ -71,9 +71,11 @@ app.include_router(appointments.router, prefix="/api/appointments", tags=["Appoi
 # Admin dashboard endpoints
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
-# TODO: Appointments, Technicians endpoints will be added by team
-# from app.api.v1.routes import appointments, technicians
-# app.include_router(appointments.router, prefix="/api/v1/appointments", tags=["Appointments"])
+# Enterprise endpoints
+app.include_router(enterprise.router, prefix="/api/enterprise", tags=["Enterprise"])
+
+# TODO: Technicians endpoints will be added by team
+# from app.api.v1.routes import technicians
 # app.include_router(technicians.router, prefix="/api/v1/technicians", tags=["Technicians"])
 
 if __name__ == "__main__":

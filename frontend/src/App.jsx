@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Landing from './pages/landing/Landing'
 import Login from './pages/login/Login'
 import Register from './pages/register/Register'
+import EnterpriseRegister from './pages/register/EnterpriseRegister'
 import Dashboard from './pages/Dashboard'
 import ChatPage from './pages/ChatPage'
 import AppointmentsPage from './pages/AppointmentsPage'
@@ -59,6 +60,7 @@ function AppRoutes() {
       <Route path="/welcome" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/register/enterprise" element={<EnterpriseRegister />} />
       
       {/* Protected User Routes */}
       <Route

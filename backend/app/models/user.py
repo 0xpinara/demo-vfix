@@ -73,6 +73,12 @@ class User(Base):
     referral_source = Column(String(100), nullable=True)
     age_verified = Column(Boolean, default=False)
     
+    # Enterprise fields
+    enterprise_id = Column(GUID(), ForeignKey("enterprises.id", ondelete="SET NULL"), nullable=True, index=True)
+    branch_id = Column(GUID(), ForeignKey("branches.id", ondelete="SET NULL"), nullable=True, index=True)
+    enterprise_role = Column(String(50), nullable=True, index=True)  # technician, senior_technician, branch_manager, enterprise_admin
+    employee_id = Column(String(100), nullable=True)  # Internal employee ID
+    
     # Use JSON type (SQLAlchemy automatically uses JSONB on PostgreSQL)
     available_tools = Column(JSON, default=list)
     owned_products = Column(JSON, default=list)
@@ -88,10 +94,16 @@ class User(Base):
     # OAuth fields
     google_id = Column(String(255), unique=True, nullable=True, index=True)
     
+    # Relationships
+    enterprise = relationship("Enterprise", back_populates="employees", foreign_keys=[enterprise_id])
+    branch = relationship("Branch", back_populates="employees", foreign_keys=[branch_id])
+    
     # Composite indexes for common query patterns
     __table_args__ = (
         Index('ix_users_active_created', 'is_active', 'created_at'),
         Index('ix_users_role_active', 'role', 'is_active'),
+        Index('ix_users_enterprise_branch', 'enterprise_id', 'branch_id'),
+        Index('ix_users_enterprise_role', 'enterprise_id', 'enterprise_role'),
     )
     
     # Encrypted field properties
