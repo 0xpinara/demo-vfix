@@ -5,6 +5,7 @@ import AuthLayout from '../../components/auth/AuthLayout'
 import AuthButton from '../../components/auth/AuthButton'
 import ErrorMessage from '../../components/auth/ErrorMessage'
 import StepIndicator from '../../components/register/StepIndicator'
+import { useAuth } from '../../context/AuthContext'
 import api from '../../services/api'
 import { FiMail, FiUser, FiLock, FiEye, FiEyeOff, FiPhone, FiBriefcase, FiHome } from 'react-icons/fi'
 import './Register.css'
@@ -44,6 +45,7 @@ function EnterpriseRegister() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
+  const { setTokenAndFetchUser } = useAuth()
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -118,9 +120,10 @@ function EnterpriseRegister() {
       const response = await api.post('/enterprise/register', formData)
       const { access_token } = response.data
       
-      localStorage.setItem('token', access_token)
-      api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+      // Update AuthContext state and fetch user data
+      await setTokenAndFetchUser(access_token)
       
+      // Navigate after authentication state is updated
       navigate('/chat')
     } catch (error) {
       setErrors({

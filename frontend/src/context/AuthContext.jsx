@@ -78,6 +78,29 @@ export function AuthProvider({ children }) {
     delete api.defaults.headers.common['Authorization']
   }
 
+  const setTokenAndFetchUser = async (newToken) => {
+    setToken(newToken)
+    localStorage.setItem('token', newToken)
+    api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+    setLoading(true)
+    try {
+      const response = await api.get('/users/me')
+      if (response && response.data) {
+        setUser(response.data)
+      }
+    } catch (error) {
+      if (error?.response?.status !== 401) {
+        console.error('Failed to fetch user:', error)
+      }
+      setToken(null)
+      setUser(null)
+      localStorage.removeItem('token')
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const value = {
     user,
     token,
@@ -86,6 +109,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    setTokenAndFetchUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

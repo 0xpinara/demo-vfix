@@ -10,8 +10,39 @@ from app import models
 from app.core.security import get_password_hash
 from datetime import datetime, timedelta
 import uuid
+import unicodedata
+import re
 
 fake = Faker(['tr_TR'])  # Turkish locale for realistic Turkish names
+
+
+def normalize_turkish_chars(text: str) -> str:
+    """
+    Normalize Turkish characters to ASCII equivalents for use in emails/usernames.
+    ç -> c, ğ -> g, ı -> i, ö -> o, ş -> s, ü -> u
+    """
+    # Turkish character mappings
+    turkish_map = {
+        'ç': 'c', 'Ç': 'C',
+        'ğ': 'g', 'Ğ': 'G',
+        'ı': 'i', 'İ': 'I',
+        'ö': 'o', 'Ö': 'O',
+        'ş': 's', 'Ş': 'S',
+        'ü': 'u', 'Ü': 'U'
+    }
+    
+    # Replace Turkish characters
+    for turkish_char, ascii_char in turkish_map.items():
+        text = text.replace(turkish_char, ascii_char)
+    
+    # Remove any remaining non-ASCII characters and normalize
+    text = unicodedata.normalize('NFKD', text)
+    text = text.encode('ascii', 'ignore').decode('ascii')
+    
+    # Remove any special characters except alphanumeric and basic punctuation
+    text = re.sub(r'[^a-zA-Z0-9]', '', text)
+    
+    return text.lower()
 
 
 def create_enterprise_users():
@@ -68,11 +99,12 @@ def create_enterprise_users():
             if company_name in enterprises_map:
                 enterprise = enterprises_map[company_name]
             else:
+                normalized_company_for_email = normalize_turkish_chars(company_name)
                 enterprise = models.Enterprise(
                     id=uuid.uuid4(),
                     name=company_name,
                     registration_number=f"{random.randint(1000000000, 9999999999)}",
-                    contact_email=f"info@{company_name.lower().replace(' ', '')}.com",
+                    contact_email=f"info@{normalized_company_for_email}.com",
                     contact_phone=fake.phone_number(),
                     is_active=True
                 )
@@ -104,8 +136,11 @@ def create_enterprise_users():
             # Create user
             first_name = fake.first_name()
             last_name = fake.last_name()
-            username = f"{first_name.lower()}{i+1}"
-            email = f"{username}@{company_name.lower().replace(' ', '')}.com"
+            # Normalize Turkish characters for username and email
+            normalized_first = normalize_turkish_chars(first_name)
+            normalized_company = normalize_turkish_chars(company_name)
+            username = f"{normalized_first}{i+1}"
+            email = f"{username}@{normalized_company}.com"
             
             role = roles_pool[i]
             
