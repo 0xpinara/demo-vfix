@@ -49,9 +49,10 @@ function Login() {
 
       // Redirect based on user role
       if (result.role === 'admin') {
+        // System admins go to admin panel
         navigate('/admin')
       } else {
-        // Normal users go straight to chatbot
+        // Regular users go to chatbot
         navigate('/chat')
       }
     } else {

@@ -111,6 +111,22 @@ function Landing() {
           </Link>
         </div>
 
+        <div className="landing-divider">
+          <span>veya</span>
+        </div>
+
+        <div className="landing-enterprise">
+          <Link to="/register/enterprise">
+            <motion.button
+              className="landing-btn landing-btn-enterprise"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Kurumsal Kayıt
+            </motion.button>
+          </Link>
+        </div>
+
         <div className="landing-footer">
           <span className="landing-location">• {location}</span>
           <span className="landing-datetime">{dateTime}</span>

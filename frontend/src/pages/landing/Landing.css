@@ -150,6 +150,73 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
 }
 
+.landing-divider {
+  margin: 1.5rem 0 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.landing-divider::before,
+.landing-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.landing-divider::before {
+  left: 0;
+}
+
+.landing-divider::after {
+  right: 0;
+}
+
+.landing-divider span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.landing-enterprise {
+  margin-top: 0;
+}
+
+.landing-btn-enterprise {
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(220, 38, 38, 0.5);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-btn-enterprise::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(220, 38, 38, 0.3),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+  animation-delay: 3s;
+}
+
+.landing-btn-enterprise:hover {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: #dc2626;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
 @keyframes shimmer {
   0% {
     left: -100%;
@@ -177,15 +244,6 @@
 .landing-datetime {
   font-weight: 500;
   letter-spacing: 0.5px;
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
 }
 
 @media (max-width: 640px) {

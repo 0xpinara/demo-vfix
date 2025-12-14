@@ -2,9 +2,11 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Landing from './pages/landing/Landing'
 import Login from './pages/login/Login'
 import Register from './pages/register/Register'
+import EnterpriseRegister from './pages/register/EnterpriseRegister'
 import Dashboard from './pages/Dashboard'
 import ChatPage from './pages/ChatPage'
 import AppointmentsPage from './pages/AppointmentsPage'
+import NotFound from './pages/NotFound'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { AppointmentProvider } from './context/AppointmentContext'
 
@@ -58,6 +60,7 @@ function AppRoutes() {
       <Route path="/welcome" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/register/enterprise" element={<EnterpriseRegister />} />
       
       {/* Protected User Routes */}
       <Route
@@ -111,8 +114,6 @@ function AppRoutes() {
         }
       />
       
-      {/* Default redirect */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
       <Route
         path="/appointments"
         element={
@@ -121,7 +122,9 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      
+      {/* 404 Page - Catch all unmatched routes */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }

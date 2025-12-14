@@ -70,6 +70,11 @@ class UserResponse(BaseModel):
     skill_level: int
     available_tools: List[str]
     owned_products: List[OwnedProduct]
+    # Enterprise fields
+    enterprise_id: Optional[UUID] = None
+    branch_id: Optional[UUID] = None
+    enterprise_role: Optional[str] = None
+    employee_id: Optional[str] = None
 
     model_config = {"from_attributes": True}
 

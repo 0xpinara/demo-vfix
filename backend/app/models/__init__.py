@@ -3,6 +3,7 @@ from app.models.user import User, Product, PasswordResetToken, UserSession, Logi
 from app.models.chat_session import ChatFeedback
 from app.models.admin import ChatSession, TechnicianFeedback, ImprovementData
 from app.models.appointment import Appointment, AppointmentStatus
+from app.models.enterprise import Enterprise, Branch
 
 __all__ = [
     "Base",
@@ -17,4 +18,6 @@ __all__ = [
     "ImprovementData",
     "Appointment",
     "AppointmentStatus",
+    "Enterprise",
+    "Branch",
 ]

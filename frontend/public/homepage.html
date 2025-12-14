@@ -211,21 +211,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px 16px 0 0;
         }
 
         .settings-title {
             font-family: var(--font-mono);
             font-size: 12px;
-            color: var(--text-subtle);
+            color: #000;
             text-transform: uppercase;
             letter-spacing: 1.5px;
+            font-style: italic;
+            font-weight: 500;
         }
 
         .settings-close {
             width: 28px;
             height: 28px;
             background: transparent;
-            border: 1px solid var(--border-subtle);
+            border: 1px solid rgba(0, 0, 0, 0.2);
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -242,7 +246,7 @@
         .settings-close svg {
             width: 14px;
             height: 14px;
-            stroke: var(--text-subtle);
+            stroke: #333;
         }
 
         .settings-close:hover svg {
@@ -469,7 +473,7 @@
 
         .btn-secondary {
             background: transparent;
-            color: var(--text-primary);
+            color: #000000;
             padding: 12px 24px;
             border-radius: 8px;
             font-family: var(--font-mono);
@@ -478,13 +482,13 @@
             text-decoration: none;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            border: 1px solid var(--border-main);
+            border: 1px solid #000000;
             transition: all 0.3s ease;
         }
 
         .btn-secondary:hover {
-            border-color: var(--accent-red);
-            background: rgba(229, 57, 53, 0.1);
+            border-color: #000000;
+            background: rgba(0, 0, 0, 0.1);
         }
 
         @media (max-width: 768px) {
@@ -579,21 +583,22 @@
             font-family: var(--font-display);
             font-size: clamp(36px, 5vw, 56px);
             font-weight: 600;
-            color: var(--text-primary);
+            color: #000000;
             line-height: 1.1;
             letter-spacing: -2px;
             margin-bottom: 24px;
         }
 
         .hero-title .highlight {
-            background: linear-gradient(135deg, var(--accent-red-light), var(--accent-red));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #000000;
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: #000000;
         }
 
         .hero-description {
             font-size: 18px;
-            color: var(--text-secondary);
+            color: #000000;
             max-width: 480px;
             margin-bottom: 36px;
             line-height: 1.7;
@@ -629,13 +634,13 @@
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            color: var(--text-subtle);
+            color: #000000;
         }
 
         .trust-item svg {
             width: 16px;
             height: 16px;
-            stroke: var(--accent-green);
+            stroke: #000000;
         }
 
         /* Terminal Window */
@@ -1562,6 +1567,33 @@
             border-right: 1px solid var(--border-main);
         }
 
+        .ascii-content-section .text-side .content-block {
+            width: 100%;
+            padding: var(--content-padding);
+        }
+
+        .ascii-content-section .text-side .terminal-window {
+            width: 100%;
+            max-width: 100%;
+            min-height: 450px;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        .ascii-content-section .text-side .terminal-body {
+            padding: 36px;
+            font-size: 15px;
+            min-height: 380px;
+        }
+
+        .ascii-content-section .text-side .terminal-header {
+            padding: 16px 20px;
+        }
+
+        .ascii-content-section .text-side .terminal-title {
+            font-size: 12px;
+        }
+
         .ascii-content-section.reverse .text-side {
             border-right: none;
             border-left: 1px solid var(--border-main);
@@ -1626,23 +1658,23 @@
                 <div class="setting-item">
                     <div class="setting-label">
                         <label for="cellSize">Cell Size</label>
-                        <span id="cellSizeValue">10</span>
+                        <span id="cellSizeValue">17</span>
                     </div>
-                    <input type="range" id="cellSize" class="setting-slider" min="6" max="24" value="10">
+                    <input type="range" id="cellSize" class="setting-slider" min="4" max="36" value="17">
                 </div>
                 <div class="setting-item">
                     <div class="setting-label">
                         <label for="textOpacity">Text Opacity</label>
-                        <span id="textOpacityValue">100</span>
+                        <span id="textOpacityValue">54</span>
                     </div>
-                    <input type="range" id="textOpacity" class="setting-slider" min="10" max="100" value="100">
+                    <input type="range" id="textOpacity" class="setting-slider" min="0" max="100" value="54">
                 </div>
                 <div class="setting-item">
                     <div class="setting-label">
-                        <label for="colorIntensity">Color Intensity</label>
-                        <span id="colorIntensityValue">60</span>
+                        <label for="tileOpacity">Tile Opacity</label>
+                        <span id="tileOpacityValue">100</span>
                     </div>
-                    <input type="range" id="colorIntensity" class="setting-slider" min="0" max="100" value="60">
+                    <input type="range" id="tileOpacity" class="setting-slider" min="10" max="100" value="100">
                 </div>
             </div>
         </div>
@@ -1685,59 +1717,9 @@
                         <h1 class="hero-title">
                             Beyaz Eşya Tamiri için <span class="highlight">AI Asistanınız</span>
                         </h1>
-                        <p class="hero-description">
-                            Fotoğraf çekin, sorunu açıklayın ve anında teşhis rehberliği alın. 
-                            V-Fix, ev aletlerinizi tamir etmenize yardımcı olmak için gelişmiş görüntü-dil modelleri kullanır.
-                        </p>
+
                         <div class="hero-actions">
                             <a href="/welcome" class="btn-primary">V-Fix'i Ücretsiz Dene</a>
-                            <a href="#how-it-works" class="btn-secondary">Nasıl Çalışır?</a>
-                        </div>
-                        <div class="hero-trust">
-                            <div class="trust-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                                <span>Ücretsiz teşhis</span>
-                            </div>
-                            <div class="trust-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                                <span>7/24 destek</span>
-                            </div>
-                            <div class="trust-item">
-                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                                <span>%95 doğruluk</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hero-terminal">
-                        <div class="terminal-window">
-                            <div class="terminal-header">
-                                <span class="terminal-dot red"></span>
-                                <span class="terminal-dot yellow"></span>
-                                <span class="terminal-dot green"></span>
-                                <span class="terminal-title">v-fix — teşhis oturumu</span>
-                            </div>
-                            <div class="terminal-body">
-                                <div class="terminal-line">
-                                    <span class="terminal-prompt">$</span>
-                                    <span class="terminal-command"> vfix upload camasir_makinesi.jpg</span>
-                                </div>
-                                <div class="terminal-line terminal-response">
-                                    → Görüntü VLM ile analiz ediliyor...
-                                </div>
-                                <div class="terminal-line terminal-response">
-                                    → Model: Samsung WW80T554DAW
-                                </div>
-                                <div class="terminal-line terminal-response">
-                                    → Hata kodu 4E (su temini sorunu)
-                                </div>
-                                <div class="terminal-line terminal-success">
-                                    ✓ 3 çözüm önerisi hazır
-                                </div>
-                                <div class="terminal-line">
-                                    <span class="terminal-prompt">$</span>
-                                    <span class="terminal-cursor"></span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1769,19 +1751,36 @@
             <div class="ascii-content-section">
                 <div class="text-side">
                     <div class="content-block">
-                        <span class="section-label">Teknoloji</span>
-                        <h2 class="section-title">Yapay Zeka ile Görsel Teşhis</h2>
-                        <p class="section-description">
-                            En güçlü yapay zeka modelleri yazılı kelimeler üzerinde eğitilir. Ancak gerçek zeka, dil aşar. V-Fix, görsel-dil modellerini kullanarak ev aletlerinizin sorunlarını anında tespit eder.
-                        </p>
-                        <div class="quote-block">
-                            <p class="quote-text">
-                                Gerçek anlamda akıllı makineler, kelimelerden dünyalara geçmeli. Algılama, tahmin etme ve doğaçlama kapasitesi edinmeliler.
-                            </p>
+                        <div class="terminal-window">
+                            <div class="terminal-header">
+                                <span class="terminal-dot red"></span>
+                                <span class="terminal-dot yellow"></span>
+                                <span class="terminal-dot green"></span>
+                                <span class="terminal-title">v-fix — teşhis oturumu</span>
+                            </div>
+                            <div class="terminal-body">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="terminal-command"> vfix upload camasir_makinesi.jpg</span>
+                                </div>
+                                <div class="terminal-line terminal-response">
+                                    → Görüntü VLM ile analiz ediliyor...
+                                </div>
+                                <div class="terminal-line terminal-response">
+                                    → Model: Samsung WW80T554DAW
+                                </div>
+                                <div class="terminal-line terminal-response">
+                                    → Hata kodu 4E (su temini sorunu)
+                                </div>
+                                <div class="terminal-line terminal-success">
+                                    ✓ 3 çözüm önerisi hazır
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">$</span>
+                                    <span class="terminal-cursor"></span>
+                                </div>
+                            </div>
                         </div>
-                        <p class="section-description">
-                            Fotoğrafınızı yükleyin, VLM teknolojimiz marka, model ve sorunu otomatik olarak tespit etsin.
-                        </p>
                     </div>
                 </div>
                 <div class="ascii-side">
@@ -2317,12 +2316,16 @@
     </div>
 
     <!-- ============================================
-         WebGL ASCII VIDEO RENDERER
+         WebGL ASCII VIDEO RENDERER v2.0
+         With brightness fix, text/tile opacity, cursor light
          ============================================ -->
     <script>
     /**
-     * WebGL ASCII Video Renderer
-     * Converts video frames to ASCII art in real-time using GPU shaders
+     * WebGL ASCII Video Renderer v2.0
+     * - Brighter video rendering
+     * - Text Opacity: transitions ASCII to pixels
+     * - Tile Opacity: controls overall brightness
+     * - Cursor light ball effect
      */
     class ASCIIVideoRenderer {
         constructor(container, videoElement, config = {}) {
@@ -2331,16 +2334,24 @@
             this.canvas = container.querySelector('.ascii-canvas');
             this.id = container.dataset.id || 'default';
             
-            // Configuration
+            // Configuration with better defaults
             this.config = {
-                cellSize: config.cellSize || 10,
-                textOpacity: config.textOpacity || 1.0,
-                colorIntensity: config.colorIntensity || 0.6,
-                charset: ' .,:-=+*#%@',
+                cellSize: config.cellSize || 17,
+                textOpacity: config.textOpacity !== undefined ? config.textOpacity : 0.54, // 1 = full ASCII, 0 = full pixels
+                tileOpacity: config.tileOpacity !== undefined ? config.tileOpacity : 1.0, // overall brightness
+                charset: ' .:-=+*#%@',
                 fontFamily: 'JetBrains Mono, monospace',
                 baseColor: { r: 229, g: 57, b: 53 }, // Red accent
+                lightRadius: 0.35, // Cursor light radius (relative to canvas) - larger for softer effect
+                lightIntensity: 0.8, // How much the cursor light brightens
+                lightSoftness: 2.0, // Softness of light falloff
                 ...config
             };
+            
+            // Mouse position (normalized 0-1, with smoothing)
+            this.mouse = { x: -1, y: -1 };
+            this.targetMouse = { x: -1, y: -1 };
+            this.isMouseInCanvas = false;
             
             this.gl = null;
             this.program = null;
@@ -2362,8 +2373,7 @@
             });
             
             if (!this.gl) {
-                console.error('WebGL not supported, falling back to 2D');
-                this.initFallback2D();
+                console.error('WebGL not supported');
                 return;
             }
             
@@ -2376,6 +2386,9 @@
             
             // Setup geometry
             this.setupGeometry();
+            
+            // Setup mouse tracking
+            this.setupMouseTracking();
             
             // Setup resize observer
             this.setupResizeObserver();
@@ -2410,7 +2423,7 @@
                 }
             `;
             
-            // Fragment shader - ASCII rendering
+            // Fragment shader - Enhanced ASCII rendering with cursor light (General Intuition style)
             const fsSource = `
                 precision mediump float;
                 
@@ -2418,10 +2431,15 @@
                 uniform sampler2D u_glyphs;
                 uniform vec2 u_resolution;
                 uniform float u_cellSize;
-                uniform float u_textOpacity;
-                uniform float u_colorIntensity;
+                uniform float u_textOpacity;  // 1 = ASCII, 0 = pixels
+                uniform float u_tileOpacity;  // overall brightness
                 uniform float u_glyphCount;
                 uniform vec3 u_baseColor;
+                uniform vec2 u_mouse;         // normalized mouse position
+                uniform float u_lightRadius;
+                uniform float u_lightIntensity;
+                uniform float u_lightSoftness;
+                uniform float u_mouseInCanvas;
                 
                 varying vec2 v_texCoord;
                 
@@ -2431,11 +2449,14 @@
                     vec2 cellPos = floor(v_texCoord * cellCount);
                     vec2 cellUV = fract(v_texCoord * cellCount);
                     
-                    // Sample video at cell center
+                    // Sample video at cell center for ASCII
                     vec2 sampleUV = (cellPos + 0.5) / cellCount;
                     vec4 videoColor = texture2D(u_video, sampleUV);
                     
-                    // Calculate luminance
+                    // Sample video at exact pixel for pixel mode
+                    vec4 pixelColor = texture2D(u_video, v_texCoord);
+                    
+                    // Calculate luminance (brightness)
                     float luminance = dot(videoColor.rgb, vec3(0.299, 0.587, 0.114));
                     
                     // Map luminance to glyph index
@@ -2446,16 +2467,61 @@
                     float glyphV = cellUV.y;
                     vec4 glyphColor = texture2D(u_glyphs, vec2(glyphU, glyphV));
                     
-                    // Mix video color with base color based on intensity
-                    vec3 tintColor = mix(u_baseColor / 255.0, videoColor.rgb, u_colorIntensity);
+                    // === CURSOR LIGHT EFFECT (General Intuition style) ===
+                    float lightEffect = 0.0;
+                    if (u_mouseInCanvas > 0.5) {
+                        // Calculate distance from cursor
+                        vec2 aspectCorrection = vec2(u_resolution.x / u_resolution.y, 1.0);
+                        vec2 correctedUV = v_texCoord * aspectCorrection;
+                        vec2 correctedMouse = u_mouse * aspectCorrection;
+                        float dist = distance(correctedUV, correctedMouse);
+                        
+                        // Soft gaussian-like falloff
+                        float normalizedDist = dist / (u_lightRadius * aspectCorrection.x);
+                        lightEffect = exp(-normalizedDist * normalizedDist * u_lightSoftness) * u_lightIntensity;
+                        
+                        // Additional soft edge
+                        lightEffect *= smoothstep(1.2, 0.0, normalizedDist);
+                    }
                     
-                    // Apply glyph as alpha mask
-                    float alpha = glyphColor.r * u_textOpacity;
+                    // === ASCII MODE ===
+                    // Brighter base color mixing - use more video color
+                    vec3 asciiColor = mix(
+                        u_baseColor / 255.0, 
+                        videoColor.rgb * 1.5, // Boost video color
+                        0.7  // More video color influence
+                    );
                     
                     // Brighten based on luminance
-                    vec3 finalColor = tintColor * (0.5 + luminance * 0.8);
+                    asciiColor = asciiColor * (0.8 + luminance * 1.2);
                     
-                    gl_FragColor = vec4(finalColor, alpha);
+                    // Apply glyph mask
+                    float asciiAlpha = glyphColor.r;
+                    
+                    // === PIXEL MODE ===
+                    vec3 pxColor = pixelColor.rgb * 1.3; // Boost pixel brightness
+                    float pxAlpha = 1.0;
+                    
+                    // === BLEND BASED ON TEXT OPACITY ===
+                    vec3 finalColor = mix(pxColor, asciiColor, u_textOpacity);
+                    float finalAlpha = mix(pxAlpha, asciiAlpha, u_textOpacity);
+                    
+                    // === APPLY CURSOR LIGHT ===
+                    // Add white/bright light effect (additive blending)
+                    vec3 lightColor = vec3(1.0, 0.98, 0.95); // Slightly warm white
+                    finalColor = finalColor + lightColor * lightEffect * finalAlpha;
+                    
+                    // Also brighten the alpha slightly in lit areas for ASCII mode
+                    finalAlpha = finalAlpha + lightEffect * 0.3 * (1.0 - finalAlpha);
+                    
+                    // Apply tile opacity (overall brightness)
+                    finalColor *= u_tileOpacity;
+                    finalAlpha *= u_tileOpacity;
+                    
+                    // Clamp to prevent overbrightening
+                    finalColor = clamp(finalColor, vec3(0.0), vec3(1.0));
+                    
+                    gl_FragColor = vec4(finalColor, finalAlpha);
                 }
             `;
             
@@ -2483,9 +2549,14 @@
                 resolution: gl.getUniformLocation(this.program, 'u_resolution'),
                 cellSize: gl.getUniformLocation(this.program, 'u_cellSize'),
                 textOpacity: gl.getUniformLocation(this.program, 'u_textOpacity'),
-                colorIntensity: gl.getUniformLocation(this.program, 'u_colorIntensity'),
+                tileOpacity: gl.getUniformLocation(this.program, 'u_tileOpacity'),
                 glyphCount: gl.getUniformLocation(this.program, 'u_glyphCount'),
-                baseColor: gl.getUniformLocation(this.program, 'u_baseColor')
+                baseColor: gl.getUniformLocation(this.program, 'u_baseColor'),
+                mouse: gl.getUniformLocation(this.program, 'u_mouse'),
+                lightRadius: gl.getUniformLocation(this.program, 'u_lightRadius'),
+                lightIntensity: gl.getUniformLocation(this.program, 'u_lightIntensity'),
+                lightSoftness: gl.getUniformLocation(this.program, 'u_lightSoftness'),
+                mouseInCanvas: gl.getUniformLocation(this.program, 'u_mouseInCanvas')
             };
         }
         
@@ -2507,21 +2578,18 @@
         createGlyphTexture() {
             const gl = this.gl;
             const charset = this.config.charset;
-            const cellSize = 64; // High resolution for glyph texture
+            const cellSize = 64;
             
-            // Create canvas for glyph rendering
             const glyphCanvas = document.createElement('canvas');
             glyphCanvas.width = cellSize * charset.length;
             glyphCanvas.height = cellSize;
             const ctx = glyphCanvas.getContext('2d');
             
-            // Clear with black
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, glyphCanvas.width, glyphCanvas.height);
             
-            // Draw each character
             ctx.fillStyle = '#fff';
-            ctx.font = `${cellSize * 0.8}px ${this.config.fontFamily}`;
+            ctx.font = `bold ${cellSize * 0.85}px ${this.config.fontFamily}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
@@ -2531,7 +2599,6 @@
                 ctx.fillText(charset[i], x, y);
             }
             
-            // Create WebGL texture
             this.glyphTexture = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, this.glyphTexture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, glyphCanvas);
@@ -2546,10 +2613,7 @@
             
             this.videoTexture = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, this.videoTexture);
-            
-            // Initialize with placeholder
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 255]));
-            
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -2559,30 +2623,42 @@
         setupGeometry() {
             const gl = this.gl;
             
-            // Fullscreen quad
             const positions = new Float32Array([
-                -1, -1,
-                 1, -1,
-                -1,  1,
-                 1,  1
+                -1, -1,  1, -1,  -1, 1,  1, 1
             ]);
             
             const texCoords = new Float32Array([
-                0, 1,
-                1, 1,
-                0, 0,
-                1, 0
+                0, 1,  1, 1,  0, 0,  1, 0
             ]);
             
-            // Position buffer
             this.positionBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
             
-            // TexCoord buffer
             this.texCoordBuffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
             gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+        }
+        
+        setupMouseTracking() {
+            // Track mouse position relative to this canvas
+            this.canvas.addEventListener('mousemove', (e) => {
+                const rect = this.canvas.getBoundingClientRect();
+                this.targetMouse.x = (e.clientX - rect.left) / rect.width;
+                this.targetMouse.y = 1.0 - (e.clientY - rect.top) / rect.height; // Flip Y for WebGL
+                this.isMouseInCanvas = true;
+            });
+            
+            this.canvas.addEventListener('mouseenter', () => {
+                this.isMouseInCanvas = true;
+            });
+            
+            this.canvas.addEventListener('mouseleave', () => {
+                this.isMouseInCanvas = false;
+                // Smoothly move light off-screen
+                this.targetMouse.x = -1;
+                this.targetMouse.y = -1;
+            });
         }
         
         setupResizeObserver() {
@@ -2659,8 +2735,13 @@
             
             const gl = this.gl;
             
-            // Clear
-            gl.clearColor(0.04, 0.04, 0.04, 1);
+            // Smooth mouse interpolation (more responsive)
+            const smoothing = 0.2;
+            this.mouse.x += (this.targetMouse.x - this.mouse.x) * smoothing;
+            this.mouse.y += (this.targetMouse.y - this.mouse.y) * smoothing;
+            
+            // Clear with dark background
+            gl.clearColor(0.04, 0.04, 0.043, 1);
             gl.clear(gl.COLOR_BUFFER_BIT);
             
             // Update video texture
@@ -2669,19 +2750,16 @@
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.video);
             }
             
-            // Use program
             gl.useProgram(this.program);
             
-            // Enable blending
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             
-            // Bind position buffer
+            // Bind buffers
             gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
             gl.enableVertexAttribArray(this.locations.position);
             gl.vertexAttribPointer(this.locations.position, 2, gl.FLOAT, false, 0, 0);
             
-            // Bind texCoord buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
             gl.enableVertexAttribArray(this.locations.texCoord);
             gl.vertexAttribPointer(this.locations.texCoord, 2, gl.FLOAT, false, 0, 0);
@@ -2699,7 +2777,7 @@
             gl.uniform2f(this.locations.resolution, this.canvas.width, this.canvas.height);
             gl.uniform1f(this.locations.cellSize, this.config.cellSize * window.devicePixelRatio);
             gl.uniform1f(this.locations.textOpacity, this.config.textOpacity);
-            gl.uniform1f(this.locations.colorIntensity, this.config.colorIntensity);
+            gl.uniform1f(this.locations.tileOpacity, this.config.tileOpacity);
             gl.uniform1f(this.locations.glyphCount, this.config.charset.length);
             gl.uniform3f(this.locations.baseColor, 
                 this.config.baseColor.r, 
@@ -2707,30 +2785,19 @@
                 this.config.baseColor.b
             );
             
+            // Mouse/light uniforms
+            gl.uniform2f(this.locations.mouse, this.mouse.x, this.mouse.y);
+            gl.uniform1f(this.locations.lightRadius, this.config.lightRadius);
+            gl.uniform1f(this.locations.lightIntensity, this.config.lightIntensity);
+            gl.uniform1f(this.locations.lightSoftness, this.config.lightSoftness);
+            gl.uniform1f(this.locations.mouseInCanvas, this.isMouseInCanvas ? 1.0 : 0.0);
+            
             // Draw
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
         
         updateConfig(newConfig) {
             Object.assign(this.config, newConfig);
-        }
-        
-        // Fallback 2D Canvas renderer
-        initFallback2D() {
-            const ctx = this.canvas.getContext('2d');
-            this.ctx = ctx;
-            this.isFallback = true;
-            
-            this.setupResizeObserver();
-            this.setupIntersectionObserver();
-            
-            this.waitForVideo().then(() => {
-                this.isInitialized = true;
-                this.resize();
-                if (this.isVisible) {
-                    this.startRenderLoop();
-                }
-            });
         }
         
         destroy() {
@@ -2756,20 +2823,18 @@
     
     /**
      * ASCII Renderer Manager
-     * Manages multiple ASCII renderers and provides global configuration
      */
     class ASCIIRendererManager {
         constructor() {
             this.renderers = [];
             this.globalConfig = {
-                cellSize: 10,
-                textOpacity: 1.0,
-                colorIntensity: 0.6
+                cellSize: 17,
+                textOpacity: 0.54,
+                tileOpacity: 1.0
             };
         }
         
         init() {
-            // Find all ASCII containers and initialize renderers
             const containers = document.querySelectorAll('.ascii-container[data-video]');
             
             containers.forEach(container => {
@@ -2799,14 +2864,11 @@
     
     // Initialize when DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
-        // Create global manager
         const manager = new ASCIIRendererManager();
         window.ASCIIManager = manager;
-        
-        // Initialize renderers
         manager.init();
         
-        // Settings Panel functionality
+        // Settings Panel
         const settingsToggle = document.getElementById('settings-toggle');
         const settingsPanel = document.getElementById('settings-panel');
         const settingsClose = document.getElementById('settings-close');
@@ -2821,7 +2883,6 @@
             settingsToggle.classList.remove('active');
         });
         
-        // Close panel when clicking outside
         document.addEventListener('click', (e) => {
             if (!settingsPanel.contains(e.target) && !settingsToggle.contains(e.target)) {
                 settingsPanel.classList.remove('visible');
@@ -2834,8 +2895,8 @@
         const cellSizeValue = document.getElementById('cellSizeValue');
         const textOpacitySlider = document.getElementById('textOpacity');
         const textOpacityValue = document.getElementById('textOpacityValue');
-        const colorIntensitySlider = document.getElementById('colorIntensity');
-        const colorIntensityValue = document.getElementById('colorIntensityValue');
+        const tileOpacitySlider = document.getElementById('tileOpacity');
+        const tileOpacityValue = document.getElementById('tileOpacityValue');
         
         cellSizeSlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
@@ -2843,16 +2904,18 @@
             manager.updateGlobalConfig('cellSize', value);
         });
         
+        // Text Opacity: 100 = full ASCII, 0 = full pixels
         textOpacitySlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
             textOpacityValue.textContent = value;
             manager.updateGlobalConfig('textOpacity', value / 100);
         });
         
-        colorIntensitySlider.addEventListener('input', (e) => {
+        // Tile Opacity: controls overall brightness
+        tileOpacitySlider.addEventListener('input', (e) => {
             const value = parseInt(e.target.value);
-            colorIntensityValue.textContent = value;
-            manager.updateGlobalConfig('colorIntensity', value / 100);
+            tileOpacityValue.textContent = value;
+            manager.updateGlobalConfig('tileOpacity', value / 100);
         });
         
         // FAQ Accordion
@@ -2860,11 +2923,7 @@
             button.addEventListener('click', () => {
                 const item = button.parentElement;
                 const isActive = item.classList.contains('active');
-                
-                // Close all
                 document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-                
-                // Open clicked if wasn't active
                 if (!isActive) {
                     item.classList.add('active');
                 }
@@ -2882,21 +2941,11 @@
             });
         });
         
-        // Contact form handler
+        // Contact form
         const contactForm = document.getElementById('contactForm');
         if (contactForm) {
             contactForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const formData = new FormData(contactForm);
-                const data = {
-                    name: formData.get('name'),
-                    email: formData.get('email'),
-                    subject: formData.get('subject'),
-                    message: formData.get('message')
-                };
-                
-                // Here you would typically send to your backend API
-                // For now, just show an alert
                 alert('Mesajınız alındı! En kısa sürede size dönüş yapacağız.');
                 contactForm.reset();
             });
