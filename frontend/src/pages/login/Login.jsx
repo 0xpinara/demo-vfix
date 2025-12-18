@@ -51,6 +51,9 @@ function Login() {
       if (result.role === 'admin') {
         // System admins go to admin panel
         navigate('/admin')
+      } else if (result.enterprise_role === 'branch_manager') {
+        // Branch managers go to branch manager dashboard
+        navigate('/branch-manager')
       } else {
         // Regular users go to chatbot
         navigate('/chat')

@@ -1,0 +1,365 @@
+/* Branch Statistics Page Styles */
+.branch-statistics-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-width: 100%;
+  background: #000000;
+}
+
+/* Loading & Error States */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  color: var(--text-muted);
+}
+
+.loading-icon {
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  color: #0891b2;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.retry-btn {
+  padding: 0.75rem 1.5rem;
+  background: #0891b2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.4);
+}
+
+.retry-btn:hover {
+  background: #0e7490;
+  box-shadow: 0 6px 20px rgba(8, 145, 178, 0.6);
+}
+
+/* Sections */
+.stats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+/* Performance Grid */
+.performance-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.performance-card {
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.performance-card:hover {
+  border-color: rgba(8, 145, 178, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.performance-card.main-rating {
+  display: flex;
+  flex-direction: column;
+}
+
+.rating-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rating-header-icon {
+  width: 24px;
+  height: 24px;
+  color: #0891b2;
+}
+
+.rating-header span {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.rating-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.rating-count {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.metric-card {
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  border-color: rgba(8, 145, 178, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Technicians Table */
+.technicians-table-wrapper {
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.technicians-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.technicians-table th,
+.technicians-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.technicians-table th {
+  background: rgba(8, 145, 178, 0.1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.technicians-table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.technicians-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.technicians-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tech-name {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.tech-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+}
+
+.tech-id {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-family: monospace;
+}
+
+.tech-feedback-count {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.tech-rating {
+  min-width: 140px;
+}
+
+.tech-accuracy {
+  min-width: 80px;
+}
+
+.accuracy-badge {
+  display: inline-block;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.accuracy-badge.good {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.accuracy-badge.medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.accuracy-badge.low {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem !important;
+}
+
+/* Quick Stats */
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.quick-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.quick-stat-item:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(8, 145, 178, 0.2);
+}
+
+.quick-stat-icon {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.quick-stat-icon.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.quick-stat-icon.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.quick-stat-icon.primary {
+  background: rgba(8, 145, 178, 0.15);
+  color: #0891b2;
+}
+
+.quick-stat-icon.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.quick-stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.quick-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .performance-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .performance-card.main-rating {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .branch-statistics-page {
+    gap: 1.5rem;
+  }
+  
+  .stats-grid,
+  .performance-grid,
+  .quick-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .performance-card.main-rating {
+    grid-column: span 1;
+  }
+  
+  .technicians-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .technicians-table {
+    min-width: 700px;
+  }
+}
+

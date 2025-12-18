@@ -16,6 +16,12 @@ import UserFeedback from './pages/admin/UserFeedback'
 import TechnicianFeedback from './pages/admin/TechnicianFeedback'
 import ImprovementData from './pages/admin/ImprovementData'
 
+// Branch Manager Pages
+import BranchStatistics from './pages/branch-manager/BranchStatistics'
+import BranchAppointments from './pages/branch-manager/BranchAppointments'
+import BranchVacations from './pages/branch-manager/BranchVacations'
+import BranchFeedback from './pages/branch-manager/BranchFeedback'
+
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
   
@@ -46,6 +52,28 @@ function AdminRoute({ children }) {
   }
   
   if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />
+  }
+  
+  return children
+}
+
+function BranchManagerRoute({ children }) {
+  const { user, loading, isAuthenticated } = useAuth()
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-950">
+        <div className="animate-spin h-8 w-8 border-2 border-cyan-500 border-t-transparent rounded-full"></div>
+      </div>
+    )
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+  
+  if (user?.enterprise_role !== 'branch_manager') {
     return <Navigate to="/dashboard" replace />
   }
   
@@ -120,6 +148,40 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppointmentsPage />
           </ProtectedRoute>
+        }
+      />
+      
+      {/* Branch Manager Routes */}
+      <Route
+        path="/branch-manager"
+        element={
+          <BranchManagerRoute>
+            <BranchStatistics />
+          </BranchManagerRoute>
+        }
+      />
+      <Route
+        path="/branch-manager/appointments"
+        element={
+          <BranchManagerRoute>
+            <BranchAppointments />
+          </BranchManagerRoute>
+        }
+      />
+      <Route
+        path="/branch-manager/vacations"
+        element={
+          <BranchManagerRoute>
+            <BranchVacations />
+          </BranchManagerRoute>
+        }
+      />
+      <Route
+        path="/branch-manager/feedback"
+        element={
+          <BranchManagerRoute>
+            <BranchFeedback />
+          </BranchManagerRoute>
         }
       />
       
