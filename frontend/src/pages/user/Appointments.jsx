@@ -2,17 +2,20 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppointmentViewToggle from '../../components/appointments/AppointmentViewToggle';
 import { useAppointments } from '../../context/AppointmentContext';
+import { useAuth } from '../../context/AuthContext'; // Import useAuth
 import CreateAppointmentModal from '../../components/appointments/CreateAppointmentModal';
 import './Appointments.css';
 
 function UserAppointments() {
-  const { appointments, loading, error, loadAppointments } = useAppointments();
+  const { appointments, technicians, getTechnicians, loading, error, loadAppointments } = useAppointments();
+  const { user: currentUser } = useAuth(); // Get current user
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadAppointments();
-  }, [loadAppointments]);
+    getTechnicians(); // Fetch technicians
+  }, [loadAppointments, getTechnicians]);
 
   const handleGoBack = () => {
     navigate('/dashboard'); // Assuming '/dashboard' is the route for the dashboard page
@@ -39,6 +42,8 @@ function UserAppointments() {
       <CreateAppointmentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        currentUser={currentUser}
+        technicians={technicians} // Pass technicians
       />
     </div>
   );

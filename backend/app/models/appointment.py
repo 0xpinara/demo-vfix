@@ -30,6 +30,7 @@ class Appointment(Base):
     product_brand = Column(String, nullable=False)
     product_model = Column(String, nullable=False)
     product_issue = Column(String, nullable=False)
+    knowledge = Column(String, nullable=True) # To be filled by technician or user
     
     location = Column(String, nullable=False)
     scheduled_for = Column(DateTime(timezone=True), nullable=False)

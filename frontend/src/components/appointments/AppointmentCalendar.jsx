@@ -7,6 +7,13 @@ function AppointmentCalendar({ appointments, userType }) {
   const [value, onChange] = useState(new Date());
   const [selectedDayAppointments, setSelectedDayAppointments] = useState([]);
 
+  const statusTranslations = {
+    scheduled: 'Planlandı',
+    completed: 'Tamamlandı',
+    cancelled: 'İptal Edildi',
+    pending: 'Beklemede',
+  };
+
   // Function to mark dates with appointments
   const tileContent = ({ date, view }) => {
     if (view === 'month') {
@@ -42,15 +49,16 @@ function AppointmentCalendar({ appointments, userType }) {
           value={value}
           tileContent={tileContent}
           className="react-calendar-custom"
+          locale="tr-TR" // Set locale for calendar
         />
       </div>
       <div className="selected-day-appointments">
-        <h3>{selectedDayAppointments.length > 0 ? `Randevular ${value.toLocaleDateString()}` : `Seçilen Gün: ${value.toLocaleDateString()}`}</h3>
+        <h3>{selectedDayAppointments.length > 0 ? `Randevular - ${value.toLocaleDateString('tr-TR')}` : `Seçilen Gün: ${value.toLocaleDateString('tr-TR')}`}</h3>
         {selectedDayAppointments.length > 0 ? (
           <ul>
             {selectedDayAppointments.map(app => (
               <li key={app.id}>
-                {new Date(app.scheduled_for).toLocaleTimeString()} - {app.product_brand} {app.product_model} ({app.status})
+                {new Date(app.scheduled_for).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} - {app.product_brand} {app.product_model} ({statusTranslations[app.status] || app.status})
               </li>
             ))}
           </ul>

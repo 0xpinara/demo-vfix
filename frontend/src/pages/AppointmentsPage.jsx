@@ -12,7 +12,7 @@ function AppointmentsPage() {
 
   return (
     <AppointmentProvider>
-      {user.role === 'technician' ? <TechnicianAppointments /> : <UserAppointments />}
+      {user.enterprise_role !== null ? <TechnicianAppointments /> : <UserAppointments />}
     </AppointmentProvider>
   );
 }

@@ -66,6 +66,15 @@ class UserRepository:
             models.User.created_at.desc()
         ).offset(skip).limit(limit).all()
     
+    def get_by_enterprise_role(self, role: str, skip: int = 0, limit: int = 100) -> List[models.User]:
+        """Get users by enterprise role (uses composite index)"""
+        return self.db.query(models.User).filter(
+            models.User.enterprise_role == role,
+            models.User.is_active == True
+        ).order_by(
+            models.User.created_at.desc()
+        ).offset(skip).limit(limit).all()
+    
     def create(self, user: models.User) -> models.User:
         """Create new user"""
         self.db.add(user)

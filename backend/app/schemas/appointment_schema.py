@@ -17,10 +17,13 @@ class UserInfo(BaseModel):
 # --- Schemas for API Requests (Input) ---
 
 class AppointmentCreate(BaseModel):
-    """Schema for creating a new appointment. Sent by the customer."""
+    """Schema for creating a new appointment. Sent by the customer or technician."""
+    customer_id: Optional[UUID] = Field(None, description="ID of the customer for whom the appointment is created. Required if created by a technician.")
+    technician_id: Optional[UUID] = Field(None, description="ID of the preferred technician. Can be set by the user.")
     product_brand: str = Field(..., description="Brand of the product needing service.")
     product_model: str = Field(..., description="Model of the product.")
     product_issue: str = Field(..., description="Detailed description of the issue.")
+    knowledge: Optional[str] = Field(None, description="Initial notes or knowledge provided by the creator (user or technician).")
     location: str = Field(..., description="Customer's address for the service.")
     scheduled_for: datetime = Field(..., description="Proposed date and time for the appointment.")
 
@@ -33,6 +36,7 @@ class AppointmentUpdate(BaseModel):
     scheduled_for: Optional[datetime] = Field(None, description="New date and time for rescheduling.")
     status: Optional[AppointmentStatus] = Field(None, description="Updated status of the appointment (e.g., 'completed', 'cancelled').")
     location: Optional[str] = Field(None, description="Updated location for the service.")
+    knowledge: Optional[str] = Field(None, description="Updated notes or knowledge about the appointment.")
 
 
 class AppointmentStatusUpdate(BaseModel):
@@ -64,6 +68,7 @@ class AppointmentResponse(BaseModel):
     product_brand: str
     product_model: str
     product_issue: str
+    knowledge: Optional[str] = None
     location: Optional[str] = None
     customer: Optional[UserInfo] = None
     technician: Optional[UserInfo] = None

@@ -16,6 +16,8 @@ export const useAppointments = () => {
 // 3. Create the Provider component
 export function AppointmentProvider({ children }) {
   const [appointments, setAppointments] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [technicians, setTechnicians] = useState([]); // State for technicians
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -23,11 +25,9 @@ export function AppointmentProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      // Use the central API service directly, consistent with AuthContext
       const response = await api.get(`/appointments/`);
       setAppointments(response.data);
     } catch (err) {
-      // Better error handling to display backend messages
       const errorMessage = err.response?.data?.detail || err.message;
       setError(errorMessage);
       console.error(`Failed to fetch appointments:`, err);
@@ -36,12 +36,45 @@ export function AppointmentProvider({ children }) {
     }
   }, []);
 
+  const getUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/users/');
+      setUsers(response.data);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred while fetching users.';
+      setError(errorMessage);
+      console.error('Failed to fetch users:', err);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const getTechnicians = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/technicians/');
+      setTechnicians(response.data);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred while fetching technicians.';
+      setError(errorMessage);
+      console.error('Failed to fetch technicians:', err);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const createAppointment = useCallback(async (appointmentData) => {
+    console.log("appointmentData")
+    console.log(appointmentData)
     setLoading(true);
     setError(null);
     try {
       const response = await api.post('/appointments/', appointmentData);
-      // Add new appointment to the start of the list to be immediately visible
       setAppointments(prev => [response.data, ...prev]);
       setLoading(false);
       return { success: true };
@@ -107,9 +140,13 @@ export function AppointmentProvider({ children }) {
 
   const value = {
     appointments,
+    users,
+    technicians, // Expose technicians
     loading,
     error,
     loadAppointments,
+    getUsers,
+    getTechnicians, // Expose getTechnicians
     createAppointment,
     rescheduleAppointment,
     deleteAppointment,

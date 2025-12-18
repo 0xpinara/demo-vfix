@@ -22,18 +22,41 @@ def create_appointment(
     service: AppointmentService = Depends(get_appointment_service),
 ):
     """
-    Create a new appointment request for the logged-in customer.
-    The appointment is created with a 'PENDING' status and no technician.
+    Create a new appointment.
+    - If created by a user/admin, it's for themselves.
+    - If created by a technician, it's for a specified customer and assigned to the technician.
     """
-    if not hasattr(current_user, 'role') or current_user.role not in ["user", "admin"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only users or admins can create appointment requests.")
+    # Allow users, admins, and technicians to create appointments
+    allowed_roles = ["user", "admin", "technician", "senior_technician", "branch_manager", "enterprise_admin"]
+    user_role = getattr(current_user, 'enterprise_role', getattr(current_user, 'role', ''))
+
+    if user_role not in allowed_roles and current_user.role not in allowed_roles:
+         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to create appointments.")
+
+    customer_id = None
+    if user_role in ["user", "admin", "branch_manager", "enterprise_admin"] or current_user.role in  ["user", "admin", "branch_manager", "enterprise_admin"]:
+        # Users and Admins create appointments for themselves
+        customer_id = current_user.id
+    elif user_role in ['senior_technician', "technician"] or current_user.role in ['senior_technician', "technician"]:
+        # Technicians must specify which customer they are creating the appointment for
+        if not appointment_in.customer_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Technicians must provide a customer_id when creating an appointment.")
+        customer_id = appointment_in.customer_id
+
+    if not customer_id:
+         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not determine customer for the appointment.")
 
     try:
-        appointment = service.create_appointment_request(appointment_data=appointment_in, customer_id=current_user.id)
+        # Pass the full current_user object as the creator
+        appointment = service.create_appointment_request(
+            appointment_data=appointment_in,
+            customer_id=customer_id,
+            creator=current_user
+        )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    appointment.customer = current_user
+    # The service now returns a complete appointment object, so we can return it directly.
     return appointment
 
 
@@ -193,7 +216,8 @@ def update_appointment_status(
     Update the status of an appointment. (Technician only)
     A technician can only update the status of their own assigned appointments.
     """
-    if not hasattr(current_user, 'role') or current_user.role != "technician":
+    print(current_user.enterprise_role)
+    if not hasattr(current_user, 'role') or current_user.enterprise_role == "":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only technicians can update appointment status.")
 
     try:

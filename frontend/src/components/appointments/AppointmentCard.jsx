@@ -6,6 +6,7 @@ import UpdateStatusModal from './UpdateStatusModal';
 import { useAppointments } from '../../context/AppointmentContext';
 
 function AppointmentCard({ appointment, userType = 'user' }) {
+  console.log(appointment)
   const { id, scheduled_for, status, product_brand, product_model, product_issue, technician, customer, location } = appointment;
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState(false);
@@ -13,8 +14,17 @@ function AppointmentCard({ appointment, userType = 'user' }) {
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    return new Date(dateString).toLocaleDateString('tr-TR', options);
   };
+
+  const statusTranslations = {
+    scheduled: 'Planlandı',
+    completed: 'Tamamlandı',
+    cancelled: 'İptal Edildi',
+    pending: 'Beklemede',
+  };
+
+  const translatedStatus = statusTranslations[status] || status;
 
   const canReschedule = userType === 'user' && status !== 'completed' && status !== 'cancelled';
   const canUpdateStatus = userType === 'technician';
@@ -30,17 +40,17 @@ function AppointmentCard({ appointment, userType = 'user' }) {
       <div className={`appointment-card status-${status}`}>
         <div className="card-header">
           <h3>{product_brand} {product_model}</h3>
-          <span className="status-badge">{status}</span>
+          <span className="status-badge">{translatedStatus}</span>
         </div>
         <div className="card-body">
           <p><FaCalendarAlt /> <strong>Tarih:</strong> {formatDate(scheduled_for)}</p>
           <p><FaCog /> <strong>Problem:</strong> {product_issue}</p>
           {userType === 'user' && technician && (
-            <p><FaUser /> <strong>Teknisyen:</strong> {technician.name}</p>
+            <p><FaUser /> <strong>Teknisyen:</strong> {technician.full_name}</p>
           )}
           {userType === 'technician' && customer && (
             <>
-              <p><FaUser /> <strong>Müşteri:</strong> {customer.name}</p>
+              <p><FaUser /> <strong>Müşteri:</strong> {customer.full_name}</p>
               <p><FaMapMarkerAlt /> <strong>Konum:</strong> {location}</p>
             </>
           )}

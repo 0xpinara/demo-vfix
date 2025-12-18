@@ -77,9 +77,9 @@ app.include_router(enterprise.router, prefix="/api/enterprise", tags=["Enterpris
 # Branch Manager endpoints
 app.include_router(branch_manager.router, prefix="/api/branch-manager", tags=["Branch Manager"])
 
-# TODO: Technicians endpoints will be added by team
-# from app.api.v1.routes import technicians
-# app.include_router(technicians.router, prefix="/api/v1/technicians", tags=["Technicians"])
+# Technicians endpoints
+from app.api.v1.routes import technicians
+app.include_router(technicians.router, prefix="/api/technicians", tags=["Technicians"])
 
 if __name__ == "__main__":
     import uvicorn
