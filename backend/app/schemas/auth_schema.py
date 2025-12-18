@@ -83,6 +83,8 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     role: Optional[str] = None
+    enterprise_id: Optional[str] = None
+    enterprise_role: Optional[str] = None
 
 
 class RegisterResponse(BaseModel):
