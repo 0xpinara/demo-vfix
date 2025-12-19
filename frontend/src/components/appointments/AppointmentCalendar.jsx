@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import { Calendar as CalendarIcon, Clock, MapPin, Tool, User, Info, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Wrench, User, Info, AlertCircle } from 'lucide-react';
 import './AppointmentCalendar.css';
 
 function AppointmentCalendar({ appointments, userType }) {
@@ -58,6 +58,7 @@ function AppointmentCalendar({ appointments, userType }) {
       <div className="calendar-section">
         <div className="calendar-wrapper">
           <Calendar
+            className="react-calendar-custom"
             onChange={onChange}
             value={value}
             tileContent={tileContent}
@@ -111,7 +112,7 @@ function AppointmentCalendar({ appointments, userType }) {
 
                 <div className="appointment-body">
                   <div className="info-row">
-                    <Tool size={16} />
+                    <Wrench size={16} />
                     <span className="product-info">{app.product_brand} {app.product_model}</span>
                   </div>
 

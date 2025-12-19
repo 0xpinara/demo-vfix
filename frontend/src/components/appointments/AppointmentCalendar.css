@@ -58,16 +58,12 @@
 }
 
 /* Dot for marking appointments */
-.react-calendar-custom .dot {
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
+.react-calendar-custom .calendar-dot {
+    display: inline-block;
     height: 6px;
     width: 6px;
-    background-color: #ff0000;
-    /* Red dot for appointment days */
     border-radius: 50%;
+    margin: 0 1px;
 }
 
 /* Styling for the list of appointments for a selected day */
