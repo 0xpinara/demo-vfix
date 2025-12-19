@@ -1,33 +1,38 @@
 import React, { useState } from 'react';
 import AppointmentList from './AppointmentList';
 import AppointmentCalendar from './AppointmentCalendar';
-import './AppointmentViewToggle.css'; // For styling the toggle buttons
+import { Calendar, List } from 'lucide-react';
+import './AppointmentViewToggle.css';
 
 function AppointmentViewToggle({ appointments, userType }) {
-  const [view, setView] = useState('list'); // 'list' or 'calendar'
+  const [view, setView] = useState('calendar'); // Default to calendar like Vacations
 
   return (
-    <div className="appointment-view-toggle-container">
-      <div className="view-toggle-buttons">
+    <div className="appointment-toggle-wrapper">
+      <div className="view-toggle">
         <button
-          className={`toggle-button ${view === 'list' ? 'active' : ''}`}
-          onClick={() => setView('list')}
-        >
-          Liste Görünümü
-        </button>
-        <button
-          className={`toggle-button ${view === 'calendar' ? 'active' : ''}`}
+          className={`toggle-btn ${view === 'calendar' ? 'active' : ''}`}
           onClick={() => setView('calendar')}
         >
-          Takvim Görünümü
+          <Calendar size={16} />
+          Takvim
+        </button>
+        <button
+          className={`toggle-btn ${view === 'list' ? 'active' : ''}`}
+          onClick={() => setView('list')}
+        >
+          <List size={16} />
+          Liste
         </button>
       </div>
 
-      {view === 'list' ? (
-        <AppointmentList appointments={appointments} userType={userType} />
-      ) : (
-        <AppointmentCalendar appointments={appointments} userType={userType} />
-      )}
+      <div className="appointment-view-content">
+        {view === 'list' ? (
+          <AppointmentList appointments={appointments} userType={userType} />
+        ) : (
+          <AppointmentCalendar appointments={appointments} userType={userType} />
+        )}
+      </div>
     </div>
   );
 }

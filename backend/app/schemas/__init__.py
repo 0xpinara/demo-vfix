@@ -46,6 +46,11 @@ from app.schemas.enterprise_schema import (
     EnterpriseUserResponse,
     EnterpriseRegistrationResponse,
 )
+from app.schemas.vacation_schema import (
+    VacationRequest,
+    VacationResponse,
+    VacationListResponse,
+)
 
 
 __all__ = [
@@ -88,4 +93,7 @@ __all__ = [
     "BranchResponse",
     "EnterpriseUserResponse",
     "EnterpriseRegistrationResponse",
+    "VacationRequest",
+    "VacationResponse",
+    "VacationListResponse",
 ]

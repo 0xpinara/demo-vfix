@@ -1,38 +1,56 @@
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate, NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiLogOut, FiUser, FiHome, FiMessageSquare, FiCalendar } from 'react-icons/fi'
+import { FiLogOut, FiUser, FiHome, FiMessageSquare, FiCalendar, FiMenu, FiChevronLeft } from 'react-icons/fi'
 import './Dashboard.css'
 
 function Dashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   const handleLogout = () => {
     logout()
     navigate('/login')
   }
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed)
+  }
+
   return (
     <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
-        <h1 className="sidebar-logo">V-Fix</h1>
+      <aside className={`dashboard-sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          {!isSidebarCollapsed && <h1 className="sidebar-logo">V-Fix</h1>}
+          <button className="sidebar-toggle-btn" onClick={toggleSidebar}>
+            {isSidebarCollapsed ? <FiMenu /> : <FiChevronLeft />}
+          </button>
+        </div>
+
         <nav>
           <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
-            <FiHome />
-            <span>Ana Sayfa</span>
+            <FiHome title="Ana Sayfa" />
+            {!isSidebarCollapsed && <span>Ana Sayfa</span>}
           </NavLink>
           <NavLink to="/appointments" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
-            <FiCalendar />
-            <span>Randevular</span>
+            <FiCalendar title="Randevular" />
+            {!isSidebarCollapsed && <span>Randevular</span>}
           </NavLink>
+          {['technician', 'senior_technician'].includes(user?.enterprise_role) && (
+            <NavLink to="/technician/vacations" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
+              <FiCalendar title="İzinlerim" />
+              {!isSidebarCollapsed && <span>İzinlerim</span>}
+            </NavLink>
+          )}
           <NavLink to="/chat" className={({ isActive }) => isActive ? 'sidebar-link active' : 'sidebar-link'}>
-            <FiMessageSquare />
-            <span>Sohbet</span>
+            <FiMessageSquare title="Sohbet" />
+            {!isSidebarCollapsed && <span>Sohbet</span>}
           </NavLink>
         </nav>
         <div className="sidebar-footer">
-          <p>&copy; 2025 V-Fix</p>
+          {!isSidebarCollapsed && <p>&copy; 2025 V-Fix</p>}
         </div>
       </aside>
       <main className="dashboard-main">

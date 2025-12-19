@@ -75,6 +75,23 @@ class UserRepository:
             models.User.created_at.desc()
         ).offset(skip).limit(limit).all()
     
+    def get_available_technicians(self, date: datetime, skip: int = 0, limit: int = 100) -> List[models.User]:
+        """Get a paginated list of technicians who are not on an approved vacation on the given date."""
+        vacation_repo = VacationRepository(self.db)
+        vacations_on_date = vacation_repo.get_approved_vacations_on_date(date)
+        unavailable_technician_ids = [vacation.employee_id for vacation in vacations_on_date]
+
+        query = (
+            self.db.query(models.User)
+            .filter(
+                or_(models.User.enterprise_role == 'technician', models.User.enterprise_role == 'senior_technician'),
+                models.User.is_active == True,
+                models.User.id.notin_(unavailable_technician_ids)
+            )
+        )
+        
+        return query.order_by(models.User.full_name).offset(skip).limit(limit).all()
+    
     def create(self, user: models.User) -> models.User:
         """Create new user"""
         self.db.add(user)
@@ -567,3 +584,42 @@ class AppointmentRepository:
         self.db.commit()
         logger.warning(f"Deleted {deleted_count} appointments for technician {technician_id}")
         return deleted_count
+        
+        
+class VacationRepository:
+    """Repository for Vacation model operations."""
+
+    def __init__(self, db: Session):
+        self.db = db
+        self.model = models.Vacation
+
+    def get_approved_vacations_on_date(self, date: datetime) -> List[models.Vacation]:
+        """Get all approved vacations that include the given date."""
+        return (
+            self.db.query(self.model)
+            .filter(
+                self.model.status == models.VacationStatus.APPROVED,
+                self.model.start_date <= date,
+                self.model.end_date >= date,
+            )
+            .all()
+        )
+
+    def create_vacation_request(self, vacation: models.Vacation) -> models.Vacation:
+        """Create a new vacation request."""
+        self.db.add(vacation)
+        self.db.commit()
+        self.db.refresh(vacation)
+        logger.info(f"Created vacation request for employee: {vacation.employee_id}")
+        return vacation
+
+    def get_vacations_by_employee_id(self, employee_id: str, skip: int = 0, limit: int = 100) -> List[models.Vacation]:
+        """Get all vacations for a specific employee."""
+        return (
+            self.db.query(self.model)
+            .filter(self.model.employee_id == employee_id)
+            .order_by(self.model.start_date.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
