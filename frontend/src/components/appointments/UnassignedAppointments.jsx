@@ -11,8 +11,7 @@ function UnassignedAppointments() {
   }, [loadUnassignedAppointments]);
 
   return (
-    <div className="appointments-container">
-      <h2 className="page-title">Bekleyen Randevular</h2>
+    <div className="appointment-list-container">
       {loading && <p>Randevular Yükleniyor...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       <div className="appointments-grid">

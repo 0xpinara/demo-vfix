@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import AppointmentCard from './AppointmentCard';
+import { Calendar, History } from 'lucide-react';
 import './Appointments.css';
 
 function AppointmentList({ appointments, userType }) {
@@ -19,18 +20,20 @@ function AppointmentList({ appointments, userType }) {
   // console.log("Filtered: ", filteredAppointments)
 
   return (
-    <div className="appointments-container">
-      <div className="filter-tabs">
-        <button 
-          className={`filter-tab ${filter === 'upcoming' ? 'active' : ''}`}
+    <div className="appointment-list-container">
+      <div className="view-toggle" style={{ marginBottom: '1.5rem' }}>
+        <button
+          className={`toggle-btn ${filter === 'upcoming' ? 'active' : ''}`}
           onClick={() => setFilter('upcoming')}
         >
+          <Calendar size={16} />
           Planlanan
         </button>
-        <button 
-          className={`filter-tab ${filter === 'past' ? 'active' : ''}`}
+        <button
+          className={`toggle-btn ${filter === 'past' ? 'active' : ''}`}
           onClick={() => setFilter('past')}
         >
+          <History size={16} />
           Geçmiş
         </button>
       </div>

@@ -89,7 +89,6 @@ def list_appointments(
     if not user_role:
         user_role = getattr(current_user, 'role', '')
 
-    print("Appointments.py: User Role: ", user_role)
     # Role-based access control
     if user_role in ['user']:
         if technician_id or (customer_id and customer_id != current_user.id) or unassigned:
@@ -209,8 +208,6 @@ def self_assign_appointment(
     """
     Allows a technician to assign themselves to an available appointment.
     """
-    print("Self Assign: Role: ", current_user.enterprise_role)
-    print("Self Assign: Appo Id: ", appointment_id)
     user_role = getattr(current_user, 'enterprise_role', getattr(current_user, 'role', ''))
     if user_role not in ['technician', 'senior_technician']:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only technicians can self-assign appointments.")
@@ -240,7 +237,6 @@ def update_appointment_status(
     Update the status of an appointment. (Technician only)
     A technician can only update the status of their own assigned appointments.
     """
-    print(current_user.enterprise_role)
     if not hasattr(current_user, 'role') or current_user.enterprise_role == "":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only technicians can update appointment status.")
 

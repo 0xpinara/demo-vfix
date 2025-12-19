@@ -16,6 +16,7 @@ import {
     Plus,
     X
 } from 'lucide-react';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 import './TechnicianVacations.css';
 
 const vacationTypeLabels = {
@@ -166,9 +167,16 @@ export default function TechnicianVacations() {
         }
     };
 
-    const handleCancelVacation = async (id) => {
-        if (!window.confirm('Bu izin talebini iptal etmek istediğinize emin misiniz?')) return;
+    const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+    const [confirmationConfig, setConfirmationConfig] = useState({
+        title: '',
+        message: '',
+        onConfirm: () => { },
+        isDanger: false,
+        confirmText: 'Onayla'
+    });
 
+    const handleCancelVacationCallback = async (id) => {
         try {
             await api.delete(`/technicians/vacations/${id}`);
             fetchVacations();
@@ -176,6 +184,17 @@ export default function TechnicianVacations() {
             console.error('Failed to cancel vacation:', err);
             alert('İzin talebi iptal edilirken bir hata oluştu.');
         }
+    };
+
+    const handleCancelVacation = (id) => {
+        setConfirmationConfig({
+            title: 'İzin Talebini İptal Et',
+            message: 'Bu izin talebini iptal etmek istediğinize emin misiniz?',
+            onConfirm: () => handleCancelVacationCallback(id),
+            isDanger: true,
+            confirmText: 'İptal Et'
+        });
+        setIsConfirmationOpen(true);
     };
 
     const navigate = useNavigate();
@@ -447,6 +466,15 @@ export default function TechnicianVacations() {
                     </div>
                 </div>
             )}
+            <ConfirmationModal
+                isOpen={isConfirmationOpen}
+                onClose={() => setIsConfirmationOpen(false)}
+                onConfirm={confirmationConfig.onConfirm}
+                title={confirmationConfig.title}
+                message={confirmationConfig.message}
+                isDanger={confirmationConfig.isDanger}
+                confirmText={confirmationConfig.confirmText}
+            />
         </div>
     );
 }

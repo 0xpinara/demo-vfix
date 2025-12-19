@@ -4,6 +4,7 @@ import './Appointments.css';
 import RescheduleAppointmentModal from './RescheduleAppointmentModal';
 import UpdateStatusModal from './UpdateStatusModal';
 import AppointmentDetailsModal from './AppointmentDetailsModal';
+import ConfirmationModal from '../common/ConfirmationModal';
 import { useAppointments } from '../../context/AppointmentContext';
 
 function AppointmentCard({ appointment, userType = 'user' }) {
@@ -13,7 +14,7 @@ function AppointmentCard({ appointment, userType = 'user' }) {
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [isUpdateStatusModalOpen, setIsUpdateStatusModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  
+
   const [isPastAppointment, setIsPastAppointment] = useState(false);
 
   useEffect(() => {
@@ -41,16 +42,43 @@ function AppointmentCard({ appointment, userType = 'user' }) {
   const canDelete = userType === 'user' && status !== 'completed' && status !== 'cancelled' && !isPastAppointment;
   const canSelfAssign = status === 'pending' && !technician && userType === 'technician' && !isPastAppointment;
 
-  const handleDelete = async () => {
-    if (window.confirm('Bu randevuyu iptal etmek istediğinizden emin misiniz?')) {
-      await deleteAppointment(id);
-    }
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [confirmationConfig, setConfirmationConfig] = useState({
+    title: '',
+    message: '',
+    onConfirm: () => { },
+    isDanger: false,
+    confirmText: 'Onayla'
+  });
+
+  const handleDeleteCallback = async () => {
+    await deleteAppointment(id);
   };
 
-  const handleSelfAssign = async () => {
-    if (window.confirm('Bu randevuyu üstlenmek istediğinizden emin misiniz?')) {
-      await selfAssignAppointment(id);
-    }
+  const handleSelfAssignCallback = async () => {
+    await selfAssignAppointment(id);
+  };
+
+  const handleDeleteClick = () => {
+    setConfirmationConfig({
+      title: 'Randevuyu İptal Et',
+      message: 'Bu randevuyu iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+      onConfirm: handleDeleteCallback,
+      isDanger: true,
+      confirmText: 'İptal Et'
+    });
+    setIsConfirmationOpen(true);
+  };
+
+  const handleSelfAssignClick = () => {
+    setConfirmationConfig({
+      title: 'Randevuyu Üstlen',
+      message: 'Bu randevuyu üstlenmek istediğinizden emin misiniz?',
+      onConfirm: handleSelfAssignCallback,
+      isDanger: false,
+      confirmText: 'Üstlen'
+    });
+    setIsConfirmationOpen(true);
   };
 
   return (
@@ -79,13 +107,13 @@ function AppointmentCard({ appointment, userType = 'user' }) {
             <button className="card-button" onClick={() => setIsRescheduleModalOpen(true)} disabled={isPastAppointment}>Yeni Tarih Seç</button>
           )}
           {canDelete && (
-            <button className="card-button danger" onClick={handleDelete} disabled={isPastAppointment}>Randevuyu İptal Et</button>
+            <button className="card-button danger" onClick={handleDeleteClick} disabled={isPastAppointment}>Randevuyu İptal Et</button>
           )}
           {canUpdateStatus && (
             <button className="card-button" onClick={() => setIsUpdateStatusModalOpen(true)} disabled={isPastAppointment}>Durumu Güncelle</button>
           )}
           {canSelfAssign && (
-            <button className="card-button" onClick={handleSelfAssign} disabled={isPastAppointment}>Randevuyu Üstlen</button>
+            <button className="card-button" onClick={handleSelfAssignClick} disabled={isPastAppointment}>Randevuyu Üstlen</button>
           )}
         </div>
       </div>
@@ -103,6 +131,15 @@ function AppointmentCard({ appointment, userType = 'user' }) {
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         appointment={appointment}
+      />
+      <ConfirmationModal
+        isOpen={isConfirmationOpen}
+        onClose={() => setIsConfirmationOpen(false)}
+        onConfirm={confirmationConfig.onConfirm}
+        title={confirmationConfig.title}
+        message={confirmationConfig.message}
+        isDanger={confirmationConfig.isDanger}
+        confirmText={confirmationConfig.confirmText}
       />
     </>
   );

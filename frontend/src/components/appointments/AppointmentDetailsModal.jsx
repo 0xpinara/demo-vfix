@@ -51,53 +51,53 @@ const AppointmentDetailsModal = ({ isOpen, onClose, appointment }) => {
         </div>
         <div className="modal-body">
           <div className="details-grid">
-            <div className="detail-item">
+            <div className="apt-detail-item">
               <strong>Durum:</strong>
               <span className={`status-badge status-${status}`}>
                 {statusTranslations[status] || status}
               </span>
             </div>
-            <div className="detail-item">
+            <div className="apt-detail-item">
               <strong>Oluşturulma:</strong>
               <span>{formatDate(created_at)}</span>
             </div>
             {updated_at && (
-              <div className="detail-item">
+              <div className="apt-detail-item">
                 <strong>Son Güncelleme:</strong>
                 <span>{formatDate(updated_at)}</span>
               </div>
             )}
-            <div className="detail-item">
+            <div className="apt-detail-item">
               <strong>Marka:</strong>
               <span>{product_brand}</span>
             </div>
-            <div className="detail-item">
+            <div className="apt-detail-item">
               <strong>Model:</strong>
               <span>{product_model}</span>
             </div>
-            <div className="detail-item wide">
+            <div className="apt-detail-item wide">
               <strong>Problem:</strong>
               <p>{product_issue}</p>
             </div>
             {knowledge && (
-              <div className="detail-item wide">
+              <div className="apt-detail-item wide">
                 <strong>Notlar:</strong>
                 <p>{knowledge}</p>
               </div>
             )}
-            <div className="detail-item">
+            <div className="apt-detail-item">
               <strong>Müşteri:</strong>
               <span>{customer?.full_name || 'N/A'}</span>
             </div>
-            <div className="detail-item">
+            <div className="apt-detail-item">
               <strong>Teknisyen:</strong>
               <span>{technician?.full_name || 'Atanmamış'}</span>
             </div>
-            <div className="detail-item wide">
+            <div className="apt-detail-item wide">
               <strong>Konum:</strong>
               <span>{location}</span>
             </div>
-             <div className="detail-item">
+            <div className="apt-detail-item">
               <strong>Randevu Tarihi:</strong>
               <span>{formatDate(scheduled_for)}</span>
             </div>
