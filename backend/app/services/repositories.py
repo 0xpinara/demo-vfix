@@ -414,6 +414,18 @@ class AppointmentRepository:
             .all()
         )
 
+    def get_unassigned(self, skip: int = 0, limit: int = 100) -> tuple[List[models.Appointment], int]:
+        """Get paginated appointments that are not assigned to any technician."""
+        query = (
+            self.db.query(self.model)
+            .filter(self.model.technician_id.is_(None))
+            .options(joinedload(self.model.customer))
+            .order_by(self.model.scheduled_for.desc())
+        )
+        total_count = query.count()
+        items = query.offset(skip).limit(limit).all()
+        return items, total_count
+
     def search(
         self,
         *,
@@ -464,7 +476,7 @@ class AppointmentRepository:
         technician = user_repo.get_by_id(technician_id)
         if not technician or not technician.is_active:
             raise ValueError(f"Invalid or inactive technician ID: {technician_id}")
-        if getattr(technician, "role", "user") != "technician":
+        if getattr(technician, "enterprise_role", "user") != "technician" and getattr(technician, "enterprise_role", "user") != "senior_technician":
             raise ValueError(f"User {technician_id} is not a technician.")
 
         appointment = self.model(
@@ -500,7 +512,7 @@ class AppointmentRepository:
             technician = user_repo.get_by_id(update_data["technician_id"])
             if not technician or not technician.is_active:
                 raise ValueError(f"Invalid or inactive technician ID: {update_data['technician_id']}")
-            if getattr(technician, "role", "user") != "technician":
+            if getattr(technician, "enterprise_role", "user") != "technician" and getattr(technician, "enterprise_role", "user") != "senior_technician":
                 raise ValueError(f"User {update_data['technician_id']} is not a technician.")
 
         for key, value in update_data.items():

@@ -107,19 +107,6 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
             </div>
           )}
 
-          {isUserCreator && (
-             <div className="form-group">
-                <label>Teknisyen Seç (Opsiyonel)</label>
-                <SearchableDropdown
-                    options={technicians}
-                    onSelect={(option) => handleSelect('technician_id', option)}
-                    placeholder="Teknisyen ara..."
-                    displayKey="full_name"
-                    secondaryDisplayKey="email"
-                />
-             </div>
-          )}
-
           <div className="form-group">
             <label>Ürün Markası</label>
             <input type="text" name="product_brand" value={formData.product_brand} onChange={handleChange} required />
@@ -144,6 +131,20 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
             <label>Randevu Tarihi ve Saati</label>
             <input type="datetime-local" name="scheduled_for" value={formData.scheduled_for} onChange={handleChange} required />
           </div>
+
+          {isUserCreator && (
+             <div className="form-group">
+                <label>Teknisyen Seç (Opsiyonel)</label>
+                <SearchableDropdown
+                    options={technicians}
+                    onSelect={(option) => handleSelect('technician_id', option)}
+                    placeholder="Teknisyen ara..."
+                    displayKey="full_name"
+                    secondaryDisplayKey="email"
+                />
+             </div>
+          )}
+          
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>İptal</button>
             <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Oluşturuluyor...' : 'Randevu Oluştur'}</button>

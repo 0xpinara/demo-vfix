@@ -29,6 +29,11 @@ class AppointmentService:
         logger.debug(f"Fetching appointments for technician: {technician_id}")
         return self.repo.get_by_technician_id(technician_id, skip=skip, limit=limit)
 
+    def get_unassigned_appointments(self, skip: int = 0, limit: int = 100) -> tuple[List[models.Appointment], int]:
+        """Gets a paginated list of unassigned appointments."""
+        logger.debug("Fetching unassigned appointments")
+        return self.repo.get_unassigned(skip=skip, limit=limit)
+
     def create_appointment_request(
         self,
         *,
@@ -42,9 +47,12 @@ class AppointmentService:
         - If created by a 'technician', it's SCHEDULED for the customer and assigned to the technician.
         """
         # 1. Validate the other exists and is active.
-        other = self.user_repo.get_by_id(other_id)
-        if not other or not other.is_active:
-            raise ValueError(f"Invalid or inactive customer/technician ID: {other_id}")
+        if other_id == "empty_technician":
+            customer_id = creator.id
+        else:
+            other = self.user_repo.get_by_id(other_id)
+            if not other or not other.is_active:
+                raise ValueError(f"Invalid or inactive customer/technician ID: {other_id}")
 
         # 2. Determine technician and status based on the creator's role
         technician_id = None
@@ -52,7 +60,6 @@ class AppointmentService:
 
         # Check for enterprise role first, as that's more specific for technicians
         user_role = getattr(creator, 'enterprise_role', getattr(creator, 'role', ''))
-        print("User role: ", user_role)
         if user_role == 'technician' or user_role == 'senior_technician':
             technician_id = creator.id
             customer_id = other_id
@@ -116,6 +123,28 @@ class AppointmentService:
 
         logger.info(f"Assigning technician {technician_id} to appointment {appointment_id}")
         # The repo's update_by_id method includes validation for the technician_id.
+        return self.repo.update_by_id(appointment_id, update_payload)
+
+    def assign_technician_to_appointment(self, appointment_id: int, technician_id: str) -> Optional[models.Appointment]:
+        """
+        Allows a technician to assign themselves to an unassigned appointment.
+        """
+        appointment = self.repo.get_by_id(appointment_id)
+        if not appointment:
+            raise ValueError("Appointment not found.")
+        if appointment.technician_id:
+            raise ValueError("Appointment is already assigned.")
+
+        technician = self.user_repo.get_by_id(technician_id)
+        if not technician or (getattr(technician, 'enterprise_role', '') not in ['technician', 'senior_technician']):
+            raise ValueError("Invalid technician.")
+
+        update_payload: Dict[str, Any] = {
+            "technician_id": technician_id,
+            "status": models.AppointmentStatus.SCHEDULED
+        }
+
+        logger.info(f"Technician {technician_id} is self-assigning to appointment {appointment_id}")
         return self.repo.update_by_id(appointment_id, update_payload)
 
     def update_appointment_status(self, appointment_id: int, new_status: models.AppointmentStatus, technician_id: str) -> Optional[models.Appointment]:

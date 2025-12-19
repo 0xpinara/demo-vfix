@@ -40,6 +40,8 @@ def create_appointment(
         # Users and Admins create appointments for themselves
         if appointment_in.technician_id:
             other_id = appointment_in.technician_id
+        else:
+            other_id = "empty_technician"
     elif user_role in ['senior_technician', "technician"]:
         # Technicians must specify which customer they are creating the appointment for
         if not appointment_in.customer_id:
@@ -64,11 +66,12 @@ def create_appointment(
 
 
 @router.get("/", response_model=List[schemas.AppointmentResponse])
-def search_appointments(
+def list_appointments(
     response: Response,
     customer_id: Optional[str] = None,
     technician_id: Optional[str] = None,
     status: Optional[str] = None,
+    unassigned: bool = False,
     date_from: Optional[datetime] = None,
     date_to: Optional[datetime] = None,
     skip: int = 0,
@@ -77,12 +80,33 @@ def search_appointments(
     service: AppointmentService = Depends(get_appointment_service),
 ):
     """
-    Search for appointments.
-    - Admins can search by any criteria.
-    - Technicians can only see their own appointments.
+    List and search for appointments with extensive filtering.
+    - Admins/Managers can search with any criteria.
+    - Technicians can see their own appointments or view unassigned ones.
     - Customers can only see their own appointments.
     """
-    if not hasattr(current_user, 'role') or current_user.role == "guest":
+    user_role = getattr(current_user, 'enterprise_role', getattr(current_user, 'role', ''))
+    if not user_role:
+        user_role = getattr(current_user, 'role', '')
+
+    print("Appointments.py: User Role: ", user_role)
+    # Role-based access control
+    if user_role in ['user']:
+        if technician_id or (customer_id and customer_id != current_user.id) or unassigned:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view these appointments.")
+        customer_id = current_user.id
+    
+    elif user_role in ['technician', 'senior_technician']:
+        if unassigned:
+            appointments, total_count = service.get_unassigned_appointments(skip=skip, limit=limit)
+            response.headers["X-Total-Count"] = str(total_count)
+            return appointments
+        
+        if customer_id or (technician_id and technician_id != current_user.id):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Technicians can only view their own appointments.")
+        technician_id = current_user.id
+
+    elif user_role not in ['branch_manager', 'enterprise_admin', 'admin']:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to search appointments.")
 
     search_params = {
@@ -92,44 +116,12 @@ def search_appointments(
         "date_from": date_from,
         "date_to": date_to,
     }
-
-    if current_user.role == "user":
-        if technician_id or (customer_id and customer_id != current_user.id):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Users can only view their own appointments.")
-        search_params["customer_id"] = current_user.id
-
-    if current_user.role == "technician":
-        if customer_id or (technician_id and technician_id != current_user.id):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Technicians can only view their own appointments.")
-        search_params["technician_id"] = current_user.id
-
+    
     clean_params = {k: v for k, v in search_params.items() if v is not None}
-
+    
     appointments, total_count = service.search_appointments(search_params=clean_params, skip=skip, limit=limit)
-
     response.headers["X-Total-Count"] = str(total_count)
     return appointments
-
-
-@router.get("/", response_model=List[schemas.AppointmentResponse])
-def get_appointments(
-    current_user: models.User = Depends(get_current_user),
-    service: AppointmentService = Depends(get_appointment_service),
-    skip: int = 0,
-    limit: int = 100,
-):
-    """
-    Get all appointments for the currently logged-in user or technician.
-    """
-    if not hasattr(current_user, 'role') or current_user.role not in ["user", "technician", "admin"]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized for this resource")
-
-    if current_user.role == "admin":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Admins should use the search endpoint: GET /api/appointments/")
-    elif current_user.role == "user":
-        return service.get_appointments_for_customer(customer_id=current_user.id, skip=skip, limit=limit)
-    elif current_user.role == "technician":
-        return service.get_appointments_for_technician(technician_id=current_user.id, skip=skip, limit=limit)
 
 
 @router.get("/{appointment_id}", response_model=schemas.AppointmentResponse)
@@ -198,6 +190,35 @@ def assign_appointment(
             appointment_id=appointment_id,
             technician_id=assignment_data.technician_id,
             scheduled_for=assignment_data.scheduled_for
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    if not appointment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found.")
+
+    return appointment
+
+
+@router.post("/{appointment_id}/self-assign", response_model=schemas.AppointmentResponse)
+def self_assign_appointment(
+    appointment_id: int,
+    current_user: models.User = Depends(get_current_user),
+    service: AppointmentService = Depends(get_appointment_service),
+):
+    """
+    Allows a technician to assign themselves to an available appointment.
+    """
+    print("Self Assign: Role: ", current_user.enterprise_role)
+    print("Self Assign: Appo Id: ", appointment_id)
+    user_role = getattr(current_user, 'enterprise_role', getattr(current_user, 'role', ''))
+    if user_role not in ['technician', 'senior_technician']:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only technicians can self-assign appointments.")
+
+    try:
+        appointment = service.assign_technician_to_appointment(
+            appointment_id=appointment_id,
+            technician_id=current_user.id
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

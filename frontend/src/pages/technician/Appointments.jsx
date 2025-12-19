@@ -1,25 +1,29 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppointmentViewToggle from '../../components/appointments/AppointmentViewToggle';
+import UnassignedAppointments from '../../components/appointments/UnassignedAppointments'; // Import the new component
 import { useAppointments } from '../../context/AppointmentContext';
-import { useAuth } from '../../context/AuthContext'; // Import useAuth
+import { useAuth } from '../../context/AuthContext';
 import CreateAppointmentModal from '../../components/appointments/CreateAppointmentModal';
 import './Appointments.css';
 
-function TechnicianAppointments() { // Renamed component
+function TechnicianAppointments() {
   const { appointments, users, getUsers, loading, error, loadAppointments } = useAppointments();
-  const { user: currentUser } = useAuth(); // Get current user
+  const { user: currentUser } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [view, setView] = useState('my-appointments'); // 'my-appointments' or 'unassigned'
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadAppointments();
-    // Fetch users if the current user is a technician
+    if (view === 'my-appointments') {
+      loadAppointments();
+    }
+    // getUsers is still needed for creating appointments for customers
     if (currentUser?.role === 'technician' || currentUser?.enterprise_role === 'technician' || 
       currentUser?.enterprise_role === 'senior_technician' || currentUser?.enterprise_role === 'branch_manager' || currentUser?.enterprise_role === 'enterprise_admin') {
       getUsers();
     }
-  }, [loadAppointments, getUsers, currentUser]);
+  }, [view, loadAppointments, getUsers, currentUser]);
 
   const handleGoBack = () => {
     navigate('/dashboard');
@@ -37,20 +41,41 @@ function TechnicianAppointments() { // Renamed component
         </button>
       </div>
 
+      <div className="view-selector-tabs">
+        <button
+          className={`view-tab ${view === 'my-appointments' ? 'active' : ''}`}
+          onClick={() => setView('my-appointments')}
+        >
+          Randevularım
+        </button>
+        <button
+          className={`view-tab ${view === 'unassigned' ? 'active' : ''}`}
+          onClick={() => setView('unassigned')}
+        >
+          Mevcut Randevular
+        </button>
+      </div>
+
       <div className="appointments-main-content">
-        {loading && appointments.length === 0 && <p>Randevular Yükleniyor...</p>}
+        {loading && <p>Randevular Yükleniyor...</p>}
         {error && !isModalOpen && <p style={{ color: 'red' }}>Hata: {error}</p>}
-        <AppointmentViewToggle appointments={appointments} userType="technician" />
+        
+        {view === 'my-appointments' ? (
+          <AppointmentViewToggle appointments={appointments} userType="technician" />
+        ) : (
+          <UnassignedAppointments />
+        )}
       </div>
       
       <CreateAppointmentModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         currentUser={currentUser}
-        customers={users} // Pass users as customers
+        customers={users}
       />
     </div>
   );
 }
 
-export default TechnicianAppointments; // Renamed export
+export default TechnicianAppointments;
+

@@ -102,6 +102,36 @@
     background-color: #555;
 }
 
+/* Tab styling for Technician Appointments */
+.view-selector-tabs {
+  margin-bottom: 1.5rem;
+  display: flex;
+  border-bottom: 2px solid #333;
+}
+
+.view-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #a0a0a0;
+  margin-bottom: -2px; /* Align with the bottom border */
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.view-tab.active {
+  color: #ff0000;
+  border-bottom-color: #ff0000;
+  font-weight: 600;
+}
+
+.view-tab:hover {
+  color: #ff4545;
+}
+
 /* Ensure calendar and list components inside AppointmentViewToggle are styled correctly */
 /* These styles might need to be adjusted in AppointmentCalendar.css and AppointmentList.css as well */
 /* but for now, this ensures the main page layout is good */

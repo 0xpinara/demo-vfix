@@ -69,7 +69,7 @@ function SearchableDropdown({ options, onSelect, placeholder, displayKey = 'full
               </li>
             ))
           ) : (
-            <li className="dropdown-item-none">No results found</li>
+            <li className="dropdown-item-none">Seçenek Bulunamadı.</li>
           )}
         </ul>
       )}

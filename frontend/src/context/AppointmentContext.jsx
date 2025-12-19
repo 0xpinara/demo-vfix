@@ -16,6 +16,7 @@ export const useAppointments = () => {
 // 3. Create the Provider component
 export function AppointmentProvider({ children }) {
   const [appointments, setAppointments] = useState([]);
+  const [unassignedAppointments, setUnassignedAppointments] = useState([]);
   const [users, setUsers] = useState([]);
   const [technicians, setTechnicians] = useState([]); // State for technicians
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,40 @@ export function AppointmentProvider({ children }) {
       console.error(`Failed to fetch appointments:`, err);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const loadUnassignedAppointments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get(`/appointments/?unassigned=true`);
+      setUnassignedAppointments(response.data);
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || err.message;
+      setError(errorMessage);
+      console.error(`Failed to fetch unassigned appointments:`, err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const selfAssignAppointment = useCallback(async (appointmentId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.post(`/appointments/${appointmentId}/self-assign`);
+      // Add to main appointments list and remove from unassigned list
+      setAppointments(prev => [response.data, ...prev]);
+      setUnassignedAppointments(prev => prev.filter(app => app.id !== appointmentId));
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred.';
+      setError(errorMessage);
+      console.error('Failed to self-assign appointment:', err);
+      setLoading(false);
+      return { success: false, error: errorMessage };
     }
   }, []);
 
@@ -140,11 +175,14 @@ export function AppointmentProvider({ children }) {
 
   const value = {
     appointments,
+    unassignedAppointments,
     users,
     technicians, // Expose technicians
     loading,
     error,
     loadAppointments,
+    loadUnassignedAppointments,
+    selfAssignAppointment,
     getUsers,
     getTechnicians, // Expose getTechnicians
     createAppointment,
