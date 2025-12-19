@@ -64,8 +64,26 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
     return null;
   }
 
+  const toLocalISOString = (date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+    const localISOTime = (new Date(date - tzOffset)).toISOString().slice(0, 16);
+    return localISOTime;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === 'scheduled_for') {
+      const date = new Date(value);
+      const hour = date.getHours();
+      if (hour < 8 || hour >= 20) {
+        setError('Lütfen 08:00 ile 20:00 saatleri arasında bir zaman seçiniz.');
+        // Don't set the invalid value, or set it but keep error
+      } else {
+        setError('');
+      }
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -89,6 +107,14 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
         setError(`Please fill out the ${fieldName} field.`);
         return;
       }
+    }
+
+    // Time validation check
+    const date = new Date(formData.scheduled_for);
+    const hour = date.getHours();
+    if (hour < 8 || hour >= 20) {
+      setError('Lütfen 08:00 ile 20:00 saatleri arasında bir zaman seçiniz.');
+      return;
     }
 
     // Clean up payload before sending
@@ -151,7 +177,15 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
           </div>
           <div className="form-group">
             <label>Randevu Tarihi ve Saati</label>
-            <input type="datetime-local" name="scheduled_for" value={formData.scheduled_for} onChange={handleChange} required />
+            <input
+              type="datetime-local"
+              name="scheduled_for"
+              value={formData.scheduled_for}
+              onChange={handleChange}
+              min={toLocalISOString(new Date())}
+              max={toLocalISOString(new Date(new Date().setMonth(new Date().getMonth() + 1)))}
+              required
+            />
           </div>
 
           {isUserCreator && (
