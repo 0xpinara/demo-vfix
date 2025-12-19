@@ -189,15 +189,15 @@ export function AppointmentProvider({ children }) {
     appointments,
     unassignedAppointments,
     users,
-    technicians, // Expose technicians
+    technicians,
     loading,
     error,
+    useAppointments,
     loadAppointments,
     loadUnassignedAppointments,
     selfAssignAppointment,
     getUsers,
-    getUsers,
-    getTechnicians, // Expose getTechnicians
+    getTechnicians,
     getAvailableTechnicians,
     createAppointment,
     rescheduleAppointment,

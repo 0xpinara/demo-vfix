@@ -33,7 +33,7 @@ class VacationResponse(BaseModel):
     created_at: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class VacationListResponse(BaseModel):
     """Response schema for list of vacations"""

@@ -214,6 +214,21 @@ export default function TechnicianVacations() {
         );
     }
 
+    const toLocalISOString = (date) => {
+        const tzOffset = date.getTimezoneOffset() * 60000;
+        return (new Date(date - tzOffset)).toISOString().split('T')[0];
+    };
+
+    const handleStartDateChange = (e) => {
+        const newStartDate = e.target.value;
+        setRequestForm(prev => ({
+            ...prev,
+            start_date: newStartDate,
+            // If end date is before new start date, reset it or set to start date
+            end_date: prev.end_date && new Date(prev.end_date) < new Date(newStartDate) ? newStartDate : prev.end_date
+        }));
+    };
+
     return (
         <div className="technician-vacations-page">
             <div className="page-header">
@@ -420,7 +435,8 @@ export default function TechnicianVacations() {
                                 <input
                                     type="date"
                                     value={requestForm.start_date}
-                                    onChange={e => setRequestForm({ ...requestForm, start_date: e.target.value })}
+                                    onChange={handleStartDateChange}
+                                    min={toLocalISOString(new Date())}
                                     required
                                 />
                             </div>
@@ -431,6 +447,8 @@ export default function TechnicianVacations() {
                                     type="date"
                                     value={requestForm.end_date}
                                     onChange={e => setRequestForm({ ...requestForm, end_date: e.target.value })}
+                                    min={requestForm.start_date}
+                                    disabled={!requestForm.start_date}
                                     required
                                 />
                             </div>
