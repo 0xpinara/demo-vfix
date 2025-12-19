@@ -15,11 +15,33 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
     scheduled_for: '',
   });
   const [error, setError] = useState('');
-  const { createAppointment, loading } = useAppointments();
+  const { createAppointment, loading, getAvailableTechnicians } = useAppointments();
 
-  const isTechnicianCreator = currentUser?.role === 'technician' || currentUser?.enterprise_role === 'technician' || 
+  const isTechnicianCreator = currentUser?.role === 'technician' || currentUser?.enterprise_role === 'technician' ||
     currentUser?.enterprise_role === 'senior_technician';
   const isUserCreator = !isTechnicianCreator;
+
+  const [filteredTechnicians, setFilteredTechnicians] = useState([]);
+  const [loadingTechnicians, setLoadingTechnicians] = useState(false);
+
+  useEffect(() => {
+    const fetchAvailableTechnicians = async () => {
+      if (formData.scheduled_for) {
+        setLoadingTechnicians(true);
+        const result = await getAvailableTechnicians(formData.scheduled_for);
+        if (result.success) {
+          setFilteredTechnicians(result.data);
+        }
+        setLoadingTechnicians(false);
+      } else {
+        setFilteredTechnicians([]);
+      }
+    };
+
+    if (isUserCreator) {
+      fetchAvailableTechnicians();
+    }
+  }, [formData.scheduled_for, getAvailableTechnicians, isUserCreator]);
 
   // Reset form state when the modal is opened or closed
   useEffect(() => {
@@ -46,7 +68,7 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
+
   const handleSelect = (name, selectedOption) => {
     setFormData(prev => ({ ...prev, [name]: selectedOption ? selectedOption.id : '' }));
   };
@@ -68,14 +90,14 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
         return;
       }
     }
-    
+
     // Clean up payload before sending
     const payload = { ...formData };
     if (!isTechnicianCreator) {
       delete payload.customer_id; // Users don't send this
     }
     if (!isUserCreator || !payload.technician_id) {
-        delete payload.technician_id; // Technicians don't send this for themselves
+      delete payload.technician_id; // Technicians don't send this for themselves
     }
 
 
@@ -93,7 +115,7 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
         <h2>Yeni Randevu Oluştur</h2>
         {error && <p className="modal-error">{error}</p>}
         <form onSubmit={handleSubmit}>
-          
+
           {isTechnicianCreator && (
             <div className="form-group">
               <label>Müşteri Seç</label>
@@ -133,18 +155,19 @@ function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], 
           </div>
 
           {isUserCreator && (
-             <div className="form-group">
-                <label>Teknisyen Seç (Opsiyonel)</label>
-                <SearchableDropdown
-                    options={technicians}
-                    onSelect={(option) => handleSelect('technician_id', option)}
-                    placeholder="Teknisyen ara..."
-                    displayKey="full_name"
-                    secondaryDisplayKey="email"
-                />
-             </div>
+            <div className="form-group">
+              <label>Teknisyen Seç (Opsiyonel)</label>
+              <SearchableDropdown
+                options={filteredTechnicians}
+                onSelect={(option) => handleSelect('technician_id', option)}
+                placeholder={!formData.scheduled_for ? "Önce tarih seçiniz" : (loadingTechnicians ? "Teknisyenler yükleniyor..." : "Teknisyen ara...")}
+                displayKey="full_name"
+                secondaryDisplayKey="email"
+                disabled={!formData.scheduled_for || loadingTechnicians}
+              />
+            </div>
           )}
-          
+
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>İptal</button>
             <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Oluşturuluyor...' : 'Randevu Oluştur'}</button>

@@ -36,12 +36,14 @@ def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
 def get_all_technicians(
     current_user: models.User = Depends(get_current_user),
     repo: UserRepository = Depends(get_user_repository),
+    db: Session = Depends(get_db),
     skip: int = 0,
-    limit: int = 100
+    limit: int = 100,
+    date: str = None
 ):
     """
     Get a list of all active technicians.
-    This is a public endpoint for authenticated users to be able to select a technician.
+    Optional 'date' parameter filters out technicians who have an APPROVED vacation on that date.
     """
     if not current_user:
         raise HTTPException(
@@ -51,7 +53,34 @@ def get_all_technicians(
     
     technicians = repo.get_by_enterprise_role('technician', skip=skip, limit=limit)
     senior_technicians = repo.get_by_enterprise_role('senior_technician', skip=skip, limit=limit)
-    return technicians + senior_technicians
+    all_technicians = technicians + senior_technicians
+
+    if date:
+        try:
+            from datetime import datetime
+            
+            # Using basic string parsing, assuming ISO format or YYYY-MM-DD
+            # Backend usually expects ISO format from frontend datetime-local (e.g., 2025-12-19T10:00)
+            check_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+            
+            # Find technicians with approved vacations on this date
+            busy_technician_ids = db.query(Vacation.employee_id).filter(
+                Vacation.status == VacationStatus.APPROVED,
+                Vacation.start_date <= check_date,
+                Vacation.end_date >= check_date
+            ).all()
+            
+            busy_ids = {id[0] for id in busy_technician_ids}
+            
+            # Filter out busy technicians
+            all_technicians = [tech for tech in all_technicians if tech.id not in busy_ids]
+            
+        except ValueError:
+             # If date parsing fails, log it but don't crash, or raise 400
+             # For now, let's ignore filtering if date is invalid
+             pass
+
+    return all_technicians
 
 
 @router.get("/vacations", response_model=schemas.VacationListResponse)

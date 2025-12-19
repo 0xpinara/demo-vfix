@@ -103,6 +103,20 @@ export function AppointmentProvider({ children }) {
     }
   }, []);
 
+  const getAvailableTechnicians = useCallback(async (date) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/technicians/?date=${date}`);
+      return { success: true, data: response.data };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred while fetching technicians.';
+      console.error('Failed to fetch available technicians:', err);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const createAppointment = useCallback(async (appointmentData) => {
     console.log("appointmentData")
     console.log(appointmentData)
@@ -184,7 +198,9 @@ export function AppointmentProvider({ children }) {
     loadUnassignedAppointments,
     selfAssignAppointment,
     getUsers,
+    getUsers,
     getTechnicians, // Expose getTechnicians
+    getAvailableTechnicians,
     createAppointment,
     rescheduleAppointment,
     deleteAppointment,

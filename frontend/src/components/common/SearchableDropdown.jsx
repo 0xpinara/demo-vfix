@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './SearchableDropdown.css';
 
-function SearchableDropdown({ options, onSelect, placeholder, displayKey = 'full_name', secondaryDisplayKey = 'email' }) {
+function SearchableDropdown({ options, onSelect, placeholder, displayKey = 'full_name', secondaryDisplayKey = 'email', disabled = false }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOptions, setFilteredOptions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -44,20 +44,21 @@ function SearchableDropdown({ options, onSelect, placeholder, displayKey = 'full
     setSearchTerm(e.target.value);
     setIsOpen(true);
     if (selectedOption) {
-        setSelectedOption(null);
-        onSelect(null); // Clear parent state if user types again
+      setSelectedOption(null);
+      onSelect(null); // Clear parent state if user types again
     }
   }
 
   return (
-    <div className="searchable-dropdown" ref={wrapperRef}>
+    <div className={`searchable-dropdown ${disabled ? 'disabled' : ''}`} ref={wrapperRef}>
       <input
         type="text"
         placeholder={placeholder}
         value={searchTerm}
         onChange={handleInputChange}
-        onFocus={() => setIsOpen(true)}
+        onFocus={() => !disabled && setIsOpen(true)}
         className="dropdown-input"
+        disabled={disabled}
       />
       {isOpen && (
         <ul className="dropdown-list">
