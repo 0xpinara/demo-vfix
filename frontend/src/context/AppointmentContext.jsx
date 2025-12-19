@@ -118,8 +118,6 @@ export function AppointmentProvider({ children }) {
   }, []);
 
   const createAppointment = useCallback(async (appointmentData) => {
-    console.log("appointmentData")
-    console.log(appointmentData)
     setLoading(true);
     setError(null);
     try {
