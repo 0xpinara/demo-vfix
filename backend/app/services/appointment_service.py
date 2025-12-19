@@ -33,7 +33,7 @@ class AppointmentService:
         self,
         *,
         appointment_data: schemas.AppointmentCreate,
-        customer_id: str,
+        other_id: str,
         creator: models.User,
     ) -> models.Appointment:
         """
@@ -41,10 +41,10 @@ class AppointmentService:
         - If created by a 'user' or 'admin', it's a PENDING request for that customer.
         - If created by a 'technician', it's SCHEDULED for the customer and assigned to the technician.
         """
-        # 1. Validate the customer exists and is active.
-        customer = self.user_repo.get_by_id(customer_id)
-        if not customer or not customer.is_active:
-            raise ValueError(f"Invalid or inactive customer ID: {customer_id}")
+        # 1. Validate the other exists and is active.
+        other = self.user_repo.get_by_id(other_id)
+        if not other or not other.is_active:
+            raise ValueError(f"Invalid or inactive customer/technician ID: {other_id}")
 
         # 2. Determine technician and status based on the creator's role
         technician_id = None
@@ -52,8 +52,10 @@ class AppointmentService:
 
         # Check for enterprise role first, as that's more specific for technicians
         user_role = getattr(creator, 'enterprise_role', getattr(creator, 'role', ''))
+        print("User role: ", user_role)
         if user_role == 'technician' or user_role == 'senior_technician':
             technician_id = creator.id
+            customer_id = other_id
             status = models.AppointmentStatus.SCHEDULED
         elif appointment_data.technician_id:
             # If user is not a technician but specifies one, validate and assign
@@ -63,6 +65,7 @@ class AppointmentService:
                  raise ValueError(f"Invalid or non-existent technician ID: {appointment_data.technician_id}")
             technician_id = appointment_data.technician_id
             # Status remains PENDING for user-requested technician, awaiting confirmation
+            customer_id = creator.id
             status = models.AppointmentStatus.PENDING
         
         # 3. Create the appointment object

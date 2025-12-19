@@ -29,28 +29,31 @@ def create_appointment(
     # Allow users, admins, and technicians to create appointments
     allowed_roles = ["user", "admin", "technician", "senior_technician", "branch_manager", "enterprise_admin"]
     user_role = getattr(current_user, 'enterprise_role', getattr(current_user, 'role', ''))
+    if not user_role:
+        user_role = getattr(current_user, 'role', '')
 
     if user_role not in allowed_roles and current_user.role not in allowed_roles:
          raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to create appointments.")
 
-    customer_id = None
-    if user_role in ["user", "admin", "branch_manager", "enterprise_admin"] or current_user.role in  ["user", "admin", "branch_manager", "enterprise_admin"]:
+    other_id = None
+    if user_role in  ["user", "admin", "branch_manager", "enterprise_admin"]:
         # Users and Admins create appointments for themselves
-        customer_id = current_user.id
-    elif user_role in ['senior_technician', "technician"] or current_user.role in ['senior_technician', "technician"]:
+        if appointment_in.technician_id:
+            other_id = appointment_in.technician_id
+    elif user_role in ['senior_technician', "technician"]:
         # Technicians must specify which customer they are creating the appointment for
         if not appointment_in.customer_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Technicians must provide a customer_id when creating an appointment.")
-        customer_id = appointment_in.customer_id
+        other_id = appointment_in.customer_id
 
-    if not customer_id:
-         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not determine customer for the appointment.")
+    if not other_id:
+         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not determine customer/technician for the appointment.")
 
     try:
         # Pass the full current_user object as the creator
         appointment = service.create_appointment_request(
             appointment_data=appointment_in,
-            customer_id=customer_id,
+            other_id=other_id,
             creator=current_user
         )
     except ValueError as e:

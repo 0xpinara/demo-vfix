@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from app.database import get_db, engine, Base
 from app.core.security import get_rate_limit_handler
 from app.core.logger import setup_logging
-from app.api.v1.routes import chat, admin, appointments, auth, users, system, enterprise, branch_manager
+from app.api.v1.routes import chat, admin, appointments, auth, users, system, enterprise, branch_manager, technicians
 
 load_dotenv()
 
@@ -78,7 +78,6 @@ app.include_router(enterprise.router, prefix="/api/enterprise", tags=["Enterpris
 app.include_router(branch_manager.router, prefix="/api/branch-manager", tags=["Branch Manager"])
 
 # Technicians endpoints
-from app.api.v1.routes import technicians
 app.include_router(technicians.router, prefix="/api/technicians", tags=["Technicians"])
 
 if __name__ == "__main__":
