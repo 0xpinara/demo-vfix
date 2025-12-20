@@ -22,9 +22,12 @@ import BranchAppointments from './pages/branch-manager/BranchAppointments'
 import BranchVacations from './pages/branch-manager/BranchVacations'
 import BranchFeedback from './pages/branch-manager/BranchFeedback'
 
+// Technician Pages
+import TechnicianVacations from './pages/technician/TechnicianVacations'
+
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
@@ -32,13 +35,13 @@ function ProtectedRoute({ children }) {
       </div>
     )
   }
-  
+
   return isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
 function AdminRoute({ children }) {
   const { user, loading, isAuthenticated } = useAuth()
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
@@ -46,21 +49,21 @@ function AdminRoute({ children }) {
       </div>
     )
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
-  
+
   if (user?.role !== 'admin') {
     return <Navigate to="/dashboard" replace />
   }
-  
+
   return children
 }
 
 function BranchManagerRoute({ children }) {
   const { user, loading, isAuthenticated } = useAuth()
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
@@ -68,15 +71,15 @@ function BranchManagerRoute({ children }) {
       </div>
     )
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
-  
+
   if (user?.enterprise_role !== 'branch_manager') {
     return <Navigate to="/dashboard" replace />
   }
-  
+
   return children
 }
 
@@ -89,7 +92,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/register/enterprise" element={<EnterpriseRegister />} />
-      
+
       {/* Protected User Routes */}
       <Route
         path="/dashboard"
@@ -107,7 +110,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      
+
       {/* Admin Routes */}
       <Route
         path="/admin"
@@ -141,7 +144,16 @@ function AppRoutes() {
           </AdminRoute>
         }
       />
-      
+
+      <Route
+        path="/technician/vacations"
+        element={
+          <ProtectedRoute>
+            <TechnicianVacations />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/appointments"
         element={
@@ -150,7 +162,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      
+
       {/* Branch Manager Routes */}
       <Route
         path="/branch-manager"
@@ -184,7 +196,7 @@ function AppRoutes() {
           </BranchManagerRoute>
         }
       />
-      
+
       {/* 404 Page - Catch all unmatched routes */}
       <Route path="*" element={<NotFound />} />
     </Routes>

@@ -1,49 +1,135 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppointments } from '../../context/AppointmentContext';
+import SearchableDropdown from '../common/SearchableDropdown'; // Import the new component
 import './CreateAppointmentModal.css';
 
-function CreateAppointmentModal({ isOpen, onClose }) {
+function CreateAppointmentModal({ isOpen, onClose, currentUser, customers = [], technicians = [] }) {
   const [formData, setFormData] = useState({
+    customer_id: '',
+    technician_id: '',
     product_brand: '',
     product_model: '',
     product_issue: '',
+    knowledge: '',
     location: '',
     scheduled_for: '',
   });
   const [error, setError] = useState('');
-  const { createAppointment, loading } = useAppointments();
+  const { createAppointment, loading, getAvailableTechnicians } = useAppointments();
+
+  const isTechnicianCreator = currentUser?.role === 'technician' || currentUser?.enterprise_role === 'technician' ||
+    currentUser?.enterprise_role === 'senior_technician';
+  const isUserCreator = !isTechnicianCreator;
+
+  const [filteredTechnicians, setFilteredTechnicians] = useState([]);
+  const [loadingTechnicians, setLoadingTechnicians] = useState(false);
+
+  useEffect(() => {
+    const fetchAvailableTechnicians = async () => {
+      if (formData.scheduled_for) {
+        setLoadingTechnicians(true);
+        const result = await getAvailableTechnicians(formData.scheduled_for);
+        if (result.success) {
+          setFilteredTechnicians(result.data);
+        }
+        setLoadingTechnicians(false);
+      } else {
+        setFilteredTechnicians([]);
+      }
+    };
+
+    if (isUserCreator) {
+      fetchAvailableTechnicians();
+    }
+  }, [formData.scheduled_for, getAvailableTechnicians, isUserCreator]);
+
+  // Reset form state when the modal is opened or closed
+  useEffect(() => {
+    if (isOpen) {
+      setError('');
+      setFormData({
+        customer_id: '',
+        technician_id: '',
+        product_brand: '',
+        product_model: '',
+        product_issue: '',
+        knowledge: '',
+        location: '',
+        scheduled_for: '',
+      });
+    }
+  }, [isOpen]);
 
   if (!isOpen) {
     return null;
   }
 
+  const toLocalISOString = (date) => {
+    const tzOffset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+    const localISOTime = (new Date(date - tzOffset)).toISOString().slice(0, 16);
+    return localISOTime;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === 'scheduled_for') {
+      const date = new Date(value);
+      const hour = date.getHours();
+      if (hour < 8 || hour >= 20) {
+        setError('Lütfen 08:00 ile 20:00 saatleri arasında bir zaman seçiniz.');
+        // Don't set the invalid value, or set it but keep error
+      } else {
+        setError('');
+      }
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelect = (name, selectedOption) => {
+    setFormData(prev => ({ ...prev, [name]: selectedOption ? selectedOption.id : '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Basic validation
-    for (const key in formData) {
+    // --- Validation ---
+    const requiredFields = ['product_brand', 'product_model', 'product_issue', 'location', 'scheduled_for'];
+    if (isTechnicianCreator) {
+      requiredFields.push('customer_id');
+    }
+
+    for (const key of requiredFields) {
       if (!formData[key]) {
-        setError(`Please fill out the ${key.replace(/_/g, ' ')} field.`);
+        const fieldName = key.replace(/_/g, ' ');
+        setError(`Please fill out the ${fieldName} field.`);
         return;
       }
     }
 
-    const result = await createAppointment(formData);
+    // Time validation check
+    const date = new Date(formData.scheduled_for);
+    const hour = date.getHours();
+    if (hour < 8 || hour >= 20) {
+      setError('Lütfen 08:00 ile 20:00 saatleri arasında bir zaman seçiniz.');
+      return;
+    }
+
+    // Clean up payload before sending
+    const payload = { ...formData };
+    if (!isTechnicianCreator) {
+      delete payload.customer_id; // Users don't send this
+    }
+    if (!isUserCreator || !payload.technician_id) {
+      delete payload.technician_id; // Technicians don't send this for themselves
+    }
+
+
+    const result = await createAppointment(payload);
     if (result.success) {
-      onClose(); // Close modal on success
-      setFormData({ // Reset form
-        product_brand: '',
-        product_model: '',
-        product_issue: '',
-        location: '',
-        scheduled_for: '',
-      });
+      onClose();
     } else {
       setError(result.error || 'Failed to create appointment.');
     }
@@ -55,6 +141,20 @@ function CreateAppointmentModal({ isOpen, onClose }) {
         <h2>Yeni Randevu Oluştur</h2>
         {error && <p className="modal-error">{error}</p>}
         <form onSubmit={handleSubmit}>
+
+          {isTechnicianCreator && (
+            <div className="form-group">
+              <label>Müşteri Seç</label>
+              <SearchableDropdown
+                options={customers}
+                onSelect={(option) => handleSelect('customer_id', option)}
+                placeholder="Müşteri ara..."
+                displayKey="full_name"
+                secondaryDisplayKey="email"
+              />
+            </div>
+          )}
+
           <div className="form-group">
             <label>Ürün Markası</label>
             <input type="text" name="product_brand" value={formData.product_brand} onChange={handleChange} required />
@@ -68,13 +168,40 @@ function CreateAppointmentModal({ isOpen, onClose }) {
             <textarea name="product_issue" value={formData.product_issue} onChange={handleChange} required />
           </div>
           <div className="form-group">
+            <label>Notlar / Bilgi</label>
+            <textarea name="knowledge" value={formData.knowledge} onChange={handleChange} />
+          </div>
+          <div className="form-group">
             <label>Konum / Adres</label>
             <input type="text" name="location" value={formData.location} onChange={handleChange} required />
           </div>
           <div className="form-group">
             <label>Randevu Tarihi ve Saati</label>
-            <input type="datetime-local" name="scheduled_for" value={formData.scheduled_for} onChange={handleChange} required />
+            <input
+              type="datetime-local"
+              name="scheduled_for"
+              value={formData.scheduled_for}
+              onChange={handleChange}
+              min={toLocalISOString(new Date())}
+              max={toLocalISOString(new Date(new Date().setMonth(new Date().getMonth() + 1)))}
+              required
+            />
           </div>
+
+          {isUserCreator && (
+            <div className="form-group">
+              <label>Teknisyen Seç (Opsiyonel)</label>
+              <SearchableDropdown
+                options={filteredTechnicians}
+                onSelect={(option) => handleSelect('technician_id', option)}
+                placeholder={!formData.scheduled_for ? "Önce tarih seçiniz" : (loadingTechnicians ? "Teknisyenler yükleniyor..." : "Teknisyen ara...")}
+                displayKey="full_name"
+                secondaryDisplayKey="email"
+                disabled={!formData.scheduled_for || loadingTechnicians}
+              />
+            </div>
+          )}
+
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>İptal</button>
             <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Oluşturuluyor...' : 'Randevu Oluştur'}</button>

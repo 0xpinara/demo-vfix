@@ -1,103 +1,91 @@
+/* Appointment Calendar Container */
 .appointment-calendar-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px;
-}
-
-.calendar-display {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-/* Customize react-calendar */
-.react-calendar-custom {
-    background-color: #1a1a1a; /* Mostly black background */
-    border: 1px solid #ff0000; /* Red border */
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Darker shadow for black theme */
-    width: 100%;
-    font-family: 'Arial', sans-serif;
-}
-
-.react-calendar-custom .react-calendar__navigation button {
-    color: #ff0000; /* Red navigation buttons */
     font-weight: bold;
     font-size: 1.1em;
-    background: none; /* Remove default background */
+    background: none;
+    /* Remove default background */
 }
 
 .react-calendar-custom .react-calendar__navigation button:hover {
-    background-color: #330000; /* Darker red on hover */
+    background-color: #330000;
+    /* Darker red on hover */
 }
 
 .react-calendar-custom .react-calendar__month-view__weekdays {
-    color: #cccccc; /* Lighter color for weekdays */
+    color: #cccccc;
+    /* Lighter color for weekdays */
 }
 
 .react-calendar-custom .react-calendar__month-view__days__day {
-    color: #cccccc; /* Lighter color for days */
+    color: #cccccc;
+    /* Lighter color for days */
 }
 
 .react-calendar-custom .react-calendar__month-view__days__day--weekend {
-    color: #ff3333; /* Brighter red for weekend days */
+    color: #ff3333;
+    /* Brighter red for weekend days */
 }
 
 .react-calendar-custom .react-calendar__tile {
     padding: 10px 5px;
     position: relative;
-    background-color: #1a1a1a; /* Ensure tile background is dark */
-    color: #cccccc; /* Default day number color */
+    background-color: #1a1a1a;
+    /* Ensure tile background is dark */
+    color: #cccccc;
+    /* Default day number color */
 }
 
 .react-calendar-custom .react-calendar__tile--active,
 .react-calendar-custom .react-calendar__tile--active:enabled:hover,
 .react-calendar-custom .react-calendar__tile--active:enabled:focus {
-    background: #ff0000; /* Red background for active/selected day */
+    background: #ff0000;
+    /* Red background for active/selected day */
     color: white;
     border-radius: 4px;
 }
 
 .react-calendar-custom .react-calendar__tile--now {
-    background: #550000; /* Darker red for today's date */
+    background: #550000;
+    /* Darker red for today's date */
     border-radius: 4px;
     color: white;
 }
 
 .react-calendar-custom .react-calendar__tile--now:enabled:hover,
 .react-calendar-custom .react-calendar__tile--now:enabled:focus {
-    background: #880000; /* Even darker red on hover for today's date */
+    background: #880000;
+    /* Even darker red on hover for today's date */
 }
 
 /* Dot for marking appointments */
-.react-calendar-custom .dot {
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
+.react-calendar-custom .calendar-dot {
+    display: inline-block;
     height: 6px;
     width: 6px;
-    background-color: #ff0000; /* Red dot for appointment days */
     border-radius: 50%;
+    margin: 0 1px;
 }
 
 /* Styling for the list of appointments for a selected day */
 .selected-day-appointments {
     margin-top: 20px;
     padding: 15px;
-    border: 1px solid #ff0000; /* Red border for the appointments list */
+    border: 1px solid #ff0000;
+    /* Red border for the appointments list */
     border-radius: 8px;
-    background-color: #1a1a1a; /* Black background for appointments list */
+    background-color: #1a1a1a;
+    /* Black background for appointments list */
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
-    color: #cccccc; /* Default text color for the list */
+    color: #cccccc;
+    /* Default text color for the list */
 }
 
 .selected-day-appointments h3 {
     margin-top: 0;
-    color: #ff0000; /* Red heading for the list */
+    color: #ff0000;
+    /* Red heading for the list */
     font-size: 1.2em;
 }
 
@@ -109,8 +97,10 @@
 
 .selected-day-appointments li {
     padding: 8px 0;
-    border-bottom: 1px dashed #555; /* Darker dashed border for list items */
-    color: #cccccc; /* Lighter color for list items */
+    border-bottom: 1px dashed #555;
+    /* Darker dashed border for list items */
+    color: #cccccc;
+    /* Lighter color for list items */
     font-size: 0.95em;
 }
 
@@ -119,6 +109,7 @@
 }
 
 .selected-day-appointments p {
-    color: #ff3333; /* Red color for "No appointments" message */
+    color: #ff3333;
+    /* Red color for "No appointments" message */
     font-style: italic;
 }

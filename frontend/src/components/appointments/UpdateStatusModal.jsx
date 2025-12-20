@@ -42,9 +42,8 @@ function UpdateStatusModal({ isOpen, onClose, appointment }) {
               required
             >
               <option value="pending">Beklemede</option>
-              <option value="scheduled">Zamanlandı</option>
+              <option value="scheduled">Planlandı</option>
               <option value="completed">Tamamlandı</option>
-              <option value="cancelled">İptal Edildi</option>
             </select>
           </div>
           {error && <p className="error-message">{error}</p>}

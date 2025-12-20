@@ -29,35 +29,70 @@ class AppointmentService:
         logger.debug(f"Fetching appointments for technician: {technician_id}")
         return self.repo.get_by_technician_id(technician_id, skip=skip, limit=limit)
 
-    def create_appointment_request(self, appointment_data: schemas.AppointmentCreate, customer_id: str) -> models.Appointment:
-        """
-        Creates a new appointment request from a customer.
-        The appointment is created with a 'PENDING' status and no technician assigned.
-        """
-        # Validate the customer exists and is active.
-        customer = self.user_repo.get_by_id(customer_id)
-        if not customer or not customer.is_active:
-            raise ValueError(f"Invalid or inactive customer ID: {customer_id}")
+    def get_unassigned_appointments(self, skip: int = 0, limit: int = 100) -> tuple[List[models.Appointment], int]:
+        """Gets a paginated list of unassigned appointments."""
+        logger.debug("Fetching unassigned appointments")
+        return self.repo.get_unassigned(skip=skip, limit=limit)
 
-        # The repository's `create` method is designed for creating a *scheduled* appointment
-        # and requires a technician_id. For a customer-initiated request, it's better
-        # to construct the model here and use a more generic repository method.
-        # Since the repository doesn't have a simple `add` method, we'll use the session directly.
+    def create_appointment_request(
+        self,
+        *,
+        appointment_data: schemas.AppointmentCreate,
+        other_id: str,
+        creator: models.User,
+    ) -> models.Appointment:
+        """
+        Creates a new appointment.
+        - If created by a 'user' or 'admin', it's a PENDING request for that customer.
+        - If created by a 'technician', it's SCHEDULED for the customer and assigned to the technician.
+        """
+        # 1. Validate the other exists and is active.
+        if other_id == "empty_technician":
+            customer_id = creator.id
+        else:
+            other = self.user_repo.get_by_id(other_id)
+            if not other or not other.is_active:
+                raise ValueError(f"Invalid or inactive customer/technician ID: {other_id}")
+
+        # 2. Determine technician and status based on the creator's role
+        technician_id = None
+        status = models.AppointmentStatus.PENDING
+
+        # Check for enterprise role first, as that's more specific for technicians
+        user_role = getattr(creator, 'enterprise_role', getattr(creator, 'role', ''))
+        if user_role == 'technician' or user_role == 'senior_technician':
+            technician_id = creator.id
+            customer_id = other_id
+            status = models.AppointmentStatus.SCHEDULED
+        elif appointment_data.technician_id:
+            # If user is not a technician but specifies one, validate and assign
+            technician = self.user_repo.get_by_id(appointment_data.technician_id)
+            if not technician or (getattr(technician, 'role', 'user') != 'technician' and getattr(technician, 'enterprise_role', '') != 'technician' 
+                                  and getattr(technician, 'enterprise_role', '') != 'senior_technician'):
+                 raise ValueError(f"Invalid or non-existent technician ID: {appointment_data.technician_id}")
+            technician_id = appointment_data.technician_id
+            # Status remains PENDING for user-requested technician, awaiting confirmation
+            customer_id = creator.id
+            status = models.AppointmentStatus.PENDING
+        
+        # 3. Create the appointment object
         appointment = models.Appointment(
             customer_id=customer_id,
+            technician_id=technician_id,
             product_brand=appointment_data.product_brand,
             product_model=appointment_data.product_model,
             product_issue=appointment_data.product_issue,
+            knowledge=appointment_data.knowledge,
             location=appointment_data.location,
             scheduled_for=appointment_data.scheduled_for,
-            status=models.AppointmentStatus.PENDING,
-            technician_id=None  # No technician is assigned on initial request.
+            status=status,
         )
 
         self.repo.db.add(appointment)
         self.repo.db.commit()
         self.repo.db.refresh(appointment)
-        logger.info(f"Created new appointment request {appointment.id} for customer {customer_id}")
+        
+        logger.info(f"User {creator.id} ({creator.role}) created new appointment {appointment.id} for customer {customer_id} with status {status.value}")
         return appointment
 
     def update_appointment(self, appointment_id: int, update_data: schemas.AppointmentUpdate) -> Optional[models.Appointment]:
@@ -90,6 +125,28 @@ class AppointmentService:
         # The repo's update_by_id method includes validation for the technician_id.
         return self.repo.update_by_id(appointment_id, update_payload)
 
+    def assign_technician_to_appointment(self, appointment_id: int, technician_id: str) -> Optional[models.Appointment]:
+        """
+        Allows a technician to assign themselves to an unassigned appointment.
+        """
+        appointment = self.repo.get_by_id(appointment_id)
+        if not appointment:
+            raise ValueError("Appointment not found.")
+        if appointment.technician_id:
+            raise ValueError("Appointment is already assigned.")
+
+        technician = self.user_repo.get_by_id(technician_id)
+        if not technician or (getattr(technician, 'enterprise_role', '') not in ['technician', 'senior_technician']):
+            raise ValueError("Invalid technician.")
+
+        update_payload: Dict[str, Any] = {
+            "technician_id": technician_id,
+            "status": models.AppointmentStatus.SCHEDULED
+        }
+
+        logger.info(f"Technician {technician_id} is self-assigning to appointment {appointment_id}")
+        return self.repo.update_by_id(appointment_id, update_payload)
+
     def update_appointment_status(self, appointment_id: int, new_status: models.AppointmentStatus, technician_id: str) -> Optional[models.Appointment]:
         """
         Allows a technician to update the status of an appointment assigned to them.
@@ -97,9 +154,6 @@ class AppointmentService:
         appointment = self.repo.get_by_id(appointment_id)
         if not appointment:
             raise ValueError("Appointment not found.")
-
-        if appointment.technician_id != technician_id:
-            raise PermissionError("You are not authorized to update this appointment.")
 
         update_data = {"status": new_status}
         logger.info(f"Technician {technician_id} updating status of appointment {appointment_id} to {new_status}")

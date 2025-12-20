@@ -12,11 +12,12 @@ import GeneralStatistics from "@/pages/admin/GeneralStatistics";
 import UserFeedback from "@/pages/admin/UserFeedback";
 import TechnicianFeedback from "@/pages/admin/TechnicianFeedback";
 import ImprovementData from "@/pages/admin/ImprovementData";
+import TechnicianVacations from "@/pages/technician/TechnicianVacations";
 
 // Protected Route wrapper for admin pages
 function AdminRoute({ children }) {
   const { user, loading, isAuthenticated } = useAuth();
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
@@ -24,22 +25,22 @@ function AdminRoute({ children }) {
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   if (user?.role !== "admin") {
     return <Navigate to="/" replace />;
   }
-  
+
   return children;
 }
 
 // Protected Route wrapper for authenticated users
 function ProtectedRoute({ children }) {
   const { loading, isAuthenticated } = useAuth();
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
@@ -47,11 +48,11 @@ function ProtectedRoute({ children }) {
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 }
 
@@ -62,7 +63,7 @@ export default function AppRoutes() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
         {/* Protected User Routes */}
         <Route path="/" element={
           <ProtectedRoute>
@@ -76,16 +77,20 @@ export default function AppRoutes() {
         } />
         <Route path="/appointments" element={
           <ProtectedRoute>
-            <Route index element={<AppointmentsPage />} />
+            <AppointmentsPage />
           </ProtectedRoute>
-        }>
-        </Route>
+        } />
         <Route path="/chat" element={
           <ProtectedRoute>
             <ChatPage />
           </ProtectedRoute>
         } />
-        
+        <Route path="/technician/vacations" element={
+          <ProtectedRoute>
+            <TechnicianVacations />
+          </ProtectedRoute>
+        } />
+
         {/* Admin Routes */}
         <Route path="/admin" element={
           <AdminRoute>
@@ -107,7 +112,7 @@ export default function AppRoutes() {
             <ImprovementData />
           </AdminRoute>
         } />
-        
+
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

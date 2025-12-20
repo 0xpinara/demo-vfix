@@ -16,6 +16,9 @@ export const useAppointments = () => {
 // 3. Create the Provider component
 export function AppointmentProvider({ children }) {
   const [appointments, setAppointments] = useState([]);
+  const [unassignedAppointments, setUnassignedAppointments] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [technicians, setTechnicians] = useState([]); // State for technicians
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -23,14 +26,92 @@ export function AppointmentProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      // Use the central API service directly, consistent with AuthContext
       const response = await api.get(`/appointments/`);
       setAppointments(response.data);
     } catch (err) {
-      // Better error handling to display backend messages
       const errorMessage = err.response?.data?.detail || err.message;
       setError(errorMessage);
       console.error(`Failed to fetch appointments:`, err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadUnassignedAppointments = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get(`/appointments/?unassigned=true`);
+      setUnassignedAppointments(response.data);
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || err.message;
+      setError(errorMessage);
+      console.error(`Failed to fetch unassigned appointments:`, err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const selfAssignAppointment = useCallback(async (appointmentId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.post(`/appointments/${appointmentId}/self-assign`);
+      // Add to main appointments list and remove from unassigned list
+      setAppointments(prev => [response.data, ...prev]);
+      setUnassignedAppointments(prev => prev.filter(app => app.id !== appointmentId));
+      setLoading(false);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred.';
+      setError(errorMessage);
+      console.error('Failed to self-assign appointment:', err);
+      setLoading(false);
+      return { success: false, error: errorMessage };
+    }
+  }, []);
+
+  const getUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/users/');
+      setUsers(response.data);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred while fetching users.';
+      setError(errorMessage);
+      console.error('Failed to fetch users:', err);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const getTechnicians = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/technicians/');
+      setTechnicians(response.data);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred while fetching technicians.';
+      setError(errorMessage);
+      console.error('Failed to fetch technicians:', err);
+      return { success: false, error: errorMessage };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const getAvailableTechnicians = useCallback(async (date) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/technicians/?date=${date}`);
+      return { success: true, data: response.data };
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'An unexpected error occurred while fetching technicians.';
+      console.error('Failed to fetch available technicians:', err);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -41,7 +122,6 @@ export function AppointmentProvider({ children }) {
     setError(null);
     try {
       const response = await api.post('/appointments/', appointmentData);
-      // Add new appointment to the start of the list to be immediately visible
       setAppointments(prev => [response.data, ...prev]);
       setLoading(false);
       return { success: true };
@@ -107,9 +187,18 @@ export function AppointmentProvider({ children }) {
 
   const value = {
     appointments,
+    unassignedAppointments,
+    users,
+    technicians,
     loading,
     error,
+    useAppointments,
     loadAppointments,
+    loadUnassignedAppointments,
+    selfAssignAppointment,
+    getUsers,
+    getTechnicians,
+    getAvailableTechnicians,
     createAppointment,
     rescheduleAppointment,
     deleteAppointment,
