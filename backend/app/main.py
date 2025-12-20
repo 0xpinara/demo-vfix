@@ -29,7 +29,9 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # Create tables (in production, use Alembic migrations)
-Base.metadata.create_all(bind=engine)
+# Skip if in testing mode - tests manage their own database
+if not os.environ.get("TESTING"):
+    Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="V-Fix Web App API",
@@ -42,8 +44,9 @@ app = FastAPI(
 # Initialize rate limiting
 app = get_rate_limit_handler(app)
 
-# Add GZip compression for responses
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+# Add GZip compression for responses (skip in test mode to avoid I/O errors)
+if not os.environ.get("TESTING"):
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS middleware
 app.add_middleware(

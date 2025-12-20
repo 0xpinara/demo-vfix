@@ -51,6 +51,10 @@ from app.schemas.vacation_schema import (
     VacationResponse,
     VacationListResponse,
 )
+from app.schemas.technician_schema import (
+    TechnicianFeedbackCreate,
+    TechnicianFeedbackResponse,
+)
 
 
 __all__ = [
@@ -96,4 +100,6 @@ __all__ = [
     "VacationRequest",
     "VacationResponse",
     "VacationListResponse",
+    "TechnicianFeedbackCreate",
+    "TechnicianFeedbackResponse",
 ]

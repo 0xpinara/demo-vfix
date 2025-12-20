@@ -76,7 +76,7 @@ class User(Base):
     # Enterprise fields
     enterprise_id = Column(GUID(), ForeignKey("enterprises.id", ondelete="SET NULL"), nullable=True, index=True)
     branch_id = Column(GUID(), ForeignKey("branches.id", ondelete="SET NULL"), nullable=True, index=True)
-    enterprise_role = Column(String(50), nullable=True, index=True)  # technician, senior_technician, branch_manager, enterprise_admin
+    enterprise_role = Column(String(50), nullable=True)  # technician, senior_technician, branch_manager, enterprise_admin (indexed via composite index in __table_args__)
     employee_id = Column(String(100), nullable=True)  # Internal employee ID
     
     # Use JSON type (SQLAlchemy automatically uses JSONB on PostgreSQL)

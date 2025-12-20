@@ -13,7 +13,7 @@ import { AppointmentProvider } from './context/AppointmentContext'
 // Admin Pages
 import GeneralStatistics from './pages/admin/GeneralStatistics'
 import UserFeedback from './pages/admin/UserFeedback'
-import TechnicianFeedback from './pages/admin/TechnicianFeedback'
+import AdminTechnicianFeedback from './pages/admin/TechnicianFeedback'
 import ImprovementData from './pages/admin/ImprovementData'
 
 // Branch Manager Pages
@@ -24,6 +24,7 @@ import BranchFeedback from './pages/branch-manager/BranchFeedback'
 
 // Technician Pages
 import TechnicianVacations from './pages/technician/TechnicianVacations'
+import TechnicianFeedback from './pages/technician/TechnicianFeedback'
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth()
@@ -132,7 +133,7 @@ function AppRoutes() {
         path="/admin/technician-feedback"
         element={
           <AdminRoute>
-            <TechnicianFeedback />
+            <AdminTechnicianFeedback />
           </AdminRoute>
         }
       />
@@ -150,6 +151,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <TechnicianVacations />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/technician/feedback"
+        element={
+          <ProtectedRoute>
+            <TechnicianFeedback />
           </ProtectedRoute>
         }
       />

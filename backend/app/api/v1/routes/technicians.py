@@ -1,5 +1,5 @@
 """
-Endpoints for fetching technician data.
+Endpoints for fetching technician data and submitting feedback.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -8,8 +8,9 @@ import logging
 from uuid import UUID
 
 from app import models, schemas
-from app.core.dependencies import get_current_user, get_db
+from app.core.dependencies import get_current_user, get_db, require_technician
 from app.services.repositories import UserRepository
+from app.services.technician_service import TechnicianService
 from app.database import get_db
 from app.models.user import User
 from app.models.vacation import VacationType, Vacation, VacationStatus
@@ -17,15 +18,6 @@ from app.models.vacation import VacationType, Vacation, VacationStatus
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-def require_technician(current_user: User = Depends(get_current_user)):
-    """Dependency to ensure user is a technician or senior technician"""
-    if current_user.enterprise_role not in ["technician", "senior_technician"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Technician access required"
-        )
-    return current_user
 
 
 def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
@@ -170,4 +162,62 @@ def cancel_vacation_request(
 
     vacation.status = VacationStatus.CANCELLED
     db.commit()
+
+
+# ==================== Technician Feedback ====================
+
+@router.post(
+    "/feedback",
+    response_model=schemas.TechnicianFeedbackResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def submit_feedback(
+    feedback_data: schemas.TechnicianFeedbackCreate,
+    current_user: User = Depends(require_technician),
+    db: Session = Depends(get_db),
+):
+    """Submit technician feedback after a field visit."""
+    service = TechnicianService(db)
+    try:
+        saved = service.save_feedback(str(current_user.id), feedback_data)
+        return saved
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get(
+    "/feedback",
+    response_model=List[schemas.TechnicianFeedbackResponse],
+    status_code=status.HTTP_200_OK,
+)
+def list_my_feedback(
+    limit: int = 50,
+    current_user: User = Depends(require_technician),
+    db: Session = Depends(get_db),
+):
+    """List feedback entries submitted by the current technician."""
+    service = TechnicianService(db)
+    items = service.list_feedback(str(current_user.id), limit=limit)
+    return items
+
+
+@router.get(
+    "/feedback/{feedback_id}",
+    response_model=schemas.TechnicianFeedbackResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_feedback(
+    feedback_id: UUID,
+    current_user: User = Depends(require_technician),
+    db: Session = Depends(get_db),
+):
+    """Get a specific feedback entry by ID."""
+    service = TechnicianService(db)
+    feedback = service.get_feedback(str(current_user.id), str(feedback_id))
+    if not feedback:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Feedback not found",
+        )
+    return feedback
 

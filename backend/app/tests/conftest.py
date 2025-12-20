@@ -3,33 +3,44 @@ Shared test fixtures and configuration
 """
 import os
 from datetime import datetime, timedelta
+from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Configure testing env before importing the app
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-TEST_DB_PATH = os.path.join(BASE_DIR, "test_api.db")
-os.environ["DATABASE_URL"] = f"sqlite:///{TEST_DB_PATH}"
 os.environ["TESTING"] = "true"
 
 from app.main import app  # noqa: E402
-from app.database import Base, engine, SessionLocal  # noqa: E402
+from app.database import Base, get_db  # noqa: E402
 from app import models  # noqa: E402
 from app.core.security import create_access_token, get_password_hash  # noqa: E402
+
+# Create an in-memory test database (unique per session)
+test_engine = create_engine(
+    "sqlite:///:memory:",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool
+)
+TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 
 def _create_user_with_session(
     db: Session,
     *,
     email="test@example.com",
-    username="testuser",
+    username=None,
     password="password123",
     role="user",
     is_active=True
 ):
     """Helper to create a user and active session for authenticated requests."""
+    if username is None:
+        username = f"testuser_{uuid4().hex[:8]}"
+    
     user = models.User(
         email=email,
         username=username,
@@ -58,15 +69,32 @@ def _create_user_with_session(
     return user, token
 
 
+def override_get_db():
+    """Override for dependency injection in tests."""
+    db = TestSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 @pytest.fixture(autouse=True)
 def clean_db():
     """Clean database before and after each test."""
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    # Drop all tables (in-memory database, so no file conflicts)
+    Base.metadata.drop_all(bind=test_engine)
+    
+    # Create fresh tables
+    Base.metadata.create_all(bind=test_engine)
+    
+    # Override the get_db dependency
+    app.dependency_overrides[get_db] = override_get_db
+    
     yield
-    Base.metadata.drop_all(bind=engine)
-    if os.path.exists(TEST_DB_PATH):
-        os.remove(TEST_DB_PATH)
+    
+    # Cleanup
+    app.dependency_overrides.clear()
+    Base.metadata.drop_all(bind=test_engine)
 
 
 @pytest.fixture
@@ -78,8 +106,11 @@ def client():
 @pytest.fixture
 def db_session():
     """Database session fixture."""
-    with SessionLocal() as db:
+    db = TestSessionLocal()
+    try:
         yield db
+    finally:
+        db.close()
 
 
 @pytest.fixture
