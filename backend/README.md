@@ -37,6 +37,11 @@ Future versions: `/api/v2/…`.
 - `GET /api/chat/feedback/{session_id}` — fetch feedback for the current user and chat session.
 - `GET /api/chat/feedback` — list recent feedback for the authenticated user (limit 50 by default).
 
+## Technician Feedback Endpoints
+- `POST /api/technicians/feedback` — submit technician feedback after a field visit. Requires technician role. Body: `rating` (1-5), optional `comment`, `diagnosis_correct` (bool), `parts_sufficient` (bool), `second_trip_required` (bool), optional `chat_session_id`, and conditional fields (`actual_problem`, `actual_solution`, etc.) when diagnosis was incorrect.
+- `GET /api/technicians/feedback` — list all feedback submitted by the authenticated technician (with optional `limit` query param, default 50).
+- `GET /api/technicians/feedback/{feedback_id}` — retrieve a specific feedback entry by ID (only accessible by the technician who created it).
+
 ## Environment Variables (.env)
 ```ini
 DATABASE_URL=postgresql://user:pass@localhost:5432/vlm_db
@@ -61,6 +66,9 @@ Run all tests:
 ```bash
 pytest -v
 pytest app/tests/test_chat_feedback.py
+pytest app/tests/test_technician_feedback.py
 ```
+
+**Note:** Test warnings are suppressed via `pytest.ini`. GZip middleware is disabled during tests to prevent I/O errors.
 
 ---

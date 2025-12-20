@@ -26,10 +26,11 @@
 |------|----------------|------------------|
 | Auth | `/login`, `/register` | `/api/v1/auth/*` |
 | User Dashboard | `/user/*` | `/api/v1/users/*` |
-| Technician | `/technician/*` | `/api/v1/technicians/*` |
+| Technician | `/technician/*`, `/technician/feedback` | `/api/v1/technicians/*` |
 | Admin | `/admin/*` | `/api/v1/admin/*` |
 | Chat (VLM) | `/chat` | `/api/v1/chat/*` |
 | Appointments | `/user/appointments`, `/technician/appointments` | `/api/v1/appointments/*` |
+| Feedback | Chat: `/chat` (modal), Technician: `/technician/feedback` | `/api/chat/feedback`, `/api/technicians/feedback` |
 
 ---
 
