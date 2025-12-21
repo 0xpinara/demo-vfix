@@ -13,7 +13,8 @@ import uuid
 from app.database.connection import SessionLocal, engine, Base
 from app.models.user import User
 from app.models.appointment import Appointment, AppointmentStatus
-from app.models.admin import TechnicianFeedback, ChatSession
+from app.models.chat_session import ChatSession
+from app.models.admin import TechnicianFeedback
 from app.models.enterprise import Enterprise, Branch
 from app.models.vacation import Vacation, VacationType, VacationStatus
 from app.core.security import get_password_hash

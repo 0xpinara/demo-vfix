@@ -10,32 +10,6 @@ from app.database.connection import Base
 from app.models.user import GUID
 
 
-class ChatSession(Base):
-    """
-    Tracks chat sessions between users and the chatbot.
-    """
-    __tablename__ = "chat_sessions"
-
-    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
-    user_id = Column(GUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    session_key = Column(String(255), unique=True, nullable=False, index=True)
-    title = Column(String(255), nullable=True)
-    message_count = Column(Integer, default=0)
-    problem_solved = Column(Boolean, default=False)
-    technician_dispatched = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
-    ended_at = Column(DateTime(timezone=True), nullable=True)
-
-    user = relationship("User", backref="chat_sessions")
-
-    __table_args__ = (
-        Index('ix_chat_sessions_user_created', 'user_id', 'created_at'),
-    )
-
-    def __repr__(self):
-        return f"<ChatSession(id={self.id}, user_id={self.user_id}, solved={self.problem_solved})>"
-
-
 class TechnicianFeedback(Base):
     """
     Feedback from technicians after field visits.

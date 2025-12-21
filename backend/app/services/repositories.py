@@ -6,7 +6,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from app import models
-from app.models import User, Product, PasswordResetToken, UserSession, LoginHistory, ChatFeedback, Appointment
+from app.models import User, Product, PasswordResetToken, UserSession, LoginHistory, ChatFeedback, ChatSession, ChatMessage, Appointment
 from datetime import datetime
 import logging
 
@@ -390,6 +390,115 @@ class ChatFeedbackRepository:
         self.db.commit()
         self.db.refresh(feedback)
         return feedback
+
+class ChatSessionRepository:
+    """Repository for chat session persistence"""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, user_id: str, title: Optional[str] = None) -> models.ChatSession:
+        """Create a new chat session"""
+        session = models.ChatSession(
+            user_id=user_id,
+            title=title or "Yeni Sohbet",
+        )
+        self.db.add(session)
+        self.db.commit()
+        self.db.refresh(session)
+        return session
+
+    def get_by_id(self, session_id: str, user_id: str) -> Optional[models.ChatSession]:
+        """Get a session by ID, ensuring it belongs to the user"""
+        return (
+            self.db.query(models.ChatSession)
+            .filter(models.ChatSession.id == session_id, models.ChatSession.user_id == user_id)
+            .first()
+        )
+
+    def list_for_user(self, user_id: str, limit: int = 50) -> List[models.ChatSession]:
+        """List sessions for a user, sorted by created_at descending (latest first)"""
+        return (
+            self.db.query(models.ChatSession)
+            .filter(models.ChatSession.user_id == user_id)
+            .order_by(models.ChatSession.created_at.desc())
+            .limit(limit)
+            .all()
+        )
+
+    def update(self, session_id: str, user_id: str, **kwargs) -> Optional[models.ChatSession]:
+        """Update a session"""
+        session = self.get_by_id(session_id, user_id)
+        if not session:
+            return None
+        
+        for key, value in kwargs.items():
+            if hasattr(session, key) and value is not None:
+                setattr(session, key, value)
+        
+        self.db.commit()
+        self.db.refresh(session)
+        return session
+
+    def delete(self, session_id: str, user_id: str) -> bool:
+        """Delete a session (cascade will delete messages)"""
+        session = self.get_by_id(session_id, user_id)
+        if not session:
+            return False
+        
+        self.db.delete(session)
+        self.db.commit()
+        return True
+
+    def increment_message_count(self, session_id: str) -> None:
+        """Increment message count for a session"""
+        session = self.db.query(models.ChatSession).filter(models.ChatSession.id == session_id).first()
+        if session:
+            session.message_count = (session.message_count or 0) + 1
+            self.db.commit()
+
+
+class ChatMessageRepository:
+    """Repository for chat message persistence"""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(
+        self,
+        session_id: str,
+        role: str,
+        content: Optional[str] = None,
+        images: Optional[List[str]] = None,
+    ) -> models.ChatMessage:
+        """Create a new chat message with encrypted content and images"""
+        message = models.ChatMessage(
+            session_id=session_id,
+            role=role,
+        )
+        if content:
+            message.content = content
+        if images:
+            message.images = images
+        
+        self.db.add(message)
+        self.db.commit()
+        self.db.refresh(message)
+        return message
+
+    def get_by_session(self, session_id: str) -> List[models.ChatMessage]:
+        """Get all messages for a session, ordered by created_at"""
+        return (
+            self.db.query(models.ChatMessage)
+            .filter(models.ChatMessage.session_id == session_id)
+            .order_by(models.ChatMessage.created_at.asc())
+            .all()
+        )
+
+    def get_by_id(self, message_id: str) -> Optional[models.ChatMessage]:
+        """Get a message by ID"""
+        return self.db.query(models.ChatMessage).filter(models.ChatMessage.id == message_id).first()
+
 
 class AppointmentRepository:
     """Repository for Appointment model operations with validation and optimized queries."""
