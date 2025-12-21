@@ -28,9 +28,10 @@
 | User Dashboard | `/user/*` | `/api/v1/users/*` |
 | Technician | `/technician/*`, `/technician/feedback` | `/api/v1/technicians/*` |
 | Admin | `/admin/*` | `/api/v1/admin/*` |
-| Chat (VLM) | `/chat` | `/api/v1/chat/*` |
+| Chat (VLM) | `/chat` | `/api/chat/*` |
 | Appointments | `/user/appointments`, `/technician/appointments` | `/api/v1/appointments/*` |
 | Feedback | Chat: `/chat` (modal), Technician: `/technician/feedback` | `/api/chat/feedback`, `/api/technicians/feedback` |
+| Chat Sessions | `/chat` (auto-loaded) | `/api/chat/sessions/*` |
 
 ---
 
@@ -150,8 +151,12 @@ cp .env.example .env
 # ENCRYPTION_KEY=your-encryption-key-here  # For field-level encryption
 ```
 
-### 5. Run database migrations (if using Alembic)
+### 5. Run database migrations
 ```bash
+# Run chat database migration (creates chat_sessions and chat_messages tables)
+python -m app.database.migrate_chat
+
+# If using Alembic for other migrations:
 alembic upgrade head
 ```
 

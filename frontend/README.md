@@ -48,6 +48,13 @@ VITE_API_URL=http://localhost:8000/api
 - All new pages under src/pages/
 - API access only through lib/api.js
 
+## 💬 Chat Persistence (Chatbot Database Integration)
+- **Session Management:** Chat sessions are automatically saved to the backend when created. Users can see their past chat sessions in the sidebar under "SON SOHBETLER".
+- **Message Persistence:** All messages (user and assistant) are saved to the database with encryption. Messages are automatically loaded when clicking on a past session.
+- **Session Loading:** Sessions are loaded on page mount and when the user logs in. Sessions are sorted by creation date (latest first).
+- **API Integration:** The `useChat` hook integrates with `/api/chat/sessions` endpoints for CRUD operations.
+- **Encryption:** Message content and images are encrypted at rest on the backend and automatically decrypted when retrieved.
+
 ## ⭐ Chat Feedback
 - Past chats now show a **Değerlendir** button per session (sidebar) and a top button for the active chat.
 - Feedback modal collects a 1–5 star rating plus an optional comment and sends it to `/api/chat/feedback`.
@@ -69,6 +76,7 @@ npm test
 ```
 Vitest + Testing Library run component and service tests, including:
 - Chat feedback modal and API client (`FeedbackModal.test.jsx`, `feedback.test.js`)
+- Chat session and message management (`useChat.sessions.test.js`, `chat.test.js`) - 32 tests
 - Technician feedback form, page, and service (`TechnicianFeedbackForm.test.jsx`, `TechnicianFeedback.test.jsx`, `technicianFeedback.test.js`)
 - All 48 frontend tests passing for technician feedback feature
 

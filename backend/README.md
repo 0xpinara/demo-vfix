@@ -32,6 +32,16 @@ uvicorn app.main:app --reload
 All routes are currently under `/api/...` (chat feedback uses `/api/chat/feedback`).
 Future versions: `/api/v2/…`.
 
+## Chat Session and Message Endpoints
+- `POST /api/chat/sessions` — create a new chat session. Body: optional `title`.
+- `GET /api/chat/sessions` — list chat sessions for the authenticated user (sorted by created_at descending, limit 50 by default).
+- `GET /api/chat/sessions/{session_id}` — get a chat session with all its messages (decrypted).
+- `PUT /api/chat/sessions/{session_id}` — update a session (title, problem_solved, technician_dispatched).
+- `DELETE /api/chat/sessions/{session_id}` — delete a session and all its messages.
+- `POST /api/chat/sessions/{session_id}/messages` — add a message to a session. Body: `role` ("user" or "assistant"), optional `content`, optional `images` (array of base64 strings).
+
+**Note:** All messages are encrypted at rest using Fernet encryption. Content and images are automatically encrypted when saved and decrypted when retrieved.
+
 ## Chat Feedback Endpoints
 - `POST /api/chat/feedback` — create or update feedback for a chat session. Body: `session_id` (string), `rating` (1-5), optional `comment`, optional `session_title`.
 - `GET /api/chat/feedback/{session_id}` — fetch feedback for the current user and chat session.
@@ -60,12 +70,24 @@ VLM_MODEL_PATH=/models/vlm/
 { "status": "success", "data": {...}, "message": "..." }
 ```
 
+## Database Migrations
+Run the chat database migration to create chat session and message tables:
+
+```bash
+python -m app.database.migrate_chat
+```
+
+This creates:
+- `chat_sessions` table (with nullable `session_key` for legacy compatibility)
+- `chat_messages` table (with encrypted `content` and `images` fields)
+
 ## Testing
 Run all tests:
 
 ```bash
 pytest -v
 pytest app/tests/test_chat_feedback.py
+pytest app/tests/test_chat_sessions.py  # Comprehensive tests for chat persistence
 pytest app/tests/test_technician_feedback.py
 ```
 
