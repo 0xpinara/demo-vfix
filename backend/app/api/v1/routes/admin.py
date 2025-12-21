@@ -11,7 +11,8 @@ import logging
 from app.database import get_db
 from app.models.user import User
 from app.models.chat_session import ChatFeedback
-from app.models.admin import ChatSession, TechnicianFeedback, ImprovementData
+from app.models.chat_session import ChatSession
+from app.models.admin import TechnicianFeedback, ImprovementData
 from app.schemas.admin_schema import (
     StatisticsResponse,
     GeneralStatistics,

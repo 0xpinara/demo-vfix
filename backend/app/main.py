@@ -44,9 +44,10 @@ app = FastAPI(
 # Initialize rate limiting
 app = get_rate_limit_handler(app)
 
-# Add GZip compression for responses (skip in test mode to avoid I/O errors)
-if not os.environ.get("TESTING"):
-    app.add_middleware(GZipMiddleware, minimum_size=1000)
+# GZip compression disabled - causes I/O errors with Python 3.13 when connections close early
+# TODO: Re-enable when upgrading to a fixed version of Python/uvicorn
+# if not os.environ.get("TESTING"):
+#     app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS middleware
 app.add_middleware(

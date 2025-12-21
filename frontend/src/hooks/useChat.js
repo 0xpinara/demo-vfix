@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid"; // for unique session IDs
 import { getFeedback, saveFeedback } from "@/services/feedback";
+import * as chatService from "@/services/chat";
+import { useAuth } from "@/context/AuthContext";
 
 export function useChat() {
   const [sessions, setSessions] = useState([]);
@@ -11,15 +13,120 @@ export function useChat() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const loadedSessionsRef = useRef(new Set()); // Track which sessions have loaded messages
+  const previousSessionIdRef = useRef(null); // Track previous session ID to detect changes
   const [feedbackBySession, setFeedbackBySession] = useState({});
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [feedbackError, setFeedbackError] = useState(null);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionsError, setSessionsError] = useState(null);
+  const { user } = useAuth();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [sessions, currentSessionId]);  
+  useEffect(scrollToBottom, [sessions, currentSessionId]);
+
+  // Load sessions from backend on mount and when user changes
+  useEffect(() => {
+    const loadSessions = async () => {
+      // Only load if user is authenticated
+      if (!user || !user.id) {
+        setSessions([]);
+        setCurrentSessionId(null);
+        loadedSessionsRef.current.clear();
+        return;
+      }
+
+      try {
+        setSessionsLoading(true);
+        setSessionsError(null);
+        const data = await chatService.getSessions(50);
+        const formattedSessions = (data.sessions || []).map((session) => ({
+          id: session.id,
+          title: session.title || "Yeni Sohbet",
+          messages: [], // Messages will be loaded when session is selected
+          message_count: session.message_count || 0,
+          created_at: session.created_at,
+        }));
+        // Ensure sessions are sorted by created_at descending (latest first)
+        formattedSessions.sort((a, b) => {
+          const dateA = new Date(a.created_at || 0);
+          const dateB = new Date(b.created_at || 0);
+          return dateB - dateA;
+        });
+        setSessions(formattedSessions);
+        // Clear loaded sessions cache when user changes
+        loadedSessionsRef.current.clear();
+        previousSessionIdRef.current = null; // Reset previous session ID tracking
+        setCurrentSessionId(null); // Reset current session when user changes
+      } catch (err) {
+        console.error("Failed to load sessions:", err);
+        setSessionsError(err?.response?.data?.detail || "Sessions could not be loaded.");
+        // Set empty sessions on error to avoid showing stale data
+        setSessions([]);
+      } finally {
+        setSessionsLoading(false);
+      }
+    };
+
+    loadSessions();
+  }, [user?.id]); // Reload when user ID changes (login/logout)
+
+  // Load messages when switching to a session
+  useEffect(() => {
+    // Skip if session ID hasn't changed
+    if (currentSessionId === previousSessionIdRef.current) {
+      return;
+    }
+    previousSessionIdRef.current = currentSessionId;
+
+    const loadSessionMessages = async () => {
+      if (!currentSessionId) {
+        return;
+      }
+      
+      // Check if messages are already loaded
+      if (loadedSessionsRef.current.has(currentSessionId)) {
+        return;
+      }
+
+      try {
+        const data = await chatService.getSession(currentSessionId);
+        if (!data) {
+          console.error("Session data is empty");
+          return;
+        }
+        
+        const formattedMessages = (data.messages || []).map((msg) => ({
+          role: msg.role,
+          content: msg.content || "",
+          images: msg.images || [],
+        }));
+
+        setSessions((prev) => {
+          const sessionExists = prev.some((s) => s.id === currentSessionId);
+          if (!sessionExists) {
+            // Session not in list yet, don't update
+            return prev;
+          }
+          return prev.map((s) =>
+            s.id === currentSessionId
+              ? { ...s, messages: formattedMessages }
+              : s
+          );
+        });
+        
+        loadedSessionsRef.current.add(currentSessionId);
+      } catch (err) {
+        console.error("Failed to load session messages:", err);
+        // Don't mark as loaded on error so user can retry
+      }
+    };
+
+    loadSessionMessages();
+  }, [currentSessionId]);  
 
   const msgs = sessions.find((s) => s.id === currentSessionId)?.messages || [];
 
@@ -168,21 +275,71 @@ Varsa fotoğraf da gönderebilirsiniz, daha iyi yardımcı olabilirim! 😊`;
     setCurrentSessionId(null); // mark as unsaved new chat
   };
 
-  const createNewSession = (firstMessage) => {
-    const id = uuidv4();
-    const title =
-      firstMessage.content.length > 20
-        ? firstMessage.content.substring(0, 20) + "..."
-        : firstMessage.content;
+  // Helper to convert image files to base64
+  const convertImagesToBase64 = async (imageObjects) => {
+    const base64Promises = imageObjects.map((imgObj) => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result); // base64 string
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(imgObj.file);
+      });
+    });
+    return (await Promise.all(base64Promises)).filter(Boolean);
+  };
 
-    const newSession = {
-      id,
-      title,
-      messages: [firstMessage],
-    };
-    setSessions((prev) => [...prev, newSession]);
-    setCurrentSessionId(id);
-    return id;
+  const createNewSession = async (firstMessage) => {
+    try {
+      const title =
+        firstMessage.content.length > 20
+          ? firstMessage.content.substring(0, 20) + "..."
+          : firstMessage.content;
+
+      // Convert images to base64
+      const imageBase64 = firstMessage.images
+        ? await convertImagesToBase64(firstMessage.images)
+        : [];
+
+      // Create session in backend
+      const sessionData = await chatService.createSession({ title });
+      const id = sessionData.id;
+
+      // Add first message to backend
+      await chatService.addMessage(id, {
+        role: "user",
+        content: firstMessage.content,
+        images: imageBase64,
+      });
+
+      const newSession = {
+        id,
+        title: sessionData.title,
+        messages: [firstMessage],
+        message_count: 1,
+        created_at: sessionData.created_at,
+      };
+      setSessions((prev) => [newSession, ...prev]); // Add to beginning (latest first)
+      setCurrentSessionId(id);
+      return id;
+    } catch (err) {
+      console.error("Failed to create session:", err);
+      // Fallback to local-only session if backend fails
+      const id = uuidv4();
+      const title =
+        firstMessage.content.length > 20
+          ? firstMessage.content.substring(0, 20) + "..."
+          : firstMessage.content;
+      const newSession = {
+        id,
+        title,
+        messages: [firstMessage],
+      };
+      setSessions((prev) => [newSession, ...prev]);
+      setCurrentSessionId(id);
+      return id;
+    }
   };
 
   const addMessageToSession = (message) => {
@@ -195,7 +352,7 @@ Varsa fotoğraf da gönderebilirsiniz, daha iyi yardımcı olabilirim! 😊`;
     );
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e?.preventDefault?.();
     if ((!input.trim() && attachedImages.length === 0) || busy) return;
 
@@ -211,33 +368,70 @@ Varsa fotoğraf da gönderebilirsiniz, daha iyi yardımcı olabilirim! 😊`;
 
     let sessionId = currentSessionId;
 
-    // If no current session, create one
-    if (!sessionId) {
-      sessionId = createNewSession(userMessage);
-    } else {
-      // Add message to existing session
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === sessionId
-            ? { ...s, messages: [...s.messages, userMessage] }
-            : s
-        )
-      );
-    }
+    try {
+      // If no current session, create one
+      if (!sessionId) {
+        sessionId = await createNewSession(userMessage);
+      } else {
+        // Convert images to base64 and save message to backend
+        const imageBase64 = userMessage.images.length > 0
+          ? await convertImagesToBase64(userMessage.images)
+          : [];
 
-    setTimeout(() => {
-      const response = getDemoResponse(userMessage.content);
+        try {
+          await chatService.addMessage(sessionId, {
+            role: "user",
+            content: userMessage.content,
+            images: imageBase64,
+          });
+        } catch (err) {
+          console.error("Failed to save message to backend:", err);
+          // Continue with local state update even if backend fails
+        }
 
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === sessionId
-            ? { ...s, messages: [...s.messages, { role: "assistant", content: response }] }
-            : s
-        )
-      );
+        // Add message to existing session (local state)
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === sessionId
+              ? { ...s, messages: [...s.messages, userMessage] }
+              : s
+          )
+        );
+      }
 
+      // Generate and save assistant response
+      setTimeout(async () => {
+        const response = getDemoResponse(userMessage.content);
+        const assistantMessage = { role: "assistant", content: response };
+
+        // Save assistant message to backend if session exists
+        if (sessionId) {
+          try {
+            await chatService.addMessage(sessionId, {
+              role: "assistant",
+              content: response,
+              images: null,
+            });
+          } catch (err) {
+            console.error("Failed to save assistant message to backend:", err);
+          }
+        }
+
+        // Update local state
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === sessionId
+              ? { ...s, messages: [...s.messages, assistantMessage] }
+              : s
+          )
+        );
+
+        setBusy(false);
+      }, 800);
+    } catch (err) {
+      console.error("Error in onSubmit:", err);
       setBusy(false);
-    }, 800);
+    }
   };
 
   const fetchFeedbackForSession = async (sessionId) => {
@@ -315,5 +509,7 @@ Varsa fotoğraf da gönderebilirsiniz, daha iyi yardımcı olabilirim! 😊`;
     feedbackBySession,
     feedbackLoading,
     feedbackError,
+    sessionsLoading,
+    sessionsError,
   };
 }
