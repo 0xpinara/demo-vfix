@@ -77,7 +77,7 @@ function BranchManagerRoute({ children }) {
     return <Navigate to="/login" replace />
   }
 
-  if (user?.enterprise_role !== 'branch_manager') {
+  if (user?.enterprise_role !== 'branch_manager' && user?.enterprise_role !== 'enterprise_admin') {
     return <Navigate to="/dashboard" replace />
   }
 
@@ -172,9 +172,9 @@ function AppRoutes() {
         }
       />
 
-      {/* Branch Manager Routes */}
+      {/* Enterprise Routes (Branch Manager & Enterprise Admin) */}
       <Route
-        path="/branch-manager"
+        path="/enterprise"
         element={
           <BranchManagerRoute>
             <BranchStatistics />
@@ -182,7 +182,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/branch-manager/appointments"
+        path="/enterprise/appointments"
         element={
           <BranchManagerRoute>
             <BranchAppointments />
@@ -190,7 +190,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/branch-manager/vacations"
+        path="/enterprise/vacations"
         element={
           <BranchManagerRoute>
             <BranchVacations />
@@ -198,7 +198,7 @@ function AppRoutes() {
         }
       />
       <Route
-        path="/branch-manager/feedback"
+        path="/enterprise/feedback"
         element={
           <BranchManagerRoute>
             <BranchFeedback />

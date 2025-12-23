@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import AuthLayout from '../../components/auth/AuthLayout'
@@ -11,6 +11,8 @@ import { FiMail, FiUser, FiLock, FiEye, FiEyeOff, FiPhone, FiBriefcase, FiHome }
 import './Register.css'
 
 function EnterpriseRegister() {
+  const { setTokenAndFetchUser, user } = useAuth()
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
     // Account info
@@ -44,8 +46,6 @@ function EnterpriseRegister() {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const navigate = useNavigate()
-  const { setTokenAndFetchUser } = useAuth()
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -123,8 +123,12 @@ function EnterpriseRegister() {
       // Update AuthContext state and fetch user data
       await setTokenAndFetchUser(access_token)
       
-      // Navigate after authentication state is updated
-      navigate('/chat')
+      // Navigate based on enterprise role from form data (user will be available after fetchUser completes)
+      if (formData.enterprise_role === 'branch_manager' || formData.enterprise_role === 'enterprise_admin') {
+        navigate('/enterprise')
+      } else {
+        navigate('/chat')
+      }
     } catch (error) {
       setErrors({
         submit: error.response?.data?.detail || 'Kayıt başarısız oldu',

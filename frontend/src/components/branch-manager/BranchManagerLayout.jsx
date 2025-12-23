@@ -15,23 +15,23 @@ import './BranchManagerLayout.css';
 
 const navItems = [
   {
-    path: '/branch-manager',
+    path: '/enterprise',
     label: 'Genel İstatistikler',
     icon: BarChart3,
     exact: true
   },
   {
-    path: '/branch-manager/appointments',
+    path: '/enterprise/appointments',
     label: 'Randevu Takvimi',
     icon: Calendar
   },
   {
-    path: '/branch-manager/vacations',
+    path: '/enterprise/vacations',
     label: 'İzin Durumu',
     icon: CalendarOff
   },
   {
-    path: '/branch-manager/feedback',
+    path: '/enterprise/feedback',
     label: 'AI Geri Bildirimleri',
     icon: MessageSquare
   }
