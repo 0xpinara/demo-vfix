@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import random
 import uuid
 
-from app.database.connection import SessionLocal, engine, Base
+from app.database.connection import SessionLocal, engine, Base, create_tables_safely
 from app.models.user import User
 from app.models.chat_session import ChatFeedback
 from app.models.chat_session import ChatSession
@@ -24,7 +24,7 @@ def seed_database():
     
     try:
         # Create tables if they don't exist
-        Base.metadata.create_all(bind=engine)
+        create_tables_safely()
         
         print("🌱 Starting database seeding...")
         

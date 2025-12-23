@@ -4,6 +4,7 @@ Database configuration with optimized connection pooling for scalability
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.pool import QueuePool, NullPool
+from sqlalchemy.exc import OperationalError
 import os
 import logging
 from dotenv import load_dotenv
@@ -66,4 +67,21 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def create_tables_safely():
+    """
+    Create database tables and indexes safely.
+    Handles existing indexes gracefully (SQLite doesn't support IF NOT EXISTS for indexes).
+    """
+    try:
+        Base.metadata.create_all(bind=engine, checkfirst=True)
+    except OperationalError as e:
+        # SQLite throws errors for existing indexes, which is safe to ignore
+        error_msg = str(e).lower()
+        if "already exists" in error_msg and "index" in error_msg:
+            logger.warning(f"Ignoring existing index error: {e}")
+        else:
+            # Re-raise if it's a different error
+            raise
 

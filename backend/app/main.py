@@ -17,7 +17,7 @@ import os
 import logging
 from dotenv import load_dotenv
 
-from app.database import get_db, engine, Base
+from app.database import get_db, engine, Base, create_tables_safely
 from app.core.security import get_rate_limit_handler
 from app.core.logger import setup_logging
 from app.api.v1.routes import chat, admin, appointments, auth, users, system, enterprise, branch_manager, technicians
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Create tables (in production, use Alembic migrations)
 # Skip if in testing mode - tests manage their own database
 if not os.environ.get("TESTING"):
-    Base.metadata.create_all(bind=engine)
+    create_tables_safely()
 
 app = FastAPI(
     title="V-Fix Web App API",

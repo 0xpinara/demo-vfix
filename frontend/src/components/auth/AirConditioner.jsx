@@ -31,8 +31,9 @@ function AirConditioner({ isPasswordFocused, passwordValue, showPassword }) {
 
   useEffect(() => {
     if (showPassword) {
-      setEyesClosed(false)
-      setIsPeeking(true)
+      // Air conditioner closes its eyes when password is shown (no peeking!)
+      setEyesClosed(true)
+      setIsPeeking(false)
     } else {
       setEyesClosed(isPasswordFocused && passwordValue.length > 0)
       setIsPeeking(false)

@@ -31,13 +31,9 @@ function Appliance({ type, isPasswordFocused, passwordValue, showPassword, isPee
 
   useEffect(() => {
     if (showPassword) {
+      // All appliances close their eyes when password is shown (no peeking!)
       setEyesClosed(true)
-      if (isPeeker) {
-        setIsPeeking(true)
-        setEyesClosed(false)
-      } else {
-        setIsPeeking(false)
-      }
+      setIsPeeking(false)
     } else {
       setEyesClosed(isPasswordFocused && passwordValue.length > 0)
       setIsPeeking(false)

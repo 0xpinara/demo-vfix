@@ -103,7 +103,7 @@ class User(Base):
         Index('ix_users_active_created', 'is_active', 'created_at'),
         Index('ix_users_role_active', 'role', 'is_active'),
         Index('ix_users_enterprise_branch', 'enterprise_id', 'branch_id'),
-        Index('ix_users_enterprise_role', 'enterprise_id', 'enterprise_role'),
+        Index('ix_users_enterprise_id_role', 'enterprise_id', 'enterprise_role'),  # Renamed to avoid conflict
     )
     
     # Encrypted field properties
