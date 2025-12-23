@@ -6,7 +6,7 @@ from app.core.security import verify_token
 from app.database import get_db
 from app import models
 from app.services.repositories import SessionRepository
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 security = HTTPBearer()
@@ -45,7 +45,7 @@ def get_current_user(
                 detail="Session expired or revoked"
             )
         # Check if session is expired
-        if session.expires_at < datetime.utcnow():
+        if session.expires_at < datetime.now(timezone.utc):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Session expired"

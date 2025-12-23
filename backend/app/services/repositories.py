@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from app import models
 from app.models import User, Product, PasswordResetToken, UserSession, LoginHistory, ChatFeedback, ChatSession, ChatMessage, Appointment
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -204,9 +204,8 @@ class PasswordResetTokenRepository:
     
     def cleanup_expired(self) -> int:
         """Delete expired reset tokens (uses composite index)"""
-        from datetime import datetime
         result = self.db.query(models.PasswordResetToken).filter(
-            models.PasswordResetToken.expires_at < datetime.utcnow()
+            models.PasswordResetToken.expires_at < datetime.now(timezone.utc)
         ).delete()
         self.db.commit()
         logger.info(f"Cleaned up {result} expired reset tokens")
@@ -252,8 +251,7 @@ class SessionRepository:
     
     def update_last_used(self, session: models.UserSession) -> models.UserSession:
         """Update session last used timestamp"""
-        from datetime import datetime
-        session.last_used_at = datetime.utcnow()
+        session.last_used_at = datetime.now(timezone.utc)
         self.db.commit()
         self.db.refresh(session)
         return session
@@ -287,9 +285,8 @@ class SessionRepository:
     
     def cleanup_expired(self) -> int:
         """Delete expired sessions"""
-        from datetime import datetime
         result = self.db.query(models.UserSession).filter(
-            models.UserSession.expires_at < datetime.utcnow()
+            models.UserSession.expires_at < datetime.now(timezone.utc)
         ).delete()
         self.db.commit()
         logger.info(f"Cleaned up {result} expired sessions")
@@ -328,8 +325,8 @@ class LoginHistoryRepository:
     
     def get_recent_failures(self, email: str, minutes: int = 15) -> List[models.LoginHistory]:
         """Get recent failed login attempts for an email"""
-        from datetime import datetime, timedelta
-        cutoff_time = datetime.utcnow() - timedelta(minutes=minutes)
+        from datetime import timedelta
+        cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=minutes)
         return self.db.query(models.LoginHistory).filter(
             models.LoginHistory.email == email,
             models.LoginHistory.success == False,

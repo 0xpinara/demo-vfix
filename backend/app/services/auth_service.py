@@ -4,7 +4,7 @@ Coordinates between repositories, caching, and authentication.
 """
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 import logging
 
@@ -114,8 +114,7 @@ class AuthService:
         
         # Check if account is locked
         if user and user.locked_until:
-            from datetime import datetime
-            if user.locked_until > datetime.utcnow():
+            if user.locked_until > datetime.now(timezone.utc):
                 # Account is still locked
                 self._log_login_attempt(
                     email=email,
@@ -166,8 +165,7 @@ class AuthService:
             
             # Lock account if max attempts reached
             if user.failed_login_attempts >= self.MAX_FAILED_ATTEMPTS:
-                from datetime import datetime, timedelta
-                user.locked_until = datetime.utcnow() + timedelta(minutes=self.LOCKOUT_DURATION_MINUTES)
+                user.locked_until = datetime.now(timezone.utc) + timedelta(minutes=self.LOCKOUT_DURATION_MINUTES)
                 logger.warning(f"Account locked for user {user.email} due to {user.failed_login_attempts} failed attempts")
             
             self.user_repo.update(user)
@@ -274,7 +272,7 @@ class AuthService:
         token = secrets.token_urlsafe(32)
         
         # Set expiration (1 hour from now)
-        expires_at = datetime.utcnow() + timedelta(hours=1)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         
         # Create token
         reset_token = models.PasswordResetToken(
@@ -300,7 +298,7 @@ class AuthService:
             return False
         
         # Check if token is expired
-        if reset_token.expires_at < datetime.utcnow():
+        if reset_token.expires_at < datetime.now(timezone.utc):
             return False
         
         # Get user
@@ -343,7 +341,7 @@ class AuthService:
         device_name, user_agent, ip_address = get_device_info(request)
         
         # Calculate expiration (30 days for sessions)
-        expires_at = datetime.utcnow() + timedelta(days=30)
+        expires_at = datetime.now(timezone.utc) + timedelta(days=30)
         
         session = models.UserSession(
             user_id=user_id,

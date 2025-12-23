@@ -1,7 +1,7 @@
 """
 Security utilities: JWT authentication, password hashing, and rate limiting
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 from jose import JWTError, jwt
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -57,14 +57,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None, j
     
     # Set expiration
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode.update({
         "exp": expire,
         "jti": jti,  # JWT ID for session tracking
-        "iat": datetime.utcnow()  # Issued at time
+        "iat": datetime.now(timezone.utc)  # Issued at time
     })
     
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
