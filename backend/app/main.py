@@ -52,13 +52,19 @@ app = get_rate_limit_handler(app)
 # CORS middleware
 # In production, allow all origins for Railway deployments
 cors_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
-if os.getenv("ENVIRONMENT") == "production":
-    # Allow all Railway domains and localhost for development
-    cors_origins = "*"
+is_production = os.getenv("ENVIRONMENT") == "production"
+if is_production:
+    # In production, allow all origins (Railway domains vary)
+    cors_origins_list = ["*"]
+    allow_creds = False  # Can't use credentials with wildcard origin
+else:
+    cors_origins_list = cors_origins.split(",")
+    allow_creds = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins.split(",") if cors_origins != "*" else ["*"],
-    allow_credentials=True,
+    allow_origins=cors_origins_list,
+    allow_credentials=allow_creds,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["X-Request-ID"]
