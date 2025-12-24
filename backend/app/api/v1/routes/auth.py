@@ -92,6 +92,13 @@ async def login(request: Request, credentials: schemas.UserLogin, db: Session = 
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Geçersiz e-posta veya şifre"
             )
+    except Exception as e:
+        # Catch all other exceptions to prevent 500 errors
+        logger.error(f"Login error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Login işlemi sırasında bir hata oluştu: {str(e)}"
+        )
 
 
 @router.post("/google", response_model=schemas.TokenResponse)
