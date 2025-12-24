@@ -14,6 +14,9 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./vfix_db.sqlite")
+# Strip any whitespace/newlines from DATABASE_URL (common issue with Railway env vars)
+if DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.strip()
 
 # Connection pool configuration for scalability
 connect_args = {}

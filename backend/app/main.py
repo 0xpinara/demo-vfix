@@ -50,9 +50,14 @@ app = get_rate_limit_handler(app)
 #     app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS middleware
+# In production, allow all origins for Railway deployments
+cors_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
+if os.getenv("ENVIRONMENT") == "production":
+    # Allow all Railway domains and localhost for development
+    cors_origins = "*"
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(","),
+    allow_origins=cors_origins.split(",") if cors_origins != "*" else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
