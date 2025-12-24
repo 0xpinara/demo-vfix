@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models
 from app.core.security import get_password_hash
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import uuid
 import unicodedata
 import re
@@ -181,7 +181,7 @@ def create_enterprise_users():
                 user_agent="Python Seed",
                 ip_address="127.0.0.1",
                 is_active=True,
-                expires_at=datetime.utcnow() + timedelta(days=30)
+                expires_at=datetime.now(timezone.utc) + timedelta(days=30)
             )
             db.add(session)
             

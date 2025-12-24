@@ -6,7 +6,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import random
 import uuid
 
@@ -75,6 +75,7 @@ def seed_database():
                     age_verified=True
                 )
                 db.add(user)
+                db.flush()  # Flush to get the ID
                 sample_users.append(user)
         
         db.commit()
@@ -105,6 +106,7 @@ def seed_database():
                     age_verified=True
                 )
                 db.add(tech)
+                db.flush()  # Flush to get the ID
                 technicians.append(tech)
         
         db.commit()
@@ -143,7 +145,7 @@ def seed_database():
                     message_count=random.randint(3, 15),
                     problem_solved=random.random() > 0.25,  # 75% solved
                     technician_dispatched=random.random() > 0.7,  # 30% dispatched
-                    created_at=datetime.utcnow() - timedelta(days=random.randint(0, 30))
+                    created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(0, 30))
                 )
                 db.add(session)
                 chat_sessions.append(session)
@@ -315,7 +317,7 @@ def seed_database():
                 appliance_brand=entry["appliance_brand"],
                 appliance_model=entry["appliance_model"],
                 used_for_training=random.random() > 0.6,  # 40% used
-                created_at=datetime.utcnow() - timedelta(days=random.randint(1, 20))
+                created_at=datetime.now(timezone.utc) - timedelta(days=random.randint(1, 20))
             )
             db.add(imp_data)
             improvement_count += 1

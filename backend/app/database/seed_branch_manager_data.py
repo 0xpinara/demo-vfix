@@ -6,7 +6,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import random
 import uuid
 
@@ -26,7 +26,8 @@ def seed_branch_manager_data():
     
     try:
         # Create tables if they don't exist
-        Base.metadata.create_all(bind=engine)
+        from app.database.connection import create_tables_safely
+        create_tables_safely()
         
         print("🌱 Şube yöneticisi test verileri oluşturuluyor...")
         
@@ -125,6 +126,7 @@ def seed_branch_manager_data():
                     age_verified=True
                 )
                 db.add(tech)
+                db.flush()  # Flush to get the ID
                 technicians.append(tech)
             else:
                 tech.branch_id = branch.id
@@ -166,6 +168,7 @@ def seed_branch_manager_data():
                     age_verified=True
                 )
                 db.add(cust)
+                db.flush()  # Flush to get the ID
                 customers.append(cust)
             else:
                 customers.append(cust)
@@ -181,7 +184,7 @@ def seed_branch_manager_data():
         vacation_data = []
         
         # Current/upcoming vacations
-        today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
         
         # Technician 1 - on vacation now (conflict scenario)
         if len(all_technicians) > 0:
@@ -241,7 +244,7 @@ def seed_branch_manager_data():
                     end_date=vac_info["end"],
                     reason=vac_info["reason"],
                     approved_by=manager.id,
-                    approved_at=datetime.utcnow() - timedelta(days=30)
+                    approved_at=datetime.now(timezone.utc) - timedelta(days=30)
                 )
                 db.add(vacation)
                 vacations_created += 1
