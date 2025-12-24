@@ -16,6 +16,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+@router.get("/")
+async def root():
+    """Root endpoint - API information"""
+    return {
+        "message": "V-Fix Web App API",
+        "version": "1.0.0",
+        "docs": "/api/docs",
+        "health": "/health"
+    }
+
+
 @router.get("/health")
 async def health_check(db: Session = Depends(get_db)):
     """
