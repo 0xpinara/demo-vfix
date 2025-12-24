@@ -21,6 +21,16 @@ export default defineConfig({
       }
     }
   },
+  preview: {
+    host: '0.0.0.0',
+    port: process.env.PORT || 5173,
+    strictPort: false,
+    allowedHosts: [
+      'spectacular-enjoyment-production.up.railway.app',
+      '.railway.app',
+      'localhost'
+    ]
+  },
   test: {
     globals: true,
     environment: 'jsdom',
